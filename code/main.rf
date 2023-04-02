@@ -1,0 +1,6 @@
+fn main(a: int, b: int, c: char, d: short) {
+
+}
+fn add(a: int, b: int) {
+
+}

@@ -1,0 +1,124 @@
+#ifndef TOKENIZER_H
+#define TOKENIZER_H
+#include <stdlib.h>
+
+#define LOC_FIELD(tokenizer, len) \
+  .loc = (token_loc_t) {.begin_index = tokenizer->cursor - tokenizer->source.contents, .length = len, .line = tokenizer->line_number, .column = tokenizer->column_number } 
+
+typedef enum {
+  T_UNKNOWN = -1,
+  T_NL, T_SPC, T_TAB,
+  T_FN, T_PROC,
+  T_IF, T_FOR, T_WHILE,
+  T_ASM,
+  T_RB, T_LB,
+  T_RP, T_LP,
+  T_EQ, T_NOT,
+  T_COLON, T_SEMICOLON, T_COMMA,
+
+  T_ARROW,
+  
+  // Types
+  T_INT, T_SHT, T_CHR, T_DBL, T_FLT, T_BOOL,
+
+  // Comparison
+  T_GT, T_LT,
+  
+  // Quotes
+  T_DQT, T_SQT,
+  
+  // Escape
+  T_BACKSLASH,
+
+  // Binary ops
+  T_PLUS, T_MINUS, T_MUL, T_DIV, T_MOD,
+
+  // Other
+  T_NUM,
+  T_ID,
+  T_EOF
+} token_type_t;
+
+typedef struct {
+  char* contents;
+  const char* contents_end;
+  size_t length;
+} source_code_t;
+
+typedef struct {
+  int begin_index, length;
+  int line, column;
+} token_loc_t;
+
+typedef struct {
+  token_type_t type;
+  token_loc_t loc;
+} token_t;
+
+typedef struct {
+  source_code_t source;
+  char* cursor;
+  int line_number, column_number;
+} tokenizer_t;
+
+tokenizer_t tokenizer_new(const char*);
+
+/*
+ * Desc:  
+ *   Advance the tokenizer to the next token and process the current token
+ * Notes:
+ *   User must manually consume spaces
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ * Return:
+ *   A token object representnig the next token
+ */
+token_t tokenizer_next_t(tokenizer_t*);
+
+int tokenizer_consume_spaces(tokenizer_t*);
+
+void tokenizer_advance(tokenizer_t*, int);
+
+/*
+ * Desc: 
+ *   Analyze next token without advancing the tokenizer
+ * Note:
+ *   The purpose of this function is mainly as a utlity for the 'tokenizer_next_t(...)' function
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ * Return:
+ *   A token object representing the next token
+ */
+token_t tokenizer_peek_t(tokenizer_t*);
+
+/*
+ * Desc:
+ *   Processes a string of numbers
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ *   2) either NULL or a valid memory address to store the length of the string of numbers
+ * Return:
+ *   The value of the string of numbers parsed as an integer
+ */
+int tokenizer_process_digit(tokenizer_t*, int*);
+
+/*
+ * Desc:
+ *   Processes a string of characters
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ *   2) either NULL or a valid memory address to store the length of the id
+ */
+void tokenizer_process_id(tokenizer_t*, int*);
+
+/*
+ * Desc:
+ *   Processes a string of characters
+ * Params:
+ *   1) the token you'd like to print
+ *   2) a valid pointer to a tokenizer instance 
+ *      - this must be the tokenizer that generated the token to work properly
+ */
+void token_print(token_t, tokenizer_t*);
+
+#endif
