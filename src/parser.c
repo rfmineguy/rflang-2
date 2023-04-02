@@ -29,6 +29,7 @@ void parse_func(tokenizer_t* tokenizer) {
   parse_block(tokenizer);
 }
 
+// Parse block like ['{', ..., '}']
 void parse_block(tokenizer_t* tokenizer) {
   if (tokenizer_peek_t(tokenizer).type != T_LB) {
     printf("Error: block missing '{'\n");
@@ -79,6 +80,7 @@ void parse_var_list(tokenizer_t* tokenizer) {
   tokenizer_next_t(tokenizer);
 }
 
+// Parse var like [id, ':', type]
 void parse_var(tokenizer_t* tokenizer) {
   token_t t;
   if ((t = tokenizer_peek_t(tokenizer)).type != T_ID) {
