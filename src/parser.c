@@ -116,6 +116,16 @@ var_t parse_var(tokenizer_t* tokenizer) {
   }
   var.data_type = t.type;
   tokenizer_next_t(tokenizer);
+  t = tokenizer_peek_t(tokenizer);
+  while (t.type == T_MUL) {
+    var.pointer_count++;
+    tokenizer_next_t(tokenizer);
+    t = tokenizer_peek_t(tokenizer);
+  }
+  // if (t.type == T_MUL) {
+  //   var.is_pointer = 1;
+  //   tokenizer_next_t(tokenizer);
+  // }
   return var;
 }
 
@@ -140,7 +150,7 @@ void show_func(func_t func, int level) {
 
 void show_var(var_t var, int level) {
   print_tabs(level - 1);
-  printf("var: %s, %d\n", var.id, var.data_type);
+  printf("var: %s, %d, {%s, count=%d}\n", var.id, var.data_type, var.pointer_count > 0 ? "pointer":"value", var.pointer_count);
 }
 
 void show_var_list(var_list_t list, int level) {

@@ -1,6 +1,15 @@
-fn main(argc: int, argv: char) {
+fn add(a: int, b: int, c: short) {
+
 }
 
-fn add(a: int, b: int) {
+fn putc(c: char) {
+
+}
+
+fn puts(c: char*) {
+
+}
+
+fn main(argc: int, argv: char**) {
 
 }

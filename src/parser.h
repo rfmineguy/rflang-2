@@ -6,6 +6,7 @@
 typedef struct {
   char id[10];
   int data_type; // this is just the token value for the data types 
+  int pointer_count; // number of pointer symbols...
 } var_t;
 
 typedef struct {
