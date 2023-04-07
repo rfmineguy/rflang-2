@@ -1,5 +1,11 @@
 fn add(a: int, b: int, c: short) {
+  sum: int = a + b + c;
+  return sum;
+}
 
+fn sub(a: int, b: int) {
+  difference: int = a - b;
+  return difference;
 }
 
 fn putc(c: char) {

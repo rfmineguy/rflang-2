@@ -4,6 +4,23 @@
 #include <math.h>
 #include <ctype.h>
 
+//
+//MACROS
+//
+#define TOK_CHECK_CH(ch, tp) \
+  if (*tokenizer->cursor == ch) {\
+    return (token_t) {.type = tp, LOC_FIELD(tokenizer, 1) };\
+  }
+
+#define TOK_CHECK_STR(str, len, tp) \
+  if (strncmp(tokenizer->cursor, str, len) == 0) {\
+    return (token_t) {.type = tp, LOC_FIELD(tokenizer, len) };\
+  }
+
+
+//
+//FUNCTIONS
+//
 tokenizer_t tokenizer_new(const char* file) {
   tokenizer_t t = {0};
   FILE* f = fopen(file, "r");
@@ -31,15 +48,9 @@ tokenizer_t tokenizer_new(const char* file) {
   return t;
 }
 
-#define TOK_CHECK_CH(ch, tp) \
-  if (*tokenizer->cursor == ch) {\
-    return (token_t) {.type = tp, LOC_FIELD(tokenizer, 1) };\
-  }
+void tokenizer_free(tokenizer_t* tokenizer) {
 
-#define TOK_CHECK_STR(str, len, tp) \
-  if (strncmp(tokenizer->cursor, str, len) == 0) {\
-    return (token_t) {.type = tp, LOC_FIELD(tokenizer, len) };\
-  }
+}
 
 token_t tokenizer_peek_t(tokenizer_t* tokenizer) {
   TOK_CHECK_STR("fn", 2, T_FN)
@@ -192,3 +203,4 @@ void token_print(token_t t, tokenizer_t* tokenizer) {
     default:          printf("UNIMPLEMENTED TOKEN\n"); break;
   }
 }
+

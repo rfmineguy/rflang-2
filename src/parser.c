@@ -6,7 +6,6 @@
 #define LOC_INFO_FMT "line: %d, col: %d"
 #define LOC_INFO_ARG t.loc.line, t.loc.column
 
-// Parse func like [fn, id, var_list] 
 func_t parse_func(tokenizer_t* tokenizer) {
   func_t func = {0};
   if (tokenizer_peek_t(tokenizer).type != T_FN) {
@@ -35,7 +34,6 @@ func_t parse_func(tokenizer_t* tokenizer) {
   return func;
 }
 
-// Parse block like ['{', ..., '}']
 block_t parse_block(tokenizer_t* tokenizer) {
   block_t block;
   if (tokenizer_peek_t(tokenizer).type != T_LB) {
@@ -45,6 +43,14 @@ block_t parse_block(tokenizer_t* tokenizer) {
   tokenizer_next_t(tokenizer);
   tokenizer_consume_spaces(tokenizer);
 
+  // parse everything inside the block
+  var_t v = parse_var(tokenizer);
+  tokenizer_consume_spaces(tokenizer);
+  if (tokenizer_peek_t(tokenizer).type == T_EQ) {
+    //asignment
+    var_dec_t vd = parse_var_dec(tokenizer);
+  }
+  
   if (tokenizer_peek_t(tokenizer).type != T_RB) {
     printf("Error: block missing '}'\n"); 
     exit(1);
@@ -53,7 +59,6 @@ block_t parse_block(tokenizer_t* tokenizer) {
   return block;
 }
 
-// Parse var_list like ['(', var, ',', ..., ')']
 var_list_t parse_var_list(tokenizer_t* tokenizer) {
   var_list_t var_list = {0};
   // Expect a '('
@@ -91,7 +96,28 @@ var_list_t parse_var_list(tokenizer_t* tokenizer) {
   return var_list;
 }
 
-// Parse var like [id, ':', type]
+// [var, EQ, expr]
+var_dec_t parse_var_dec(tokenizer* tokenizer) {
+  var_dec_t var_dec = {0};
+  token_t t;
+  if ((t = tokenizer_peek_t(tokenizer)).type != T_ID) {
+    printf(LOC_INFO_FMT, LOC_INFO_ARG);
+    printf("Error: var declaration has no id\n");
+    exit(1);
+  }
+  tokenizer_next_t(tokenizer);
+  tokenizer_consume_spaces(tokenizer);
+  if ((t = tokenizer_peek_t(tokenizer)).type != T_EQ) {
+    printf(LOC_INFO_FMT, LOC_INFO_ARG);
+    printf("Error: var declaration has no assignment operator\n");
+    exit(1);
+  }
+  tokenizer_next_t(tokenizer);
+  tokenizer_consume_spaces(tokenizer);
+  // NOTE: Next should be an expression construct
+  return var_dec;
+}
+
 var_t parse_var(tokenizer_t* tokenizer) {
   var_t var = {0};
   token_t t;
@@ -122,10 +148,6 @@ var_t parse_var(tokenizer_t* tokenizer) {
     tokenizer_next_t(tokenizer);
     t = tokenizer_peek_t(tokenizer);
   }
-  // if (t.type == T_MUL) {
-  //   var.is_pointer = 1;
-  //   tokenizer_next_t(tokenizer);
-  // }
   return var;
 }
 
@@ -173,6 +195,4 @@ void parse(tokenizer_t* tokenizer) {
     tokenizer_next_t(tokenizer);
   }
 }
-
-
 

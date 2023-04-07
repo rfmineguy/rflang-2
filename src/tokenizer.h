@@ -45,23 +45,48 @@ typedef struct {
   size_t length;
 } source_code_t;
 
+// token_loc
 typedef struct {
   int begin_index, length;
   int line, column;
 } token_loc_t;
 
+// token_t
 typedef struct {
   token_type_t type;
   token_loc_t loc;
 } token_t;
 
+// tokenizer_t
 typedef struct {
   source_code_t source;
   char* cursor;
   int line_number, column_number;
 } tokenizer_t;
 
+/*
+ * Desc:  
+ *   Create a new tokenizer "instance" given a filepath
+ * Notes:
+ *   Completely exits program upon invalid filepath
+ *   Does not handle possible malloc errors
+ *      - User must use the 'tokenizer_free' function to avoid leaks
+ * Params:
+ *   1) A filepath to a rflang source file
+ * Return:
+ *   A tokenizer object containing all the information in order to get tokenizing
+ */
 tokenizer_t tokenizer_new(const char*);
+
+/*
+ * Desc:  
+ *   Frees a previously allocated tokenizer instance
+ * Params:
+ *   1) A tokenizer instance previously allocated via 'tokenizer_new'
+ * Return:
+ *   N/A
+ */
+void tokenizer_free(tokenizer_t);
 
 /*
  * Desc:  
@@ -75,8 +100,30 @@ tokenizer_t tokenizer_new(const char*);
  */
 token_t tokenizer_next_t(tokenizer_t*);
 
+/*
+ * Desc:  
+ *   Consume the space tokens where the tokenizer currently is
+ * Note:
+ *   Meant to make skipping space character a little easier
+ *   Likely to not work with tab characters (NOTE: Untested)
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ * Return:
+ *   The number of space tokens consumed
+ */
 int tokenizer_consume_spaces(tokenizer_t*);
 
+/*
+ * Desc:  
+ *   Advance the tokenizer forward by 'x' characters (NOT tokens)
+ * Note:
+ *   Does not ensure that the number is a reasonable one (i.e. -5 or 300000)
+ * Params:
+ *   1) a valid pointer to a tokenizer instance
+ *   2) the number of characters to advance by
+ * Return:
+ *   N/A
+ */
 void tokenizer_advance(tokenizer_t*, int);
 
 /*
@@ -108,6 +155,8 @@ int tokenizer_process_digit(tokenizer_t*, int*);
  * Params:
  *   1) a valid pointer to a tokenizer instance
  *   2) either NULL or a valid memory address to store the length of the id
+ * Return:
+ *   N/A
  */
 void tokenizer_process_id(tokenizer_t*, int*);
 
@@ -118,6 +167,8 @@ void tokenizer_process_id(tokenizer_t*, int*);
  *   1) the token you'd like to print
  *   2) a valid pointer to a tokenizer instance 
  *      - this must be the tokenizer that generated the token to work properly
+ * Return:
+ *   N/A
  */
 void token_print(token_t, tokenizer_t*);
 
