@@ -35,11 +35,15 @@ puts:
   push rbp
   mov rbp, rsp
   
+  push qword [rbp + 16]
+  call strlen
+  mov rdx, rax
+
   mov rax, 0x01
   mov rdi, 0x01
-  mov rsi, [rbp + 8]
-  mov rdx, [rbp + 16]
+  mov rsi, [rbp + 16]
   syscall
 
   mov rsp, rbp
   pop rbp
+  ret 8
