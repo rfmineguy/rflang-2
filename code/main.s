@@ -20,8 +20,12 @@ main:
   push str2
   call puts
   
-  push str3
-  call puts
+  push 'a'
+  call putc
+ 
+  push 0ah
+  call putc
+
   ret
 
 _end:

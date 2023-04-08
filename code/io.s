@@ -1,13 +1,19 @@
 global putc
 global puts
 global strlen
+SECTION .bss
+char_buf: resb 1
+
+SECTION .text
 putc:
   push rbp
   mov rbp, rsp
 
+  mov cl, byte [rbp + 16]
+  mov [char_buf], cl
   mov rax, 0x01       ; write syscall
   mov rdi, 0x01       ; stdout=1
-  mov rsi, [rbp + 8]  ; argument 1 as char
+  mov rsi, char_buf   ; argument 1 as char
   mov rdx, 0x01       ; number of characters to write
   syscall
 
