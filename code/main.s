@@ -1,33 +1,25 @@
+SECTION .data
+str:  db "Hello World", 0ah, 0h
+str2: db "This is another string", 0h
+str3: db 0h
+
 SECTION .text
-add__int_int_short:
-  push rbp
-  mov rbp, rsp
-  mov rax, 0
-  add rax, dword [rbp + 8]
-  add rax, dword [rbp + 16]
-  add rax, word  [rbp + 24]
-  mov dword [rbp - 8], rax
-  mov rsp, rbp
-  pop rbp
-
-sub__int_int:
-  push rbp
-  mov rbp, rsp
-  mov rax, 0
-  mov rsp, rbp
-  pop rbp
-
+extern putc
+extern puts
+extern strlen
 global _start
 _start:
   call main
   call _end
 
 main:
+  push str2
+  call strlen
+  mov rdi, rax
   ret
 
 _end:
-  mov rax, 0x3c
-  mov rdi, 0
+  mov rax, 0x3C
   syscall
   ret
 
