@@ -28,7 +28,6 @@ program_t* parse_program(tokenizer_t* t) {
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
   }
-  show_program(p, 1);
 
   return p;
 }
@@ -187,10 +186,8 @@ expression_t* parse_expression(tokenizer_t* t) {
   return NULL;
 }
 
-void parse(tokenizer_t* t) {
-  program_t* prgm = parse_program(t);
-  free_program(prgm);
-  free(prgm);
+program_t* parse(tokenizer_t* t) {
+  return parse_program(t);
 }
 
 void free_program(program_t* p) {

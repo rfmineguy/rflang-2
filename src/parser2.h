@@ -117,6 +117,6 @@ void          show_param_list(param_list_t*, int);
 void          show_arg_list(arg_list_t*, int);
 void          show_expression(expression_t*, int);
 
-void          parse(tokenizer_t*);
+program_t*    parse(tokenizer_t*);
 
 #endif
