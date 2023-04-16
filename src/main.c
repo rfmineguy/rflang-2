@@ -1,10 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "parser2.h"
 #include "tokenizer2.h"
 #include "argparse.h"
 #include "codegen.h"
+
+#if defined(__linux__) // any linux distribution
+    #define PLATFORM "linux"
+#elif defined(_WIN32) // any windows system
+    #define PLATFORM "windows"
+#else
+    #define PLATFORM "Is not linux or windows"
+#endif
 
 static const char *const usages[] = {
     "basic [options] [[--] args]",
@@ -16,6 +25,15 @@ typedef struct {
   const char* file;
 } args;
 
+void execute(const char* cmd, ...) {
+  char command[200] = {0};
+  va_list l;
+  va_start(l, cmd);
+  vsprintf(command, cmd, l);
+  system(command);
+  va_end(l);
+}
+
 FILE* openf(const char* f, const char* perm) {
   FILE* pf = fopen(f, perm);
   if (!pf) {
@@ -24,6 +42,7 @@ FILE* openf(const char* f, const char* perm) {
   }
   return pf;
 }
+
 
 // https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
@@ -56,6 +75,12 @@ int main(int argc, const char** argv) {
 
   // Now codegen the program
   codegen_program(prog, output_file);
+
+  // Run nasm and ld
+  if (strcmp(PLATFORM, "linux") == 0) {
+    printf("Linux\n");
+    execute("nasm -g -f elf64 -F dwarf %s -o %s", outfile, "test_out");
+  }
 
   // Free the program
   free_program(prog);
