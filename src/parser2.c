@@ -19,7 +19,8 @@ program_t* parse_program(tokenizer_t* t) {
     use_t* use = parse_use(t);
     p->use_list[p->use_list_count++] = use;
   }
-  tokenizer_advance_t(t);
+  if (p->use_list_count != 0)
+    tokenizer_advance_t(t);
   
   // Expect functions
   while (tokenizer_get_t(t).type == T_FN) {

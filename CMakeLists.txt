@@ -29,3 +29,9 @@ add_executable(rfc
   src/parser2.c
   src/token.c
   src/tokenizer2.c)
+
+target_link_libraries(rfc PRIVATE argparse)
+
+target_include_directories(rfc PRIVATE
+  ${argparse_SOURCE_DIR}
+)
