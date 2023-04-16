@@ -4,9 +4,8 @@ str2: db "This is another string", 0ah, 0h
 str3: db 0ah, 0h
 
 SECTION .text
-extern putc
-extern puts
-extern strlen
+%include "io.inc"
+
 global _start
 _start:
   call main
@@ -25,11 +24,9 @@ main:
  
   push 0ah
   call putc
-
   ret
 
 _end:
   mov rax, 0x3C
   syscall
   ret
-

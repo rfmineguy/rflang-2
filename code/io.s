@@ -1,9 +1,13 @@
+; Expose the functions of io
 global putc
 global puts
 global strlen
+
+; Internal storage of io
 SECTION .bss
 char_buf: resb 1
 
+; Code storage of io
 SECTION .text
 putc:
   push rbp

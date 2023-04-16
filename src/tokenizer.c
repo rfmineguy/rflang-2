@@ -48,8 +48,9 @@ tokenizer_t tokenizer_new(const char* file) {
   return t;
 }
 
-void tokenizer_free(tokenizer_t* tokenizer) {
-
+void tokenizer_free(tokenizer_t tokenizer) {
+  free(tokenizer.source.contents);
+  tokenizer.source.contents = NULL;
 }
 
 token_t tokenizer_peek_t(tokenizer_t* tokenizer) {
@@ -64,6 +65,8 @@ token_t tokenizer_peek_t(tokenizer_t* tokenizer) {
   TOK_CHECK_STR("double", 6, T_DBL)
   TOK_CHECK_STR("float", 5, T_FLT)
   TOK_CHECK_STR("bool", 4, T_BOOL)
+  TOK_CHECK_STR("use", 3, T_USE)
+  TOK_CHECK_STR("return", 6, T_RETURN)
   TOK_CHECK_STR("->", 2, T_ARROW)
   TOK_CHECK_CH('\n', T_NL);
   TOK_CHECK_CH(' ', T_SPC)

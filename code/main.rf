@@ -1,21 +1,25 @@
-fn add(a: int, b: int, c: short) {
-  sum: int = a + b + c;
+use io
+use stdlib
+use mylib
+use math
+
+fn add(a: int, b: int, c: short): int {
   return sum;
 }
 
-fn sub(a: int, b: int) {
+fn sub(a: int, b: int): int {
   difference: int = a - b;
   return difference;
 }
 
-fn putc(c: char) {
+fn putc(c: char): int {
+  return 0;
+}
+
+fn puts(c: char*): int {
 
 }
 
-fn puts(c: char*) {
-
-}
-
-fn main(argc: int, argv: char**) {
+fn main(argc: int, argv: char***): int {
 
 }

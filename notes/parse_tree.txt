@@ -2,8 +2,10 @@ The parse tree is the most important underlying data structure for a programming
 It contains all the information about a rflang file in an orderly manner
 
 Example:
-fn add(a: int, b: int) {
-
+use io
+fn add(a: int, b: int) -> int {
+  sum: int = a + b;
+  return sum;
 }
 fn process(argc: int, argv: char**) -> int {
 
@@ -17,9 +19,15 @@ fn main(argc: int, argv: char**) {
 }
 
 \_Program
+  \_Use[file="io"]
   \_Function[name="add"]
     \_ParamList[{a, int}, {b, int}]
+    \_ReturnType[t="int"]
     \_Block
+      \_Assign
+        \_Var{sum, int}
+        \_Expr[{a: var}, {plus}, {b: var}]
+      \_Return{sum, var}
   \_Function[name="process"]
     \_ParamList[{argc: int}, {argv, char**}]
     \_Block
@@ -32,5 +40,13 @@ fn main(argc: int, argv: char**) {
     \_Else
       \_Block
         \_FuncCall[name="process"]
-          \_ArgList[{argc: int}, {argv: char**}]
+          \_ArgList[{argc: var}, {argv: var}]
     
+
+
+
+
+Parsing expressions
+5 + 3 - 5 * (4 - 3)
+\_Expr[5 + 3 - 5 * (4-3)]
+  \_ 5 * Expr[

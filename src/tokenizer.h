@@ -16,7 +16,7 @@ typedef enum {
   T_EQ, T_NOT,
   T_COLON, T_SEMICOLON, T_COMMA,
 
-  T_ARROW,
+  T_ARROW, T_USE, T_RETURN,
   
   // Types
   T_INT, T_SHT, T_CHR, T_DBL, T_FLT, T_BOOL,
@@ -39,13 +39,14 @@ typedef enum {
   T_EOF
 } token_type_t;
 
+// source_code_t
 typedef struct {
   char* contents;
   const char* contents_end;
   size_t length;
 } source_code_t;
 
-// token_loc
+// token_loc_t
 typedef struct {
   int begin_index, length;
   int line, column;
@@ -172,4 +173,25 @@ void tokenizer_process_id(tokenizer_t*, int*);
  */
 void token_print(token_t, tokenizer_t*);
 
+
+
+
+// V2
+
+/*
+ * Desc: Checks whether the next token in the stream is of a certain type
+ * Params:
+ *  1. pointer to tokenizer object
+ *  2. the expected token
+ * Return:
+ *  0 if the next token isn't what was expected
+ *  1 if the next token is what was expected
+ */
+int tokenizer_expect_t(tokenizer_t*, token_type_t);
+
+
+/*
+ * Desc: Advances the tokenizer to the next token, and updates the 
+ */
+void tokenizer_advance_t(tokenizer_t*);
 #endif

@@ -1,56 +1,49 @@
 #include "token.h"
-#include <stdio.h>
 
-void rfc_token_print(token_t* p_token) {
-  #define GENERIC_STRING_TEMP "t: %2d | line: %3d | col: %2d | pos: %3d | length: %2d"
-  #define GENERIC_VARARGS     p_token->token_type, p_token->line, p_token->column, p_token->pos, p_token->length
-  switch (p_token->token_type) {
-    case T_NEWLINE: {
-      printf("Token | c   = %7s | " GENERIC_STRING_TEMP " |\n", "\\n", GENERIC_VARARGS);
-      break;
-    }
-    case T_TAB: {
-      printf("Token | c   = %7s | " GENERIC_STRING_TEMP " |\n", "\\t", GENERIC_VARARGS);
-      break;
-    }
-    case T_SPACE ... T_COMP_LT : {
-      printf("Token | c   = %7c | " GENERIC_STRING_TEMP " |\n", p_token->data.char_token, GENERIC_VARARGS);
-      break;
-    }
-    case T_STRING_LITERAL: {
-      printf("Token | str = %7s | " GENERIC_STRING_TEMP " |\n", p_token->data.string_lit_token.str, GENERIC_VARARGS);
-      break;
-    }
-    case T_NUMBER_LITERAL: {
-      printf("Token | val = %7d | " GENERIC_STRING_TEMP " |\n", p_token->data.number_token.value, GENERIC_VARARGS);
-      break;
-    }
-    case T_EOF: {
-      printf("Token | val = %s | " GENERIC_STRING_TEMP " |\n", "EOF", GENERIC_VARARGS);
-      break;
-    }
-    default: {
-      printf("Token | str = %7s | " GENERIC_STRING_TEMP " |\n", p_token->data.string_lit_token.str, GENERIC_VARARGS);
-      break;
-    }
-  }
-}
-
-void rfc_set_token_list(token_t* token_list, int token_count, token_t set_token) {
-  for (int i = 0; i < token_count; i++) {
-    token_list[i] = set_token;
-  }
-}
-
-void rfc_display_token_list(token_t* token_list, int token_count) {
-  const int IGNORE_SPACES = 1;
-  for (int i = 0; i < token_count; i++) {
-    int is_token_space = token_list[i].token_type == T_SPACE;
-    int is_token_valid = token_list[i].valid;
-    if (IGNORE_SPACES && is_token_space)
-      continue;
-    if (!is_token_valid)
-      continue;
-    rfc_token_print(&token_list[i]);
+const char* token_type_stringify(token_type_t t) {
+  switch (t) {
+    case T_INVALID:   return "Invalid";
+    case T_UNKNOWN:   return "Unknown";
+    case T_NL:        return "NL";
+    case T_SPC:       return "SPC";
+    case T_TAB:       return "TAB";
+    case T_FN:        return "FN";
+    case T_PROC:      return "PROC";
+    case T_IF:        return "IF";
+    case T_FOR:       return "FOR";
+    case T_WHILE:     return "WHILE";
+    case T_ASM:       return "ASM";
+    case T_RB:        return "RB";
+    case T_LB:        return "LB";
+    case T_RP:        return "RP";
+    case T_LP:        return "LP";
+    case T_EQ:        return "EQ";
+    case T_NOT:       return "NOT";
+    case T_COLON:     return "COLON";
+    case T_SEMICOLON: return "SEMI";
+    case T_COMMA:     return "COMMA";
+    case T_ARROW:     return "ARROW";
+    case T_USE:       return "USE";
+    case T_RETURN:    return "RETURN";
+    case T_INT:       return "INT";
+    case T_SHT:       return "SHT";
+    case T_CHR:       return "CHR";
+    case T_DBL:       return "DBL";
+    case T_FLT:       return "FLT";
+    case T_BOOL:      return "BOOL";
+    case T_GT:        return "GT";
+    case T_LT:        return "LT";
+    case T_DQT:       return "DQT";
+    case T_SQT:       return "SQT";
+    case T_BACKSLASH: return "BCKSLSH";
+    case T_PLUS:      return "PL";
+    case T_MINUS:     return "MN";
+    case T_MUL:       return "MUL";
+    case T_DIV:       return "DIV";
+    case T_MOD:       return "MOD";
+    case T_NUM:       return "NUM";
+    case T_ID:        return "ID";
+    case T_EOF:       return "EOF";
+    default:          return "Defaulted";
   }
 }
