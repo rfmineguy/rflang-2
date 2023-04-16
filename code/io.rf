@@ -1,0 +1,20 @@
+fn strlen(s: char*) -> int {
+  len: int = 0;
+  while (*s) {
+    len++;
+  }
+  return len;
+}
+
+fn puts(s: char*) {
+  asm {
+    ;x86-64
+    push qword [rbp + 16]
+    call strlen
+    mov rdx, rax
+    mov rax, 0x01
+    mov rdi, 0x01
+    mov rsi, [rbp + 16]
+    syscall
+  }
+}
