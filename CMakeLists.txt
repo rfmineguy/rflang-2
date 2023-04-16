@@ -30,7 +30,7 @@ add_executable(rfc
   src/codegen.c
   src/tokenizer2.c)
 
-target_link_libraries(rfc PRIVATE argparse)
+target_link_libraries(rfc PRIVATE argparse m)
 
 target_include_directories(rfc PRIVATE
   ${argparse_SOURCE_DIR}
