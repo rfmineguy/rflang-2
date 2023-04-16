@@ -7,6 +7,20 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
 
 file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
 
+include (FetchContent)
+FetchContent_Declare(
+  argparse
+  GIT_REPOSITORY https://github.com/cofyc/argparse.git
+  GIT_TAG v1.1.0
+)
+FetchContent_GetProperties(argparse)
+if (NOT argparse_POPULATED)
+  FetchContent_Populate(argparse)
+  message(${argparse_SOURCE_DIR})
+  add_subdirectory(${argparse_SOURCE_DIR})
+endif()
+
+
 add_executable(rfc
   src/main.c
   # src/parser.c

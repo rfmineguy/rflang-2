@@ -16,20 +16,16 @@ program_t* parse_program(tokenizer_t* t) {
   /// PROGRAM PARSING
   // Expect use statements first (use statements are only allowed at the start)
   while (tokenizer_get_t(t).type == T_USE) {
-    // printf("%s\n", token_type_stringify(tokenizer_get_t(t).type));
     use_t* use = parse_use(t);
     p->use_list[p->use_list_count++] = use;
-    // show_use(use, 0);
   }
   tokenizer_advance_t(t);
   
   // Expect functions
-  // tokenizer_show_next_t(t);
   while (tokenizer_get_t(t).type == T_FN) {
     tokenizer_advance_t(t);
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
-    // tokenizer_show_next_t(t);
   }
   show_program(p, 1);
 
@@ -102,7 +98,9 @@ assign_t* parse_assign(tokenizer_t* t) {
 }
 
 return_t* parse_return(tokenizer_t* t) {
-  return NULL;
+  return_t* ret = calloc(1, sizeof(return_t));
+
+  return ret;
 }
 
 param_list_t* parse_param_list(tokenizer_t* t) {
@@ -129,7 +127,6 @@ param_list_t* parse_param_list(tokenizer_t* t) {
     }
   }
 
-  // printf("%.*s\n", tokenizer_get_t(t).loc.length, t->source_str + tokenizer_get_t(t).loc.begin_index);
   return plist;
 }
 
@@ -380,7 +377,7 @@ void show_var(var_t* var, int level) {
 void show_expression(expression_t* expr, int level) {
   tabs(level); printf("\\_ Expr\n");
   if (!expr) {
-    tabs(level+1); printf("\\_NULL\n");
+    tabs(level+1); printf("\\ _NULL\n");
     return;
   }
 }

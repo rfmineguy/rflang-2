@@ -18,13 +18,6 @@ int main() {
   tokenizer_t* t = tokenizer_new(f);
   parse(t);
 
-  //while (tokenizer_get_t(t).type != T_EOF) {
-  //  printf("%d ", tokenizer_get_t(t).type);
-  //  if (tokenizer_get_t(t).type == T_NL) {
-  //    printf("\n");
-  //  }
-  //  tokenizer_advance_t(t);
-  //}
   tokenizer_free(t);
   free(t);
   t = NULL;

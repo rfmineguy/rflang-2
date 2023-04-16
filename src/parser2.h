@@ -14,6 +14,7 @@ typedef struct return_t     return_t;
 typedef struct param_list_t param_list_t;
 typedef struct arg_list_t   arg_list_t;
 typedef struct expression_t expression_t;
+typedef struct statement_t  statement_t;
 
 struct program_t {
   use_t**  use_list;
@@ -25,7 +26,8 @@ struct use_t {
   char name[30];
 };
 struct block_t {
-
+  statement_t* statements;
+  int statement_count;
 };
 struct func_t {
   int          has_return_type;
@@ -69,6 +71,9 @@ struct expression_t {
     char s[30];
     expression_t *left, *right; // ?
   } value;
+};
+struct statement_t {
+
 };
 
 program_t*    parse_program(tokenizer_t*);
