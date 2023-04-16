@@ -15,6 +15,8 @@ typedef struct param_list_t param_list_t;
 typedef struct arg_list_t   arg_list_t;
 typedef struct expression_t expression_t;
 typedef struct statement_t  statement_t;
+typedef struct if_t         if_t;
+typedef struct condition_t       condition_t;
 
 struct program_t {
   use_t**  use_list;
@@ -69,12 +71,22 @@ struct expression_t {
   union {
     int i;
     char s[30];
-    expression_t *left, *right; // ?
   } value;
+  expression_t *left, *right; // ?
 };
 struct statement_t {
-
+  if_t* iff;
 };
+struct if_t {
+  condition_t* condition;
+  block_t* block;
+};
+struct condition_t {
+  
+};
+
+int           is_operator(token_type_t);
+int           get_precedence(token_type_t);
 
 program_t*    parse_program(tokenizer_t*);
 use_t*        parse_use(tokenizer_t*);
@@ -87,7 +99,10 @@ assign_t*     parse_assign(tokenizer_t*);
 return_t*     parse_return(tokenizer_t*);
 param_list_t* parse_param_list(tokenizer_t*);
 arg_list_t*   parse_arg_list(tokenizer_t*);
+expression_t* parse_expression_ex(tokenizer_t*, token_t*, int, int);
 expression_t* parse_expression(tokenizer_t*);
+void          get_postfix_rep(tokenizer_t*, token_t*, int*);
+if_t*         parse_if(tokenizer_t*);
 
 void          free_program(program_t*);
 void          free_use(use_t*);

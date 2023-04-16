@@ -26,4 +26,6 @@ token_t tokenizer_get_t(tokenizer_t*);
 
 void tokenizer_show_next_t(tokenizer_t*);
 
+void token_print(token_t, tokenizer_t*);
+
 #endif

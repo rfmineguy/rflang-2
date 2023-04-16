@@ -3,6 +3,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int is_operator(token_type_t type) {
+  return type == T_PLUS || type == T_MINUS || type == T_MUL || type == T_DIV || type == T_MOD;
+}
+
+int get_precedence(token_type_t type) {
+  switch (type) {
+    case T_PLUS:
+    case T_MINUS:
+      return 1;
+    case T_MUL:
+    case T_DIV:
+      return 2;
+    default:
+      return -1;
+  }
+}
+
 program_t* parse_program(tokenizer_t* t) {
   /// INITIAL SETUP
   const int FUNC_DEFAULT_MAX = 5;
@@ -182,8 +199,77 @@ func_call_t* parse_func_call(tokenizer_t* t) {
   return NULL;
 }
 
+// NOTE: Don't use the tokenizer in this function
+// The tokenizer was already advanced in the parse_expression function
+expression_t* parse_expression_ex(tokenizer_t* t, token_t* postfix, int current_index, int postfix_len) {
+  expression_t* e = calloc(1, sizeof(expression_t));
+  if (current_index == postfix_len) {
+    return e;
+  }
+  for (int c = 0; c < postfix_len; c++) {
+    token_print(postfix[c], t);
+  }
+  return e;
+}
+
+//NOTE: parse the infix expression as postfix
 expression_t* parse_expression(tokenizer_t* t) {
-  return NULL;
+  // convert entire expression to postfix
+  token_t postfix[100] = {0};
+  int postfix_len = 0;
+  get_postfix_rep(t, postfix, &postfix_len); 
+  return parse_expression_ex(t, postfix, 0, postfix_len);
+}
+
+void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
+  int j = 0;
+  token_t stack[100];
+  int top = -1;
+
+  // NOTE: Need to break at some point (when?)
+  // NOTE: Converts stream of tokens into postfix (stored in 'postfix' array) 
+  while (1) {
+    // tokenizer_show_next_t(t);
+    if (tokenizer_expect_t(t, T_ID) || tokenizer_expect_t(t, T_NUM)) {
+      postfix_out[j++] = tokenizer_get_t(t);
+    }
+    else if (tokenizer_expect_t(t, T_LP)) {
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else if (tokenizer_expect_t(t, T_RP)) {
+      while (top > -1 && stack[top].type != T_LP) {
+        postfix_out[j++] = stack[top--];
+      }
+      if (top > -1 && stack[top].type != T_LP) {
+        return;
+      }
+      else {
+        top--;
+      }
+    }
+    else if (is_operator(tokenizer_get_t(t).type)) {
+      while (top > -1 && get_precedence(stack[top].type) > get_precedence(tokenizer_get_t(t).type)) {
+        postfix_out[j++] = stack[top--];
+      }
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else {
+      break;
+    }
+    tokenizer_advance_t(t);
+  }
+  while (top > -1) {
+    if (stack[top].type == T_LP) {
+      return;
+    }
+    postfix_out[j++] = stack[top--];
+  }
+  *postfix_length = j;
+}
+
+if_t* parse_if(tokenizer_t* t) {
+  if_t* iff = calloc(1, sizeof(if_t));
+  return iff;
 }
 
 program_t* parse(tokenizer_t* t) {

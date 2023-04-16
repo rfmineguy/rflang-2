@@ -65,6 +65,9 @@ tokenizer_t* tokenizer_new(FILE* f) {
   printf("%lu\n", read);
 
   t->cursor = t->source_str;
+#if 1
+  printf("%s\n", t->source_str);
+#endif
   tokenizer_advance_t(t);
   return t;
 }
@@ -141,7 +144,7 @@ void tokenizer_advance_t(tokenizer_t* t) {
   if (isdigit(*t->cursor)) {
     int digit_len = 0;
     tokenizer_process_digit(t, &digit_len);
-    t->current = (token_t) {.type = T_INT, LOC_FIELD(t, digit_len)}; 
+    t->current = (token_t) {.type = T_NUM, LOC_FIELD(t, digit_len)}; 
     t->cursor += digit_len;
     return;
   }
@@ -161,7 +164,12 @@ token_t tokenizer_get_t(tokenizer_t* t) {
 
 void tokenizer_show_next_t(tokenizer_t* t) {
 #if 1
-  printf("%s\n", token_type_stringify(tokenizer_get_t(t).type));
+  token_t token = tokenizer_get_t(t);
+  printf("%s", token_type_stringify(token.type));
+  switch (token.type) {
+  case T_NUM: printf("%.*s", token.loc.length, t->source_str + token.loc.begin_index); break;
+  default:    printf("..."); break;
+  }
 #else
   printf(".");
 #endif
@@ -190,3 +198,49 @@ void tokenizer_process_id(tokenizer_t* tokenizer, int* id_length) {
   *id_length = length;
 }
 
+void token_print(token_t t, tokenizer_t* tokenizer) {
+  /*#define PRINT_TOKEN(type_s, t) \
+    printf("%10s,  begin: %3d, len: %3d, line: %3d, col: %3d, text: %.*s", type_s, t.loc.begin_index, t.loc.length, t.loc.line, t.loc.column, t.loc.length, tokenizer->source_str + t.loc.begin_index);
+    */
+#define PRINT_TOKEN(type_s, t) \
+    printf("{%7s, %.*s}\n", type_s, t.loc.length, tokenizer->source_str + t.loc.begin_index);
+  switch (t.type) {
+    case T_NL:      /*PRINT_TOKEN("NL", t);*/      break;
+    case T_SPC:       PRINT_TOKEN("SPC", t);       break;
+    case T_TAB:       PRINT_TOKEN("TAB", t);       break;
+    case T_FN:        PRINT_TOKEN("FN", t);        break;
+    case T_IF:        PRINT_TOKEN("IF", t);        break;
+    case T_FOR:       PRINT_TOKEN("FOR", t);       break;
+    case T_WHILE:     PRINT_TOKEN("WHILE", t);     break;
+    case T_ASM:       PRINT_TOKEN("ASM", t);       break;
+    case T_RB:        PRINT_TOKEN("RB", t);        break;
+    case T_LB:        PRINT_TOKEN("LB", t);        break;
+    case T_RP:        PRINT_TOKEN("RP", t);        break;
+    case T_LP:        PRINT_TOKEN("LP", t);        break;
+    case T_EQ:        PRINT_TOKEN("EQ", t);        break;
+    case T_NOT:       PRINT_TOKEN("NOT", t);       break;
+    case T_COLON:     PRINT_TOKEN("COLON", t);     break;
+    case T_SEMICOLON: PRINT_TOKEN("SEMICOLON", t); break;
+    case T_COMMA:     PRINT_TOKEN("COMMA", t);     break;
+    case T_ARROW:     PRINT_TOKEN("ARROW", t);     break;
+    case T_INT:       PRINT_TOKEN("INT", t);       break;
+    case T_CHR:       PRINT_TOKEN("CHR", t);       break;
+    case T_SHT:       PRINT_TOKEN("SHT", t);       break;
+    case T_DBL:       PRINT_TOKEN("DBL", t);       break;
+    case T_FLT:       PRINT_TOKEN("FLT", t);       break;
+    case T_BOOL:      PRINT_TOKEN("BOOL", t);      break;
+    case T_GT:        PRINT_TOKEN("GT", t);        break;
+    case T_LT:        PRINT_TOKEN("LT", t);        break;
+    case T_SQT:       PRINT_TOKEN("SQT", t);       break;
+    case T_DQT:       PRINT_TOKEN("DQT", t);       break;
+    case T_BACKSLASH: PRINT_TOKEN("BACKSLASH", t); break;
+    case T_PLUS:      PRINT_TOKEN("PLUS", t);      break;
+    case T_MINUS:     PRINT_TOKEN("MINUS", t);     break;
+    case T_MUL:       PRINT_TOKEN("MUL", t);       break;
+    case T_DIV:       PRINT_TOKEN("DIV", t);       break;
+    case T_NUM:       PRINT_TOKEN("NUM", t);       break;
+    case T_ID:        PRINT_TOKEN("ID", t);        break;
+    case T_EOF:       PRINT_TOKEN("EOF", t);       break;
+    default:          printf("unimplemented token\n"); break;
+  }
+}

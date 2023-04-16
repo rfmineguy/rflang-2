@@ -23,6 +23,7 @@ static const char *const usages[] = {
 
 typedef struct {
   const char* file;
+  int test;
 } args;
 
 void execute(const char* cmd, ...) {
@@ -43,30 +44,10 @@ FILE* openf(const char* f, const char* perm) {
   return pf;
 }
 
-
-// https://github.com/cofyc/argparse/blob/master/tests/basic.c
-int main(int argc, const char** argv) {
-  args a = {};
-  /// ================================================================================================
-  struct argparse_option options[] = {
-    OPT_HELP(),
-    OPT_GROUP("Basic options"),
-    OPT_STRING('f', "file", &a.file, "File to compile", NULL , 0, 0),
-    OPT_END()
-  };
-  struct argparse argparse;
-  argparse_init(&argparse, options, usages, 0);
-  argc = argparse_parse(&argparse, argc, argv);
-  /// ================================================================================================
-
-  if (a.file == NULL) {
-    fprintf(stderr, "You must supply a file to compile\n");
-    exit(90);
-  }
-
-  FILE* input_file  = openf(a.file, "r");
+int compile(args* a) {
+  FILE* input_file  = openf(a->file, "r");
   char outfile[100] = {0};
-  strncpy(outfile, a.file, 100);
+  strncpy(outfile, a->file, 100);
   strncat(outfile, ".out", 100);
   FILE* output_file = openf(outfile, "w");
   tokenizer_t* t = tokenizer_new(input_file);
@@ -95,4 +76,49 @@ int main(int argc, const char** argv) {
   // Close files
   fclose(input_file);
   fclose(output_file);
+  return 1;
+}
+
+int test(args* a) {
+  printf("============== TESTING ==============\n");
+  FILE* f = fopen("code/expressions.io", "r");
+  if (!f) {
+    fprintf(stderr, "Failed to open file\n");
+    exit(0);
+  }
+  tokenizer_t* t = tokenizer_new(f);
+  expression_t* e = parse_expression(t);
+  show_expression(e, 1);
+  free_expression(e);
+  tokenizer_free(t);
+  fclose(f);
+  return 1;
+}
+
+// https://github.com/cofyc/argparse/blob/master/tests/basic.c
+int main(int argc, const char** argv) {
+  args a = {};
+  /// ================================================================================================
+  struct argparse_option options[] = {
+    OPT_HELP(),
+    OPT_GROUP("Compilation options"),
+    OPT_STRING('f', "file", &a.file, "File to compile", NULL , 0, 0),
+    OPT_GROUP("Testing options"),
+    OPT_BOOLEAN('t', "test", &a.test, "Run tests", NULL, 0, 0), 
+    OPT_END()
+  };
+  struct argparse argparse;
+  argparse_init(&argparse, options, usages, 0);
+  argc = argparse_parse(&argparse, argc, argv);
+  /// ================================================================================================
+  if (a.test) {
+    return test(&a);
+  }
+  if (a.file == NULL) {
+    fprintf(stderr, "You must supply a file to compile\n");
+    exit(90);
+  }
+  else {
+    return compile(&a);
+  }
 }

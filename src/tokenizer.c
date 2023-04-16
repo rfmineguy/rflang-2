@@ -164,46 +164,46 @@ int tokenizer_process_digit(tokenizer_t* tokenizer, int* digit_length) {
 }
 
 void token_print(token_t t, tokenizer_t* tokenizer) {
-  #define PRINT_TOKEN(type_s, t) \
+  #define print_token(type_s, t) \
     printf("%10s,  begin: %3d, len: %3d, line: %3d, col: %3d, text: %.*s" "\n", type_s, t.loc.begin_index, t.loc.length, t.loc.line, t.loc.column, t.loc.length, tokenizer->source.contents + t.loc.begin_index);
   switch (t.type) {
-    case T_NL:      /*PRINT_TOKEN("NL", t);*/      break;
-    case T_SPC:       PRINT_TOKEN("SPC", t);       break;
-    case T_TAB:       PRINT_TOKEN("TAB", t);       break;
-    case T_FN:        PRINT_TOKEN("FN", t);        break;
-    case T_IF:        PRINT_TOKEN("IF", t);        break;
-    case T_FOR:       PRINT_TOKEN("FOR", t);       break;
-    case T_WHILE:     PRINT_TOKEN("WHILE", t);     break;
-    case T_ASM:       PRINT_TOKEN("ASM", t);       break;
-    case T_RB:        PRINT_TOKEN("RB", t);        break;
-    case T_LB:        PRINT_TOKEN("LB", t);        break;
-    case T_RP:        PRINT_TOKEN("RP", t);        break;
-    case T_LP:        PRINT_TOKEN("LP", t);        break;
-    case T_EQ:        PRINT_TOKEN("EQ", t);        break;
-    case T_NOT:       PRINT_TOKEN("NOT", t);       break;
-    case T_COLON:     PRINT_TOKEN("COLON", t);     break;
-    case T_SEMICOLON: PRINT_TOKEN("SEMICOLON", t); break;
-    case T_COMMA:     PRINT_TOKEN("COMMA", t);     break;
-    case T_ARROW:     PRINT_TOKEN("ARROW", t);     break;
-    case T_INT:       PRINT_TOKEN("INT", t);       break;
-    case T_CHR:       PRINT_TOKEN("CHR", t);       break;
-    case T_SHT:       PRINT_TOKEN("SHT", t);       break;
-    case T_DBL:       PRINT_TOKEN("DBL", t);       break;
-    case T_FLT:       PRINT_TOKEN("FLT", t);       break;
-    case T_BOOL:      PRINT_TOKEN("BOOL", t);      break;
-    case T_GT:        PRINT_TOKEN("GT", t);        break;
-    case T_LT:        PRINT_TOKEN("LT", t);        break;
-    case T_SQT:       PRINT_TOKEN("SQT", t);       break;
-    case T_DQT:       PRINT_TOKEN("DQT", t);       break;
-    case T_BACKSLASH: PRINT_TOKEN("BACKSLASH", t); break;
-    case T_PLUS:      PRINT_TOKEN("PLUS", t);      break;
-    case T_MINUS:     PRINT_TOKEN("MINUS", t);     break;
-    case T_MUL:       PRINT_TOKEN("MUL", t);       break;
-    case T_DIV:       PRINT_TOKEN("DIV", t);       break;
-    case T_NUM:       PRINT_TOKEN("NUM", t);       break;
-    case T_ID:        PRINT_TOKEN("ID", t);        break;
-    case T_EOF:       PRINT_TOKEN("EOF", t);       break;
-    default:          printf("UNIMPLEMENTED TOKEN\n"); break;
+    case t_nl:      /*print_token("nl", t);*/      break;
+    case t_spc:       print_token("spc", t);       break;
+    case t_tab:       print_token("tab", t);       break;
+    case t_fn:        print_token("fn", t);        break;
+    case t_if:        print_token("if", t);        break;
+    case t_for:       print_token("for", t);       break;
+    case t_while:     print_token("while", t);     break;
+    case t_asm:       print_token("asm", t);       break;
+    case t_rb:        print_token("rb", t);        break;
+    case t_lb:        print_token("lb", t);        break;
+    case t_rp:        print_token("rp", t);        break;
+    case t_lp:        print_token("lp", t);        break;
+    case t_eq:        print_token("eq", t);        break;
+    case t_not:       print_token("not", t);       break;
+    case t_colon:     print_token("colon", t);     break;
+    case t_semicolon: print_token("semicolon", t); break;
+    case t_comma:     print_token("comma", t);     break;
+    case t_arrow:     print_token("arrow", t);     break;
+    case t_int:       print_token("int", t);       break;
+    case t_chr:       print_token("chr", t);       break;
+    case t_sht:       print_token("sht", t);       break;
+    case t_dbl:       print_token("dbl", t);       break;
+    case t_flt:       print_token("flt", t);       break;
+    case t_bool:      print_token("bool", t);      break;
+    case t_gt:        print_token("gt", t);        break;
+    case t_lt:        print_token("lt", t);        break;
+    case t_sqt:       print_token("sqt", t);       break;
+    case t_dqt:       print_token("dqt", t);       break;
+    case t_backslash: print_token("backslash", t); break;
+    case t_plus:      print_token("plus", t);      break;
+    case t_minus:     print_token("minus", t);     break;
+    case t_mul:       print_token("mul", t);       break;
+    case t_div:       print_token("div", t);       break;
+    case t_num:       print_token("num", t);       break;
+    case t_id:        print_token("id", t);        break;
+    case t_eof:       print_token("eof", t);       break;
+    default:          printf("unimplemented token\n"); break;
   }
 }
 
