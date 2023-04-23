@@ -47,5 +47,3 @@ const char* token_type_stringify(token_type_t t) {
     default:          return "Defaulted";
   }
 }
-
-

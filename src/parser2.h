@@ -2,6 +2,8 @@
 #define PARSER2_H
 #include "tokenizer2.h"
 
+typedef enum   expr_type_t  expr_type_t; 
+
 typedef struct program_t    program_t;
 typedef struct use_t        use_t;
 typedef struct block_t      block_t;
@@ -16,7 +18,11 @@ typedef struct arg_list_t   arg_list_t;
 typedef struct expression_t expression_t;
 typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
-typedef struct condition_t       condition_t;
+typedef struct condition_t  condition_t;
+
+enum expr_type_t {
+  EXPR_INT, EXPR_STRING
+};
 
 struct program_t {
   use_t**  use_list;
@@ -28,7 +34,7 @@ struct use_t {
   char name[30];
 };
 struct block_t {
-  statement_t* statements;
+  statement_t** statements;
   int statement_count;
 };
 struct func_t {
@@ -67,7 +73,8 @@ struct arg_list_t {
   // ? not sure about this one yet
 };
 struct expression_t {
-  int type;             // single value (number or id), or composed expression (expr '+' expr)
+  expr_type_t type;             // single value (number or id), or composed expression (expr '+' expr)
+  token_type_t operation;
   union {
     int i;
     char s[30];
@@ -76,6 +83,8 @@ struct expression_t {
 };
 struct statement_t {
   if_t* iff;
+  return_t* ret;
+  func_call_t* func_call;
 };
 struct if_t {
   condition_t* condition;
@@ -85,8 +94,11 @@ struct condition_t {
   
 };
 
+
 int           is_operator(token_type_t);
 int           get_precedence(token_type_t);
+
+int           is_type_token(token_type_t);
 
 program_t*    parse_program(tokenizer_t*);
 use_t*        parse_use(tokenizer_t*);
@@ -99,9 +111,10 @@ assign_t*     parse_assign(tokenizer_t*);
 return_t*     parse_return(tokenizer_t*);
 param_list_t* parse_param_list(tokenizer_t*);
 arg_list_t*   parse_arg_list(tokenizer_t*);
-expression_t* parse_expression_ex(tokenizer_t*, token_t*, int, int);
+expression_t* parse_expression_ex(tokenizer_t*, expression_t*, token_t*, int, int);
 expression_t* parse_expression(tokenizer_t*);
 void          get_postfix_rep(tokenizer_t*, token_t*, int*);
+statement_t*  parse_statement(tokenizer_t*);
 if_t*         parse_if(tokenizer_t*);
 
 void          free_program(program_t*);
@@ -131,6 +144,8 @@ void          show_return(return_t*, int);
 void          show_param_list(param_list_t*, int);
 void          show_arg_list(arg_list_t*, int);
 void          show_expression(expression_t*, int);
+void          show_iff(if_t*, int);
+void          show_statement(statement_t*, int);
 
 program_t*    parse(tokenizer_t*);
 

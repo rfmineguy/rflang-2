@@ -47,6 +47,10 @@ typedef struct {
 typedef struct {
   token_type_t type;
   token_loc_t loc;
+  union {
+    char s[30];
+    int i;
+  } value;
 } token_t;
 
 const char* token_type_stringify(token_type_t);

@@ -81,15 +81,20 @@ int compile(args* a) {
 
 int test(args* a) {
   printf("============== TESTING ==============\n");
-  FILE* f = fopen("code/expressions.io", "r");
+  const char* test_file = "code/test.rf";
+  FILE* f = fopen(test_file, "r");
   if (!f) {
-    fprintf(stderr, "Failed to open file\n");
+    fprintf(stderr, "Failed to open file \'%s\'\n", test_file);
     exit(0);
   }
+  else {
+    printf("TEST: Compiling \'%s\'\n", test_file); 
+  }
   tokenizer_t* t = tokenizer_new(f);
-  expression_t* e = parse_expression(t);
-  show_expression(e, 1);
-  free_expression(e);
+  program_t* p = parse_program(t);
+  show_program(p, 1);
+
+  free_program(p);
   tokenizer_free(t);
   fclose(f);
   return 1;
@@ -114,6 +119,7 @@ int main(int argc, const char** argv) {
   if (a.test) {
     return test(&a);
   }
+  /// ================================================================================================
   if (a.file == NULL) {
     fprintf(stderr, "You must supply a file to compile\n");
     exit(90);
@@ -121,4 +127,5 @@ int main(int argc, const char** argv) {
   else {
     return compile(&a);
   }
+  /// ================================================================================================
 }

@@ -2,9 +2,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 int is_operator(token_type_t type) {
   return type == T_PLUS || type == T_MINUS || type == T_MUL || type == T_DIV || type == T_MOD;
+}
+
+int is_type_token(token_type_t type) {
+  return type == T_INT || type == T_SHT || type == T_CHR || type == T_DBL || type == T_FLT || type == T_BOOL;
 }
 
 int get_precedence(token_type_t type) {
@@ -44,6 +49,7 @@ program_t* parse_program(tokenizer_t* t) {
     tokenizer_advance_t(t);
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
+    // show_func(func, 0);
   }
 
   return p;
@@ -62,16 +68,27 @@ use_t* parse_use(tokenizer_t* t) {
 }
 
 block_t* parse_block(tokenizer_t* t) {
+  block_t* b = calloc(1, sizeof(block_t));
   // for now lets just skip the block
   printf("Block\n");
+  if (!tokenizer_expect_t(t, T_LB)) {
+    fprintf(stderr, "Expected TL_B in block\n");
+    exit(1);
+  }
+  b->statements = calloc(1, sizeof(statement_t) * 5);
+  tokenizer_advance_t(t);
   while (tokenizer_get_t(t).type != T_RB) {
-    tokenizer_show_next_t(t);
+    // tokenizer_show_next_t(t);
+    statement_t* s = parse_statement(t);
+    if (s) {
+      b->statements[b->statement_count++] = s;
+    }
     tokenizer_advance_t(t);
   }
   tokenizer_advance_t(t);
   tokenizer_advance_t(t);
   printf("\n");
-  return NULL;
+  return b;
 }
 
 var_t* parse_var(tokenizer_t* t) {
@@ -111,12 +128,26 @@ var_t* parse_var(tokenizer_t* t) {
 }
 
 assign_t* parse_assign(tokenizer_t* t) {
-  return NULL;
+  assign_t* a = calloc(1, sizeof(assign_t));
+  var_t* v = parse_var(t);
+  if (!tokenizer_expect_t(t, T_EQ)) {
+    fprintf(stderr, "Expected '=', got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+    exit(1);
+  }
+  tokenizer_advance_t(t);
+  expression_t* e = parse_expression(t);
+  a->var = v;
+  a->expr = e;
+  return a;
 }
 
 return_t* parse_return(tokenizer_t* t) {
   return_t* ret = calloc(1, sizeof(return_t));
-
+  printf("Parse return begin\n");
+  tokenizer_show_next_t(t);
+  expression_t* e = parse_expression(t);
+  ret->expr = e;
+  printf("Parsed return\n");
   return ret;
 }
 
@@ -182,6 +213,7 @@ func_t* parse_func(tokenizer_t* t) {
       f->has_return_type = 1;
       f->return_type = tokenizer_get_t(t).type;
       f->return_type_str = token_type_stringify(tokenizer_get_t(t).type);
+      tokenizer_advance_t(t);
     }
     else {
       fprintf(stderr, "Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
@@ -199,18 +231,60 @@ func_call_t* parse_func_call(tokenizer_t* t) {
   return NULL;
 }
 
+expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t* postfix, int current_index, int postfix_len) {
+  printf("Parse expression begin\n");
+  expression_t* e = calloc(1, sizeof(expression_t));
+  if (current_index == -1) {
+    printf("Parsed expression\n");
+    return e;
+  }
+  // printf("Next token\n");
+  // token_print(postfix[current_index], t);
+  if (postfix[current_index].type == T_ID) {
+    printf("ID %s\n", postfix[current_index].value.s);
+    token_print(postfix[current_index], t);
+    strncpy(e->value.s, postfix[current_index].value.s, 30);
+    e->type = EXPR_STRING;
+    return e;
+  }
+  else if (postfix[current_index].type == T_NUM) {
+    printf("Value: %d\n", postfix[current_index].value.i);
+    token_print(postfix[current_index], t);
+    e->value.i = postfix[current_index].value.i;
+    e->type = EXPR_INT;
+    return e;
+  } 
+  else if (is_operator(postfix[current_index].type)) {
+    printf("Operator\n");
+    token_print(postfix[current_index], t);
+    e->operation = postfix[current_index].type;
+    e->left = parse_expression_ex(t, e, postfix, current_index - 2, postfix_len);
+    e->right = parse_expression_ex(t, e, postfix, current_index - 1, postfix_len);
+    return e;
+  }
+}
+
+/*
 // NOTE: Don't use the tokenizer in this function
 // The tokenizer was already advanced in the parse_expression function
+// (1 + 3) / 4
+// 1 3 + 4 /
 expression_t* parse_expression_ex(tokenizer_t* t, token_t* postfix, int current_index, int postfix_len) {
   expression_t* e = calloc(1, sizeof(expression_t));
   if (current_index == postfix_len) {
     return e;
   }
-  for (int c = 0; c < postfix_len; c++) {
-    token_print(postfix[c], t);
+  if (is_operator(postfix[current_index].type)) {
+    token_t left = postfix[current_index - 2];
+    token_t right = postfix[current_index - 1];
+    e->operation = postfix[current_index].type;
+    e-
   }
+  else {}
+  printf("Parsed expr\n");
   return e;
 }
+*/
 
 //NOTE: parse the infix expression as postfix
 expression_t* parse_expression(tokenizer_t* t) {
@@ -218,7 +292,8 @@ expression_t* parse_expression(tokenizer_t* t) {
   token_t postfix[100] = {0};
   int postfix_len = 0;
   get_postfix_rep(t, postfix, &postfix_len); 
-  return parse_expression_ex(t, postfix, 0, postfix_len);
+  printf("postfix_len: %d\n", postfix_len);
+  return parse_expression_ex(t, NULL, postfix, postfix_len - 1, -1);
 }
 
 void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
@@ -265,6 +340,57 @@ void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) 
     postfix_out[j++] = stack[top--];
   }
   *postfix_length = j;
+}
+
+statement_t* parse_statement(tokenizer_t* t) {
+  printf("Parsing statement\n");
+  statement_t* s = calloc(1, sizeof(statement_t));
+  printf("Next t -> ");
+  tokenizer_show_next_t(t);
+  printf("\n");
+  if (tokenizer_expect_t(t, T_ID)) {
+    token_t t_id = tokenizer_get_t(t);
+    tokenizer_advance_t(t);
+    if (tokenizer_expect_t(t, T_LP)) {
+      assert(0 && "Encountered function call");
+    }
+    else if (tokenizer_expect_t(t, T_EQ)) {
+      assert(0 && "Encountered assignment");
+    }
+  }
+  else if (tokenizer_expect_t(t, T_IF)) {
+    assert(0 && "Encountered if");
+  }
+  else if (tokenizer_expect_t(t, T_FOR)) {
+    assert(0 && "Encountered for");
+  }
+  else if (tokenizer_expect_t(t, T_WHILE)) {
+    assert(0 && "Encountered while");
+  }
+  else if (tokenizer_expect_t(t, T_RETURN)) {
+    printf("Parse return\n");
+    tokenizer_advance_t(t);
+    expression_t* e = parse_expression(t);
+    return_t* r = calloc(1, sizeof(return_t));
+    r->expr = e;
+    s->ret = r;
+    // b->expr = e;
+    // assert(0 && "Encountered return");
+  }
+  else if (tokenizer_expect_t(t, T_ASM)) {
+    assert(0 && "Encountered asm");
+  }
+  else if (tokenizer_expect_t(t, T_RB)) {
+    free(s);
+    s = NULL;
+    return NULL;
+  }
+  else {
+    fprintf(stderr, "Unexpected token in block: %s\n", token_type_stringify(tokenizer_get_t(t).type));
+    fprintf(stderr, "  line: %d, col: %d\n", t->line, t->col);
+    exit(1);
+  }
+  return s;
 }
 
 if_t* parse_if(tokenizer_t* t) {
@@ -392,6 +518,14 @@ void show_block(block_t* block, int level) {
     tabs(level + 1); printf("\\_ NULL\n");
     return;
   }
+  tabs(level + 1); printf("\\_ Statements\n");
+  if (block->statement_count == 0) {
+    tabs(level + 2); printf("\\_ NULL\n"); 
+    return;
+  }
+  for (int i = 0; i < block->statement_count; i++) {
+    show_statement(block->statements[i], level + 2);
+  }
 }
 
 void show_func(func_t* func, int level) {
@@ -433,7 +567,7 @@ void show_return(return_t* _return, int level) {
     tabs(level + 1); printf("\\_ NULL\n");
     return;
   }
-  tabs(level); show_expression(_return->expr, level + 1);
+  show_expression(_return->expr, level);
 }
 
 void show_param_list(param_list_t* params, int level) {
@@ -459,9 +593,62 @@ void show_var(var_t* var, int level) {
 }
 
 void show_expression(expression_t* expr, int level) {
-  tabs(level); printf("\\_ Expr\n");
+  tabs(level); printf("\\_ Expr");
   if (!expr) {
-    tabs(level+1); printf("\\ _NULL\n");
+    printf("\n");
+    tabs(level+1); printf("\\_ NULL\n");
     return;
+  }
+  switch (expr->operation) {
+  case T_PLUS:  printf("{+}\n"); break;
+  case T_MINUS: printf("{-}\n"); break;
+  case T_MUL:   printf("{*}\n"); break;
+  case T_DIV:   printf("{/}\n"); break;
+  case T_MOD:   printf("{*}\n"); break;
+  default:      printf("\n"); break;
+  }
+  if (!expr->left && !expr->right) {
+    tabs(level + 1);
+    switch (expr->type) {
+    case EXPR_INT:    printf("\\_Value {num: %d}\n", expr->value.i); break;
+    case EXPR_STRING: printf("\\_Value {str: %s}\n", expr->value.s); break;
+    }
+  }
+  if (expr->left) {
+    show_expression(expr->left, level + 1);
+  }
+  if (expr->right) {
+    show_expression(expr->right, level + 1);
+  }
+}
+
+void show_iff(if_t* iff, int level) {
+  tabs(level); printf("\\_ If\n");
+  if (!iff) {
+     tabs(level + 1); printf("\\_ NULL\n");
+     return;
+  }
+  // tabs(level + 1); show_condition(iff->condition, level + 1);
+  tabs(level + 1); show_block(iff->block, level + 1);
+}
+
+void show_statement(statement_t* stmt, int level) {
+  tabs(level); printf("\\_ Statement\n");
+  if (!stmt) {
+    tabs(level); printf("\\_ NULL\n");
+    return;
+  }
+  if (stmt->iff) {
+    show_iff(stmt->iff, level + 2); 
+  }
+  else if (stmt->ret) {
+    show_return(stmt->ret, level + 2);
+  }
+  else if (stmt->func_call) {
+    show_func_call(stmt->func_call, level + 2);
+  }
+  else {
+    tabs(level); printf("\\_ %p\n", stmt->ret);
+    tabs(level); printf("\\_ Statement empty\n");
   }
 }

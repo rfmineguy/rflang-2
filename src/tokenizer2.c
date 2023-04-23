@@ -17,6 +17,7 @@
   if (*t->cursor == ch) {\
     t->current = (token_t) {.type = tp, LOC_FIELD(t, 1) };\
     t->cursor++;\
+    t->col++;\
     return;\
   }
 
@@ -24,6 +25,7 @@
   if (strncmp(t->cursor, str, len) == 0) {\
     t->current = (token_t) {.type = tp, LOC_FIELD(t, len) };\
     t->cursor+=len;\
+    t->col+=len;\
     return;\
   }
 
@@ -31,6 +33,7 @@
   if (t->cursor == t->source_str + t->source_length) {\
     t->current = (token_t) {.type = T_EOF, LOC_FIELD(t, 1) };\
     t->cursor++;\
+    t->col++;\
     return;\
   }
 
@@ -143,15 +146,18 @@ void tokenizer_advance_t(tokenizer_t* t) {
   TOK_CHECK_EOF(t)
   if (isdigit(*t->cursor)) {
     int digit_len = 0;
-    tokenizer_process_digit(t, &digit_len);
+    int value = tokenizer_process_digit(t, &digit_len);
     t->current = (token_t) {.type = T_NUM, LOC_FIELD(t, digit_len)}; 
     t->cursor += digit_len;
+    t->current.value.i = value;
     return;
   }
   if (isalpha(*t->cursor)) {
     int length = 0;
     tokenizer_process_id(t, &length);
     t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
+    strncpy(t->current.value.s, t->cursor, length);
+    // printf("t->current.value.s = %s\n", t->current.value.s);
     t->cursor += length;
     return;
   }
