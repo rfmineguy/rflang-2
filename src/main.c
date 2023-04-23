@@ -30,7 +30,7 @@ void execute(const char* cmd, ...) {
   char command[200] = {0};
   va_list l;
   va_start(l, cmd);
-  vsprintf(command, cmd, l);
+  vsnprintf(command, 200, cmd, l);
   system(command);
   va_end(l);
 }

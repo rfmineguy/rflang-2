@@ -50,7 +50,7 @@ tokenizer_t* tokenizer_new(FILE* f) {
   fseek(f, 0, SEEK_SET);
 
   t->source_length = size;
-  t->source_str = malloc(sizeof(char) * size);
+  t->source_str = malloc(sizeof(char) * size + 2);
   if (!t->source_str) {
     fprintf(stderr, "Failed to allocate memory\n");
     free(t->source_str);
@@ -65,6 +65,7 @@ tokenizer_t* tokenizer_new(FILE* f) {
     t->source_str = NULL;
     exit(1);
   }
+  t->source_str[read] = '\0'; //add null term (fread doesn't add this)
   printf("%lu\n", read);
 
   t->cursor = t->source_str;
@@ -157,7 +158,6 @@ void tokenizer_advance_t(tokenizer_t* t) {
     tokenizer_process_id(t, &length);
     t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
     strncpy(t->current.value.s, t->cursor, length);
-    // printf("t->current.value.s = %s\n", t->current.value.s);
     t->cursor += length;
     return;
   }

@@ -94,7 +94,6 @@ struct condition_t {
   
 };
 
-
 int           is_operator(token_type_t);
 int           get_precedence(token_type_t);
 

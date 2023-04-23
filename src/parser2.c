@@ -128,6 +128,7 @@ var_t* parse_var(tokenizer_t* t) {
 }
 
 assign_t* parse_assign(tokenizer_t* t) {
+  printf("Parsing assign\n");
   assign_t* a = calloc(1, sizeof(assign_t));
   var_t* v = parse_var(t);
   if (!tokenizer_expect_t(t, T_EQ)) {
@@ -238,8 +239,6 @@ expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t*
     printf("Parsed expression\n");
     return e;
   }
-  // printf("Next token\n");
-  // token_print(postfix[current_index], t);
   if (postfix[current_index].type == T_ID) {
     printf("ID %s\n", postfix[current_index].value.s);
     token_print(postfix[current_index], t);
@@ -263,28 +262,6 @@ expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t*
     return e;
   }
 }
-
-/*
-// NOTE: Don't use the tokenizer in this function
-// The tokenizer was already advanced in the parse_expression function
-// (1 + 3) / 4
-// 1 3 + 4 /
-expression_t* parse_expression_ex(tokenizer_t* t, token_t* postfix, int current_index, int postfix_len) {
-  expression_t* e = calloc(1, sizeof(expression_t));
-  if (current_index == postfix_len) {
-    return e;
-  }
-  if (is_operator(postfix[current_index].type)) {
-    token_t left = postfix[current_index - 2];
-    token_t right = postfix[current_index - 1];
-    e->operation = postfix[current_index].type;
-    e-
-  }
-  else {}
-  printf("Parsed expr\n");
-  return e;
-}
-*/
 
 //NOTE: parse the infix expression as postfix
 expression_t* parse_expression(tokenizer_t* t) {
@@ -345,17 +322,10 @@ void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) 
 statement_t* parse_statement(tokenizer_t* t) {
   printf("Parsing statement\n");
   statement_t* s = calloc(1, sizeof(statement_t));
-  printf("Next t -> ");
-  tokenizer_show_next_t(t);
-  printf("\n");
   if (tokenizer_expect_t(t, T_ID)) {
-    token_t t_id = tokenizer_get_t(t);
     tokenizer_advance_t(t);
     if (tokenizer_expect_t(t, T_LP)) {
       assert(0 && "Encountered function call");
-    }
-    else if (tokenizer_expect_t(t, T_EQ)) {
-      assert(0 && "Encountered assignment");
     }
   }
   else if (tokenizer_expect_t(t, T_IF)) {
@@ -374,8 +344,6 @@ statement_t* parse_statement(tokenizer_t* t) {
     return_t* r = calloc(1, sizeof(return_t));
     r->expr = e;
     s->ret = r;
-    // b->expr = e;
-    // assert(0 && "Encountered return");
   }
   else if (tokenizer_expect_t(t, T_ASM)) {
     assert(0 && "Encountered asm");

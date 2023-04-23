@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(rfc LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall -fsanitize=address")
 
 file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
 
