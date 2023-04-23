@@ -11,7 +11,8 @@ typedef struct {
   token_t current;
 } tokenizer_t;
 
-tokenizer_t* tokenizer_new(FILE*);
+tokenizer_t* tokenizer_new_from_str(const char*);
+tokenizer_t* tokenizer_new_from_file(FILE*);
 void tokenizer_free(tokenizer_t*);
 
 token_type_t tokenizer_ch(tokenizer_t*, char);

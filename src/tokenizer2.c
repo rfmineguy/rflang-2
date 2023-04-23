@@ -41,8 +41,18 @@ int tokenizer_process_digit(tokenizer_t*, int*);
 void tokenizer_process_id(tokenizer_t*, int*);
 
 // FUNCTIONS
-// 
-tokenizer_t* tokenizer_new(FILE* f) {
+tokenizer_t* tokenizer_new_from_str(const char* str) {
+  tokenizer_t* t = calloc(1, sizeof(tokenizer_t));
+  int len = strlen(str) + 1;
+  t->source_str = malloc(len);
+  strcpy(t->source_str, str);
+  t->source_str[len - 1] = 0;
+  t->cursor = t->source_str;
+  tokenizer_advance_t(t);
+  return t;
+}
+
+tokenizer_t* tokenizer_new_from_file(FILE* f) {
   tokenizer_t* t = calloc(1, sizeof(tokenizer_t));
 
   fseek(f, 0, SEEK_END);

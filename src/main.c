@@ -50,7 +50,7 @@ int compile(args* a) {
   strncpy(outfile, a->file, 100);
   strncat(outfile, ".out", 100);
   FILE* output_file = openf(outfile, "w");
-  tokenizer_t* t = tokenizer_new(input_file);
+  tokenizer_t* t = tokenizer_new_from_file(input_file);
   program_t* prog = parse(t);
   show_program(prog, 1);
 
@@ -90,7 +90,7 @@ int test(args* a) {
   else {
     printf("TEST: Compiling \'%s\'\n", test_file); 
   }
-  tokenizer_t* t = tokenizer_new(f);
+  tokenizer_t* t = tokenizer_new_from_file(f);
   program_t* p = parse_program(t);
   show_program(p, 1);
 

@@ -2,7 +2,7 @@
 #define PARSER2_H
 #include "tokenizer2.h"
 
-typedef enum   expr_type_t  expr_type_t; 
+// typedef enum   expr_type_t  expr_type_t; 
 
 typedef struct program_t    program_t;
 typedef struct use_t        use_t;
@@ -20,9 +20,9 @@ typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
 typedef struct condition_t  condition_t;
 
-enum expr_type_t {
-  EXPR_INT, EXPR_STRING
-};
+typedef enum {
+  EXPR_INT = 0, EXPR_STRING
+} expr_type_t;
 
 struct program_t {
   use_t**  use_list;
