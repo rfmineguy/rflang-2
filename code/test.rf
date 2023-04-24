@@ -1,7 +1,6 @@
 use io
 
 fn main(argc: int, argv: char**): int {
-  add(4, 4);
   return 2 + (argc - 3) * 9 - (4 * 3);
 }
 

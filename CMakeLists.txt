@@ -46,6 +46,7 @@ add_executable(rfc-tests
   src/parser2.c
   src/token.c
   src/codegen.c
+  src/errors.c
   src/tokenizer2.c)
 target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
 target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
@@ -55,6 +56,7 @@ add_executable(rfc
   src/parser2.c
   src/token.c
   src/codegen.c
+  src/errors.c
   src/tokenizer2.c)
 target_link_libraries(rfc PRIVATE argparse m)
 target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR})

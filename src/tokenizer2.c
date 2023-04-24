@@ -160,6 +160,7 @@ void tokenizer_advance_t(tokenizer_t* t) {
     int value = tokenizer_process_digit(t, &digit_len);
     t->current = (token_t) {.type = T_NUM, LOC_FIELD(t, digit_len)}; 
     t->cursor += digit_len;
+    t->col += digit_len;
     t->current.value.i = value;
     return;
   }
@@ -169,6 +170,7 @@ void tokenizer_advance_t(tokenizer_t* t) {
     t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
     strncpy(t->current.value.s, t->cursor, length);
     t->cursor += length;
+    t->col += length;
     return;
   }
   // printf("missed everything\n");

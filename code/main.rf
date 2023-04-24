@@ -1,9 +1,11 @@
-fn add(a: int, b: int, c: short): int {
+use io
+use rf
+
+fn add(a: int, b: int, c: short): int 
   return sum;
 }
 
 fn sub(a: int, b: int): int {
-  difference: int = a - b;
   return difference;
 }
 
@@ -12,9 +14,9 @@ fn putc(c: char): int {
 }
 
 fn puts(c: char*): int {
-
+  return 4;
 }
 
 fn main(argc: int, argv: char***): int {
-
+  return 0;
 }

@@ -1,8 +1,13 @@
 #include "parser2.h"
+#include "errors.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+// + t->current.loc.length
+#define ERROR(msg, ...) \
+  error_print((error_t) {.line=t->line, .column=t->col}, t, msg, __FUNCTION__, __LINE__, ##__VA_ARGS__);\
+  exit(1)
 
 int is_operator(token_type_t type) {
   return type == T_PLUS || type == T_MINUS || type == T_MUL || type == T_DIV || type == T_MOD;
@@ -59,7 +64,7 @@ use_t* parse_use(tokenizer_t* t) {
   use_t* u = calloc(1, sizeof(use_t));
   tokenizer_advance_t(t);
   if (!tokenizer_expect_t(t, T_ID)) {
-    fprintf(stderr, "Expected id, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+    ERROR("Expected id, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
     exit(1);
   }
   strncpy(u->name, t->source_str + tokenizer_get_t(t).loc.begin_index, tokenizer_get_t(t).loc.length);
@@ -72,7 +77,7 @@ block_t* parse_block(tokenizer_t* t) {
   // for now lets just skip the block
   printf("Block\n");
   if (!tokenizer_expect_t(t, T_LB)) {
-    fprintf(stderr, "Expected TL_B in block\n");
+    ERROR("Expected T_LB, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
     exit(1);
   }
   b->statements = calloc(1, sizeof(statement_t) * 5);
@@ -94,15 +99,13 @@ block_t* parse_block(tokenizer_t* t) {
 var_t* parse_var(tokenizer_t* t) {
   var_t* v = calloc(1, sizeof(var_t));
   if (!tokenizer_expect_t(t, T_ID)) {
-    fprintf(stderr, "Expected id, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    exit(1);
+    ERROR("Expected T_ID, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   strncpy(v->name, t->source_str + tokenizer_get_t(t).loc.begin_index, tokenizer_get_t(t).loc.length);
   tokenizer_advance_t(t);
 
   if (!tokenizer_expect_t(t, T_COLON)) {
-    fprintf(stderr, "Expected colon, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    exit(1);
+    ERROR("Expected T_COLON, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   tokenizer_advance_t(t);
   tokenizer_show_next_t(t);
@@ -132,8 +135,7 @@ assign_t* parse_assign(tokenizer_t* t) {
   assign_t* a = calloc(1, sizeof(assign_t));
   var_t* v = parse_var(t);
   if (!tokenizer_expect_t(t, T_EQ)) {
-    fprintf(stderr, "Expected '=', got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    exit(1);
+    ERROR("Expected T_EQ, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   tokenizer_advance_t(t);
   expression_t* e = parse_expression(t);
@@ -156,8 +158,7 @@ param_list_t* parse_param_list(tokenizer_t* t) {
   param_list_t* plist = calloc(1, sizeof(param_list_t));
   plist->params = calloc(10, sizeof(var_t));
   if (!tokenizer_expect_t(t, T_LP)) {
-    fprintf(stderr, "Expected '(', got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    exit(1);
+    ERROR("Expected T_LP, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   tokenizer_advance_t(t);
   while (tokenizer_get_t(t).type != T_RP) {
@@ -171,8 +172,8 @@ param_list_t* parse_param_list(tokenizer_t* t) {
       break;
     }
     else {
-      fprintf(stderr, "Expected ',', got %s\n", token_type_stringify(tokenizer_get_t(t).type)); 
-      exit(1);
+      printf("column: %d\n", t->col);
+      ERROR("Expected T_COMMA, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
     }
   }
 
@@ -186,8 +187,7 @@ arg_list_t* parse_arg_list(tokenizer_t* t) {
 func_decl_t* parse_func_decl(tokenizer_t* t) {
   func_decl_t* f = calloc(1, sizeof(func_decl_t));
   if (!tokenizer_expect_t(t, T_ID)) {
-    fprintf(stderr, "Expected id, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    exit(1);
+    ERROR("Expected T_ID, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   strncpy(f->name, t->source_str + tokenizer_get_t(t).loc.begin_index, tokenizer_get_t(t).loc.length);
   tokenizer_advance_t(t);
@@ -217,8 +217,9 @@ func_t* parse_func(tokenizer_t* t) {
       tokenizer_advance_t(t);
     }
     else {
-      fprintf(stderr, "Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-      exit(1);
+      ERROR("Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+      // fprintf(stderr, "Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+      // exit(1);
     }
   }
   block_t* b = parse_block(t);
@@ -233,29 +234,21 @@ func_call_t* parse_func_call(tokenizer_t* t) {
 }
 
 expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t* postfix, int current_index, int postfix_len) {
-  printf("Parse expression begin\n");
   expression_t* e = calloc(1, sizeof(expression_t));
   if (current_index == -1) {
-    printf("Parsed expression\n");
     return e;
   }
   if (postfix[current_index].type == T_ID) {
-    printf("ID %s\n", postfix[current_index].value.s);
-    token_print(postfix[current_index], t);
     strncpy(e->value.s, postfix[current_index].value.s, 30);
     e->type = EXPR_STRING;
     return e;
   }
   else if (postfix[current_index].type == T_NUM) {
-    printf("Value: %d\n", postfix[current_index].value.i);
-    token_print(postfix[current_index], t);
     e->value.i = postfix[current_index].value.i;
     e->type = EXPR_INT;
     return e;
   } 
   else if (is_operator(postfix[current_index].type)) {
-    printf("Operator\n");
-    token_print(postfix[current_index], t);
     e->operation = postfix[current_index].type;
     e->left = parse_expression_ex(t, e, postfix, current_index - 2, postfix_len);
     e->right = parse_expression_ex(t, e, postfix, current_index - 1, postfix_len);
@@ -263,7 +256,6 @@ expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t*
   }
 }
 
-//NOTE: parse the infix expression as postfix
 expression_t* parse_expression(tokenizer_t* t) {
   // convert entire expression to postfix
   token_t postfix[100] = {0};
@@ -281,7 +273,6 @@ void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) 
   // NOTE: Need to break at some point (when?)
   // NOTE: Converts stream of tokens into postfix (stored in 'postfix' array) 
   while (1) {
-    // tokenizer_show_next_t(t);
     if (tokenizer_expect_t(t, T_ID) || tokenizer_expect_t(t, T_NUM)) {
       postfix_out[j++] = tokenizer_get_t(t);
     }
@@ -354,9 +345,7 @@ statement_t* parse_statement(tokenizer_t* t) {
     return NULL;
   }
   else {
-    fprintf(stderr, "Unexpected token in block: %s\n", token_type_stringify(tokenizer_get_t(t).type));
-    fprintf(stderr, "  line: %d, col: %d\n", t->line, t->col);
-    exit(1);
+    ERROR("Unexpected token: %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   return s;
 }
