@@ -1,9 +1,13 @@
 use io
 
 fn main(argc: int, argv: char**): int {
-  return 2 + (argc - 3) * 9 - (4 * 3);
+  a: int = 4 + 3 - 4 * a;
 }
 
 fn add(a: int, b: int): int {
   return a + b;
+}
+
+fn boo(a: bool): int {
+  return 2 + 5;
 }

@@ -74,7 +74,6 @@ use_t* parse_use(tokenizer_t* t) {
 
 block_t* parse_block(tokenizer_t* t) {
   block_t* b = calloc(1, sizeof(block_t));
-  // for now lets just skip the block
   printf("Block\n");
   if (!tokenizer_expect_t(t, T_LB)) {
     ERROR("Expected T_LB, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
@@ -83,7 +82,6 @@ block_t* parse_block(tokenizer_t* t) {
   b->statements = calloc(1, sizeof(statement_t) * 5);
   tokenizer_advance_t(t);
   while (tokenizer_get_t(t).type != T_RB) {
-    // tokenizer_show_next_t(t);
     statement_t* s = parse_statement(t);
     if (s) {
       b->statements[b->statement_count++] = s;
@@ -146,11 +144,8 @@ assign_t* parse_assign(tokenizer_t* t) {
 
 return_t* parse_return(tokenizer_t* t) {
   return_t* ret = calloc(1, sizeof(return_t));
-  printf("Parse return begin\n");
-  tokenizer_show_next_t(t);
   expression_t* e = parse_expression(t);
   ret->expr = e;
-  printf("Parsed return\n");
   return ret;
 }
 
@@ -318,12 +313,20 @@ statement_t* parse_statement(tokenizer_t* t) {
     if (tokenizer_expect_t(t, T_LP)) {
       assert(0 && "Encountered function call");
     }
+    else {
+      //assign
+      printf("Parsing assign\n");
+      tokenizer_rewind_t(t);
+      assign_t* a = parse_assign(t);
+      s->assign = a;
+      // tokenizer_advance_t(t);
+    }
   }
   else if (tokenizer_expect_t(t, T_IF)) {
     assert(0 && "Encountered if");
   }
   else if (tokenizer_expect_t(t, T_FOR)) {
-    assert(0 && "Encountered for");
+    assert(0 && "Encountered for (UNSUPPORTED FOR NOW)");
   }
   else if (tokenizer_expect_t(t, T_WHILE)) {
     assert(0 && "Encountered while");
@@ -331,10 +334,7 @@ statement_t* parse_statement(tokenizer_t* t) {
   else if (tokenizer_expect_t(t, T_RETURN)) {
     printf("Parse return\n");
     tokenizer_advance_t(t);
-    expression_t* e = parse_expression(t);
-    return_t* r = calloc(1, sizeof(return_t));
-    r->expr = e;
-    s->ret = r;
+    s->ret = parse_return(t);
   }
   else if (tokenizer_expect_t(t, T_ASM)) {
     assert(0 && "Encountered asm");
@@ -346,6 +346,14 @@ statement_t* parse_statement(tokenizer_t* t) {
   }
   else {
     ERROR("Unexpected token: %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+
+  printf("Next\n");
+  tokenizer_show_next_t(t);
+  if (!tokenizer_expect_t(t, T_SEMICOLON)) {
+    free(s);
+    s = NULL;
+    ERROR("Expected SEMI, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   return s;
 }
@@ -516,6 +524,8 @@ void show_assign(assign_t* assign, int level) {
     tabs(level); printf("\\_ NULL\n");
     return;
   }
+  show_var(assign->var, level);
+  show_expression(assign->expr, level);
 }
 
 void show_return(return_t* _return, int level) {
@@ -603,6 +613,9 @@ void show_statement(statement_t* stmt, int level) {
   }
   else if (stmt->func_call) {
     show_func_call(stmt->func_call, level + 2);
+  }
+  else if (stmt->assign) {
+    show_assign(stmt->assign, level + 2);
   }
   else {
     tabs(level); printf("\\_ %p\n", stmt->ret);

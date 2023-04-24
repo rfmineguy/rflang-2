@@ -85,6 +85,7 @@ struct statement_t {
   if_t* iff;
   return_t* ret;
   func_call_t* func_call;
+  assign_t* assign;
 };
 struct if_t {
   condition_t* condition;

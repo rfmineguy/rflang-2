@@ -112,6 +112,7 @@ void tokenizer_advance_t_internal(tokenizer_t* t) {
 }
 
 void tokenizer_advance_t(tokenizer_t* t) {
+  t->prev = t->current;
   tokenizer_consume_whitespace(t);
   // if (*t->cursor == '\n') {
   //   t->cursor++;
@@ -174,6 +175,14 @@ void tokenizer_advance_t(tokenizer_t* t) {
     return;
   }
   // printf("missed everything\n");
+}
+
+void tokenizer_rewind_t(tokenizer_t* t) {
+  t->cursor -= t->current.loc.length;
+  t->col -= t->current.loc.length;
+  t->cursor -= t->prev.loc.length;
+  t->col -= t->prev.loc.length;
+  tokenizer_advance_t(t);
 }
 
 token_t tokenizer_get_t(tokenizer_t* t) {

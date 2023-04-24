@@ -9,6 +9,7 @@ typedef struct {
   int source_length;
   int col, line;
   token_t current;
+  token_t prev;
 } tokenizer_t;
 
 tokenizer_t* tokenizer_new_from_str(const char*);
@@ -23,6 +24,7 @@ token_type_t tokenizer_id(tokenizer_t*);
 int tokenizer_expect_t(tokenizer_t*, token_type_t);
 void tokenizer_advance_t_internal(tokenizer_t*);
 void tokenizer_advance_t(tokenizer_t*);
+void tokenizer_rewind_t(tokenizer_t*);
 token_t tokenizer_get_t(tokenizer_t*);
 
 void tokenizer_show_next_t(tokenizer_t*);
