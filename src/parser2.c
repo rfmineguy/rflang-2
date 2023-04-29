@@ -231,37 +231,6 @@ func_call_t* parse_func_call(tokenizer_t* t) {
  * 0     1    2      3     4
  */
 
-/*
-expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t* postfix, int current_index, int postfix_len) {
-  // NOTE(BUG): Some of the postfix elements get visited twice which causes an incorrect parse tree
-  expression_t* e = calloc(1, sizeof(expression_t));
-  if (current_index == 0) {
-    printf("end expression\n");
-    return e;
-  }
-  if (postfix[current_index].type == T_ID) {
-    printf("[%d]{ID, %s}, ", current_index, postfix[current_index].value.s);
-    strncpy(e->value.s, postfix[current_index].value.s, 30);
-    e->type = EXPR_STRING;
-    return e;
-  }
-  if (postfix[current_index].type == T_NUM) {
-    printf("[%d]{NUM, %d}, ", current_index, postfix[current_index].value.i);
-    e->value.i = postfix[current_index].value.i;
-    e->type = EXPR_NUM;
-    return e;
-  }
-  if (is_operator(postfix[current_index].type)) {
-    printf("[%d]{OP, %s}, ", current_index, token_type_stringify(postfix[current_index].type));
-    e->operation = postfix[current_index].type;
-    e->right = parse_expression_ex(t, NULL, postfix, current_index - 1, postfix_len);
-    e->left = parse_expression_ex(t, NULL, postfix, current_index - 2, postfix_len);
-    e->type = EXPR_COMPOUND;
-    return e;
-  }
-}
-*/
-
 void show_stack(expression_t** stack, int length) {
   printf("Stack: %d\n", length);
   for (int i = 0; i < length; i++) {
@@ -459,7 +428,6 @@ void free_block(block_t* block) {
   }
   free(block->statements);
   block->statements = NULL;
-  // nothing to free (yet)
 }
 
 void free_var(var_t* var) {
@@ -522,8 +490,6 @@ void free_expression(expression_t* expr) {
   free(expr->left);
   free_expression(expr->right);
   free(expr->right);
-  free(expr);
-  expr = NULL;
   printf("Freed expression\n");
 }
 
