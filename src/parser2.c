@@ -213,8 +213,6 @@ func_t* parse_func(tokenizer_t* t) {
     }
     else {
       ERROR("Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-      // fprintf(stderr, "Expected type, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
-      // exit(1);
     }
   }
   block_t* b = parse_block(t);
@@ -228,36 +226,104 @@ func_call_t* parse_func_call(tokenizer_t* t) {
   return NULL;
 }
 
+/*
+ * T_NUM T_ID T_PLUS T_NUM T_MINUS
+ * 0     1    2      3     4
+ */
+
+/*
 expression_t* parse_expression_ex(tokenizer_t* t, expression_t* parent, token_t* postfix, int current_index, int postfix_len) {
+  // NOTE(BUG): Some of the postfix elements get visited twice which causes an incorrect parse tree
   expression_t* e = calloc(1, sizeof(expression_t));
-  if (current_index == -1) {
+  if (current_index == 0) {
+    printf("end expression\n");
     return e;
   }
   if (postfix[current_index].type == T_ID) {
+    printf("[%d]{ID, %s}, ", current_index, postfix[current_index].value.s);
     strncpy(e->value.s, postfix[current_index].value.s, 30);
     e->type = EXPR_STRING;
     return e;
   }
-  else if (postfix[current_index].type == T_NUM) {
+  if (postfix[current_index].type == T_NUM) {
+    printf("[%d]{NUM, %d}, ", current_index, postfix[current_index].value.i);
     e->value.i = postfix[current_index].value.i;
-    e->type = EXPR_INT;
-    return e;
-  } 
-  else if (is_operator(postfix[current_index].type)) {
-    e->operation = postfix[current_index].type;
-    e->left = parse_expression_ex(t, e, postfix, current_index - 2, postfix_len);
-    e->right = parse_expression_ex(t, e, postfix, current_index - 1, postfix_len);
+    e->type = EXPR_NUM;
     return e;
   }
+  if (is_operator(postfix[current_index].type)) {
+    printf("[%d]{OP, %s}, ", current_index, token_type_stringify(postfix[current_index].type));
+    e->operation = postfix[current_index].type;
+    e->right = parse_expression_ex(t, NULL, postfix, current_index - 1, postfix_len);
+    e->left = parse_expression_ex(t, NULL, postfix, current_index - 2, postfix_len);
+    e->type = EXPR_COMPOUND;
+    return e;
+  }
+}
+*/
+
+void show_stack(expression_t** stack, int length) {
+  printf("Stack: %d\n", length);
+  for (int i = 0; i < length; i++) {
+    if (stack[i]) {
+      printf("Showing expression\n");
+      show_expression(stack[i], 1);
+    }
+  }
+}
+
+expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
+  expression_t** exprs = calloc(postfix_len, sizeof(expression_t*));
+  int main_counter = 0;
+  int stack_top = 0;
+  while (main_counter < postfix_len) {
+    expression_t* e = calloc(1, sizeof(expression_t));
+    if (postfix[main_counter].type == T_ID) {
+      e->type = EXPR_STRING;
+      strncpy(e->value.s, postfix[main_counter].value.s, 30);
+      exprs[stack_top] = e;
+      stack_top++;
+    }
+    else if (postfix[main_counter].type == T_NUM) {
+      e->type = EXPR_NUM;
+      e->value.i = postfix[main_counter].value.i;
+      exprs[stack_top] = e;
+      stack_top++;
+    }
+    else {
+      //NOTE: Confirm the offsets
+      expression_t* left  = exprs[stack_top - 1];
+      expression_t* right = exprs[stack_top - 2];
+      stack_top --;
+      stack_top --;
+      e->type = EXPR_COMPOUND;
+      e->value.operation = postfix[main_counter].type;
+      e->left = left;
+      e->right = right;
+      exprs[stack_top] = e;
+      stack_top++;
+    }
+    main_counter ++;
+  }
+
+  printf("Expressions: \n");
+  // for (int i = 0; i < postfix_len; i++) {
+  //   show_expression(exprs[i], 1);
+  // }
+  return exprs[0];
 }
 
 expression_t* parse_expression(tokenizer_t* t) {
   // convert entire expression to postfix
   token_t postfix[100] = {0};
   int postfix_len = 0;
-  get_postfix_rep(t, postfix, &postfix_len); 
+  get_postfix_rep(t, postfix, &postfix_len);
   printf("postfix_len: %d\n", postfix_len);
-  return parse_expression_ex(t, NULL, postfix, postfix_len - 1, -1);
+  for (int i = 0; i < postfix_len; i++) {
+    token_print(postfix[i], t);
+  }
+  //return parse_expression_ex(t, NULL, postfix, postfix_len - 1, -1);
+  return parse_expression_v2(postfix, postfix_len);
 }
 
 void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
@@ -348,7 +414,7 @@ statement_t* parse_statement(tokenizer_t* t) {
     ERROR("Unexpected token: %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
 
-  printf("Next\n");
+  // printf("Next\n");
   tokenizer_show_next_t(t);
   if (!tokenizer_expect_t(t, T_SEMICOLON)) {
     free(s);
@@ -562,30 +628,37 @@ void show_var(var_t* var, int level) {
 void show_expression(expression_t* expr, int level) {
   tabs(level); printf("\\_ Expr");
   if (!expr) {
-    printf("\n");
+    // printf("\n");
     tabs(level+1); printf("\\_ NULL\n");
     return;
   }
-  switch (expr->operation) {
-  case T_PLUS:  printf("{+}\n"); break;
-  case T_MINUS: printf("{-}\n"); break;
-  case T_MUL:   printf("{*}\n"); break;
-  case T_DIV:   printf("{/}\n"); break;
-  case T_MOD:   printf("{*}\n"); break;
-  default:      printf("\n"); break;
-  }
-  if (!expr->left && !expr->right) {
-    tabs(level + 1);
-    switch (expr->type) {
-    case EXPR_INT:    printf("\\_Value {num: %d}\n", expr->value.i); break;
-    case EXPR_STRING: printf("\\_Value {str: %s}\n", expr->value.s); break;
+  switch (expr->type) {
+    case EXPR_NUM: {
+      printf("\n");
+      tabs(level + 1); 
+      printf("\\_Value {num: %d}\n", expr->value.i);
+      break;
     }
-  }
-  if (expr->left) {
-    show_expression(expr->left, level + 1);
-  }
-  if (expr->right) {
-    show_expression(expr->right, level + 1);
+    case EXPR_STRING: {
+      printf("\n");
+      tabs(level + 1); 
+      printf("\\_Value {str: %s}\n", expr->value.s); 
+      break;
+    }
+    case EXPR_COMPOUND: {
+      // tabs(level + 1);
+      switch (expr->value.operation) {
+        case T_PLUS:  printf("{+}\n"); break;
+        case T_MINUS: printf("{-}\n"); break;
+        case T_MUL:   printf("{*}\n"); break;
+        case T_DIV:   printf("{/}\n"); break;
+        case T_MOD:   printf("{*}\n"); break;
+        default: break;
+      }
+      if (expr->left) show_expression(expr->left, level + 1);
+      if (expr->right) show_expression(expr->right, level + 1);
+      break;
+    }
   }
 }
 

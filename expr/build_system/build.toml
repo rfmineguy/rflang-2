@@ -1,0 +1,6 @@
+name = "helloworld"
+sources = ["src/main.rf", "src/"]
+libs = ["math", "io"]
+features = ["show-parse-tree", ""]
+source_dir = "src"
+output_dir = "out"   #just an override for the default

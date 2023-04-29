@@ -21,7 +21,7 @@ typedef struct if_t         if_t;
 typedef struct condition_t  condition_t;
 
 typedef enum {
-  EXPR_INT = 0, EXPR_STRING
+  EXPR_NUM = 0, EXPR_STRING, EXPR_COMPOUND
 } expr_type_t;
 
 struct program_t {
@@ -74,8 +74,8 @@ struct arg_list_t {
 };
 struct expression_t {
   expr_type_t type;             // single value (number or id), or composed expression (expr '+' expr)
-  token_type_t operation;
   union {
+    token_type_t operation;
     int i;
     char s[30];
   } value;
@@ -111,8 +111,11 @@ assign_t*     parse_assign(tokenizer_t*);
 return_t*     parse_return(tokenizer_t*);
 param_list_t* parse_param_list(tokenizer_t*);
 arg_list_t*   parse_arg_list(tokenizer_t*);
+
 expression_t* parse_expression_ex(tokenizer_t*, expression_t*, token_t*, int, int);
 expression_t* parse_expression(tokenizer_t*);
+expression_t* parse_expression_v2(token_t*, int);
+
 void          get_postfix_rep(tokenizer_t*, token_t*, int*);
 statement_t*  parse_statement(tokenizer_t*);
 if_t*         parse_if(tokenizer_t*);
