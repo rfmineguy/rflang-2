@@ -77,6 +77,7 @@ tokenizer_t* tokenizer_new_from_file(FILE* f) {
   }
   t->source_str[read] = '\0'; //add null term (fread doesn't add this)
   printf("%lu\n", read);
+  printf("%p\n", t->source_str);
 
   t->cursor = t->source_str;
 #if 1
@@ -91,7 +92,6 @@ void tokenizer_free(tokenizer_t* t) {
   t->source_str = NULL;
   free(t);
 }
-
 
 int tokenizer_expect_t(tokenizer_t* t, token_type_t type) {
   return t->current.type == type;
@@ -128,6 +128,9 @@ void tokenizer_advance_t(tokenizer_t* t) {
   TOK_CHECK_STR("for", 3, T_FOR)
   TOK_CHECK_STR("while", 5, T_WHILE)
   TOK_CHECK_STR("asm", 3, T_ASM)
+  TOK_CHECK_STR("x86_32-linux", 12, T_X86_32_LINUX)
+  TOK_CHECK_STR("x86_64-linux", 12, T_X86_64_LINUX)
+  TOK_CHECK_STR("arm64", 5, T_ARM64)
   TOK_CHECK_STR("int", 3, T_INT)
   TOK_CHECK_STR("short", 5, T_SHT)
   TOK_CHECK_STR("char", 4, T_CHR)
@@ -176,6 +179,9 @@ void tokenizer_advance_t(tokenizer_t* t) {
     t->col += length;
     return;
   }
+  t->current = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
+  t->cursor += 1;
+  t->col += 1;
   // printf("missed everything\n");
 }
 
@@ -234,42 +240,45 @@ void token_print(token_t t, tokenizer_t* tokenizer) {
 #define PRINT_TOKEN(type_s, t) \
     printf("{%7s, %.*s}\n", type_s, t.loc.length, tokenizer->source_str + t.loc.begin_index);
   switch (t.type) {
-    case T_NL:      /*PRINT_TOKEN("NL", t);*/      break;
-    case T_SPC:       PRINT_TOKEN("SPC", t);       break;
-    case T_TAB:       PRINT_TOKEN("TAB", t);       break;
-    case T_FN:        PRINT_TOKEN("FN", t);        break;
-    case T_IF:        PRINT_TOKEN("IF", t);        break;
-    case T_FOR:       PRINT_TOKEN("FOR", t);       break;
-    case T_WHILE:     PRINT_TOKEN("WHILE", t);     break;
-    case T_ASM:       PRINT_TOKEN("ASM", t);       break;
-    case T_RB:        PRINT_TOKEN("RB", t);        break;
-    case T_LB:        PRINT_TOKEN("LB", t);        break;
-    case T_RP:        PRINT_TOKEN("RP", t);        break;
-    case T_LP:        PRINT_TOKEN("LP", t);        break;
-    case T_EQ:        PRINT_TOKEN("EQ", t);        break;
-    case T_NOT:       PRINT_TOKEN("NOT", t);       break;
-    case T_COLON:     PRINT_TOKEN("COLON", t);     break;
-    case T_SEMICOLON: PRINT_TOKEN("SEMICOLON", t); break;
-    case T_COMMA:     PRINT_TOKEN("COMMA", t);     break;
-    case T_ARROW:     PRINT_TOKEN("ARROW", t);     break;
-    case T_INT:       PRINT_TOKEN("INT", t);       break;
-    case T_CHR:       PRINT_TOKEN("CHR", t);       break;
-    case T_SHT:       PRINT_TOKEN("SHT", t);       break;
-    case T_DBL:       PRINT_TOKEN("DBL", t);       break;
-    case T_FLT:       PRINT_TOKEN("FLT", t);       break;
-    case T_BOOL:      PRINT_TOKEN("BOOL", t);      break;
-    case T_GT:        PRINT_TOKEN("GT", t);        break;
-    case T_LT:        PRINT_TOKEN("LT", t);        break;
-    case T_SQT:       PRINT_TOKEN("SQT", t);       break;
-    case T_DQT:       PRINT_TOKEN("DQT", t);       break;
-    case T_BACKSLASH: PRINT_TOKEN("BACKSLASH", t); break;
-    case T_PLUS:      PRINT_TOKEN("PLUS", t);      break;
-    case T_MINUS:     PRINT_TOKEN("MINUS", t);     break;
-    case T_MUL:       PRINT_TOKEN("MUL", t);       break;
-    case T_DIV:       PRINT_TOKEN("DIV", t);       break;
-    case T_NUM:       PRINT_TOKEN("NUM", t);       break;
-    case T_ID:        PRINT_TOKEN("ID", t);        break;
-    case T_EOF:       PRINT_TOKEN("EOF", t);       break;
-    default:          printf("unimplemented token\n"); break;
+    case T_NL:      /*PRINT_TOKEN("NL", t);*/                 break;
+    case T_SPC:           PRINT_TOKEN("SPC", t);              break;
+    case T_TAB:           PRINT_TOKEN("TAB", t);              break;
+    case T_FN:            PRINT_TOKEN("FN", t);               break;
+    case T_IF:            PRINT_TOKEN("IF", t);               break;
+    case T_FOR:           PRINT_TOKEN("FOR", t);              break;
+    case T_WHILE:         PRINT_TOKEN("WHILE", t);            break;
+    case T_ASM:           PRINT_TOKEN("ASM", t);              break;
+    case T_RB:            PRINT_TOKEN("RB", t);               break;
+    case T_LB:            PRINT_TOKEN("LB", t);               break;
+    case T_RP:            PRINT_TOKEN("RP", t);               break;
+    case T_LP:            PRINT_TOKEN("LP", t);               break;
+    case T_EQ:            PRINT_TOKEN("EQ", t);               break;
+    case T_NOT:           PRINT_TOKEN("NOT", t);              break;
+    case T_COLON:         PRINT_TOKEN("COLON", t);            break;
+    case T_SEMICOLON:     PRINT_TOKEN("SEMICOLON", t);        break;
+    case T_COMMA:         PRINT_TOKEN("COMMA", t);            break;
+    case T_ARROW:         PRINT_TOKEN("ARROW", t);            break;
+    case T_INT:           PRINT_TOKEN("INT", t);              break;
+    case T_CHR:           PRINT_TOKEN("CHR", t);              break;
+    case T_SHT:           PRINT_TOKEN("SHT", t);              break;
+    case T_DBL:           PRINT_TOKEN("DBL", t);              break;
+    case T_FLT:           PRINT_TOKEN("FLT", t);              break;
+    case T_BOOL:          PRINT_TOKEN("BOOL", t);             break;
+    case T_GT:            PRINT_TOKEN("GT", t);               break;
+    case T_LT:            PRINT_TOKEN("LT", t);               break;
+    case T_SQT:           PRINT_TOKEN("SQT", t);              break;
+    case T_DQT:           PRINT_TOKEN("DQT", t);              break;
+    case T_BACKSLASH:     PRINT_TOKEN("BACKSLASH", t);        break;
+    case T_PLUS:          PRINT_TOKEN("PLUS", t);             break;
+    case T_MINUS:         PRINT_TOKEN("MINUS", t);            break;
+    case T_MUL:           PRINT_TOKEN("MUL", t);              break;
+    case T_DIV:           PRINT_TOKEN("DIV", t);              break;
+    case T_NUM:           PRINT_TOKEN("NUM", t);              break;
+    case T_ID:            PRINT_TOKEN("ID", t);               break;
+    case T_X86_32_LINUX:  PRINT_TOKEN("X86_32_ASM_LINUX", t); break;
+    case T_X86_64_LINUX:  PRINT_TOKEN("X86_64_ASM_LINUX", t); break;
+    case T_ARM64:         PRINT_TOKEN("ARM64_ASM", t);        break;
+    case T_EOF:           PRINT_TOKEN("EOF", t);              break;
+    default:              printf("unimplemented token\n");    break;
   }
 }

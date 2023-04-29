@@ -9,6 +9,10 @@
   error_print((error_t) {.line=t->line, .column=t->col}, t, msg, __FUNCTION__, __LINE__, ##__VA_ARGS__);\
   exit(1)
 
+int is_asm_type_specifier(token_type_t type) {
+  return type == T_X86_32_LINUX || type == T_X86_64_LINUX || type == T_ARM64;
+}
+
 int is_operator(token_type_t type) {
   return type == T_PLUS || type == T_MINUS || type == T_MUL || type == T_DIV || type == T_MOD;
 }
@@ -94,6 +98,35 @@ block_t* parse_block(tokenizer_t* t) {
   return b;
 }
 
+asm_block_t* parse_asm_block(tokenizer_t* t) {
+  asm_block_t* ab = calloc(1, sizeof(asm_block_t));
+  token_t tok = tokenizer_get_t(t);
+  token_print(tok, t);
+  if (!is_asm_type_specifier(tok.type)) {
+    ERROR("Expected ASM type specifier, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  tokenizer_advance_t(t);
+  if (!tokenizer_expect_t(t, T_LB)) {
+    ERROR("Expected T_LB, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  tokenizer_advance_t(t);
+  ab->asm_source_code_begin = t->cursor;
+  while (tokenizer_get_t(t).type != T_RB) {
+    tokenizer_advance_t(t);
+  }
+  ab->asm_source_code_end = t->cursor;
+  token_print(tokenizer_get_t(t), t);
+
+  // printf("offset: %lu\n", ab->asm_source_code_begin - t->source_str);
+  // printf("length: %lu\n", ab->asm_source_code_end - ab->asm_source_code_begin);
+
+  if (!tokenizer_expect_t(t, T_RB)) {
+    ERROR("Expected T_RB, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  tokenizer_advance_t(t);
+  return ab;
+}
+
 var_t* parse_var(tokenizer_t* t) {
   var_t* v = calloc(1, sizeof(var_t));
   if (!tokenizer_expect_t(t, T_ID)) {
@@ -108,13 +141,15 @@ var_t* parse_var(tokenizer_t* t) {
   tokenizer_advance_t(t);
   tokenizer_show_next_t(t);
   token_t token = tokenizer_get_t(t);
+  /*
   int is_type = token.type == T_INT || 
                 token.type == T_SHT ||
                 token.type == T_CHR ||
                 token.type == T_DBL ||
                 token.type == T_FLT ||
                 token.type == T_BOOL;
-  if (is_type) {
+  */
+  if (is_type_token(token.type)) {
     v->type = tokenizer_get_t(t).type;
     v->type_name = token_type_stringify(tokenizer_get_t(t).type);
     tokenizer_advance_t(t);
@@ -370,7 +405,10 @@ statement_t* parse_statement(tokenizer_t* t) {
     s->ret = parse_return(t);
   }
   else if (tokenizer_expect_t(t, T_ASM)) {
-    assert(0 && "Encountered asm");
+    // assert(0 && "Encountered asm");
+    tokenizer_advance_t(t);
+    asm_block_t* asm_block = parse_asm_block(t);
+    s->asm_block = asm_block;
   }
   else if (tokenizer_expect_t(t, T_RB)) {
     free(s);
@@ -428,6 +466,9 @@ void free_block(block_t* block) {
   }
   free(block->statements);
   block->statements = NULL;
+}
+
+void free_asm_block(asm_block_t* asm_block) {
 }
 
 void free_var(var_t* var) {
@@ -518,6 +559,11 @@ void free_statement(statement_t* stmt) {
     free(stmt->assign);
     stmt->assign = NULL;
   }
+  if (stmt->asm_block) {
+    free_asm_block(stmt->asm_block);
+    free(stmt->asm_block);
+    stmt->asm_block = NULL;
+  }
   free(stmt);
   stmt = NULL;
 }
@@ -557,6 +603,17 @@ void show_block(block_t* block, int level) {
   for (int i = 0; i < block->statement_count; i++) {
     show_statement(block->statements[i], level + 2);
   }
+}
+
+void show_asm_block(asm_block_t* asm_block, int level) {
+  tabs(level - 1); printf("\\_ AsmBlock\n");
+  if (!asm_block) {
+    tabs(level + 1); printf("\\_ NULL\n");
+    return;
+  }
+  tabs(level); printf("\\_ begin: %p\n", asm_block->asm_source_code_begin);
+  tabs(level); printf("\\_ end: %p\n", asm_block->asm_source_code_end);
+  tabs(level); printf("\\_ length: %zu\n", asm_block->asm_source_code_end - asm_block->asm_source_code_begin);
 }
 
 void show_func(func_t* func, int level) {
@@ -689,6 +746,9 @@ void show_statement(statement_t* stmt, int level) {
   }
   else if (stmt->assign) {
     show_assign(stmt->assign, level + 2);
+  }
+  else if (stmt->asm_block) {
+    show_asm_block(stmt->asm_block, level + 2);
   }
   else {
     tabs(level); printf("\\_ %p\n", stmt->ret);

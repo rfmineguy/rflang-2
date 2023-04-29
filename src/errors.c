@@ -5,7 +5,7 @@
 
 void error_print(error_t e, tokenizer_t* t,  const char* msg, const char* func_name, int line, ...) {
   printf("[%s, %d] ERROR: %d:%d\n", func_name, line, e.line, e.column);
-  line_info_t line_info = get_line_from_str(t->source_str, e.line);
+  line_info_t line_info = get_line_from_str(t->source_str, e.line + 1);
   printf("%.*s\n", line_info.end - line_info.begin, t->source_str + line_info.begin);
 
   for (int i = 0; i < e.column; i++)

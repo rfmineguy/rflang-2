@@ -1,13 +1,14 @@
-fn strlen(s: char*) -> int {
-  len: int = 0;
-  while (*s) {
-    len++;
-  }
-  return len;
+fn putc(c: char) {
+  asm x86_32-linux {
+  };
+  asm x86_64-linux {
+  };
+  asm arm64 {
+  };
 }
 
 fn puts(s: char*) {
-  asm {
+  asm x86_64-linux {
     ;x86-64
     push qword [rbp + 16]
     call strlen
@@ -16,5 +17,5 @@ fn puts(s: char*) {
     mov rdi, 0x01
     mov rsi, [rbp + 16]
     syscall
-  }
+  };
 }

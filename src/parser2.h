@@ -6,6 +6,7 @@
 
 typedef struct program_t    program_t;
 typedef struct use_t        use_t;
+typedef struct asm_block_t  asm_block_t;
 typedef struct block_t      block_t;
 typedef struct func_t       func_t;
 typedef struct func_decl_t  func_decl_t;
@@ -20,6 +21,9 @@ typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
 typedef struct condition_t  condition_t;
 
+typedef enum {
+  X86_64_LINUX_ASM, X86_32_LINUX_ASM, ARM64_ASM
+} asm_type_t;
 typedef enum {
   EXPR_NUM = 0, EXPR_STRING, EXPR_COMPOUND
 } expr_type_t;
@@ -36,6 +40,11 @@ struct use_t {
 struct block_t {
   statement_t** statements;
   int statement_count;
+};
+struct asm_block_t {
+  char* asm_source_code_begin;
+  char* asm_source_code_end;
+  asm_type_t asm_type;
 };
 struct func_t {
   int          has_return_type;
@@ -86,6 +95,7 @@ struct statement_t {
   return_t* ret;
   func_call_t* func_call;
   assign_t* assign;
+  asm_block_t* asm_block;
 };
 struct if_t {
   condition_t* condition;
@@ -103,6 +113,7 @@ int           is_type_token(token_type_t);
 program_t*    parse_program(tokenizer_t*);
 use_t*        parse_use(tokenizer_t*);
 block_t*      parse_block(tokenizer_t*);
+asm_block_t*  parse_asm_block(tokenizer_t*);
 var_t*        parse_var(tokenizer_t*);
 func_decl_t*  parse_func_decl(tokenizer_t*);
 func_t*       parse_func(tokenizer_t*);
@@ -123,6 +134,7 @@ if_t*         parse_if(tokenizer_t*);
 void          free_program(program_t*);
 void          free_use(use_t*);
 void          free_block(block_t*);
+void          free_asm_block(asm_block_t*);
 void          free_var(var_t*);
 void          free_func_decl(func_decl_t*);
 void          free_func(func_t*);
@@ -139,6 +151,7 @@ void          tabs(int);
 void          show_program(program_t*, int);
 void          show_use(use_t*, int);
 void          show_block(block_t*, int);
+void          show_asm_block(asm_block_t*, int);
 void          show_var(var_t*, int);
 void          show_func_decl(func_decl_t*, int);
 void          show_func(func_t*, int);
