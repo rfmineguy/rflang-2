@@ -4,11 +4,3 @@ fn main(argc: int, argv: char**): int {
   a: int = c + a * d;
   return a + 4 - 3;
 }
-
-fn add(a: int, b: int): int {
-  return a + b - 3;
-}
-
-fn boo(a: bool): int {
-  return 2 + (5 - 1) * 3;
-}

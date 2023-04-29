@@ -273,7 +273,7 @@ void show_stack(expression_t** stack, int length) {
 }
 
 expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
-  expression_t** exprs = calloc(postfix_len, sizeof(expression_t*));
+  expression_t* exprs[postfix_len];
   int main_counter = 0;
   int stack_top = 0;
   while (main_counter < postfix_len) {
@@ -294,6 +294,8 @@ expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
       //NOTE: Confirm the offsets
       expression_t* left  = exprs[stack_top - 1];
       expression_t* right = exprs[stack_top - 2];
+      exprs[stack_top - 1] = NULL;
+      exprs[stack_top - 2] = NULL;
       stack_top --;
       stack_top --;
       e->type = EXPR_COMPOUND;
@@ -306,10 +308,6 @@ expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
     main_counter ++;
   }
 
-  printf("Expressions: \n");
-  // for (int i = 0; i < postfix_len; i++) {
-  //   show_expression(exprs[i], 1);
-  // }
   return exprs[0];
 }
 
@@ -455,6 +453,12 @@ void free_use(use_t* use) {
 }
 
 void free_block(block_t* block) {
+  for (int i = 0; i < block->statement_count; i++) {
+    free_statement(block->statements[i]);
+    block->statements[i] = NULL;
+  }
+  free(block->statements);
+  block->statements = NULL;
   // nothing to free (yet)
 }
 
@@ -513,13 +517,43 @@ void free_arg_list(arg_list_t* arg_list) {
 }
 
 void free_expression(expression_t* expr) {
-
+  if (!expr) return;
+  free_expression(expr->left);
+  free(expr->left);
+  free_expression(expr->right);
+  free(expr->right);
+  free(expr);
+  expr = NULL;
+  printf("Freed expression\n");
 }
 
 void tabs(int count) {
   for (int i = 0; i < count; i++) {
     printf("  ");
   }
+}
+
+void free_statement(statement_t* stmt) {
+  if (stmt->iff) {
+    // free_iff(stmt->iff);
+  }
+  if (stmt->ret) {
+    free_return(stmt->ret);
+    free(stmt->ret);
+    stmt->ret = NULL;
+  }
+  if (stmt->func_call) {
+    free_func_call(stmt->func_call);
+    free(stmt->func_call);
+    stmt->func_call = NULL;
+  }
+  if (stmt->assign) {
+    free_assign(stmt->assign);
+    free(stmt->assign);
+    stmt->assign = NULL;
+  }
+  free(stmt);
+  stmt = NULL;
 }
 
 void show_program(program_t* p, int level) {

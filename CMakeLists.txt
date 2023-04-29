@@ -8,8 +8,8 @@ project(rfc-tests LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall -fsanitize=address")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -fsanitize=address")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
 file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
 

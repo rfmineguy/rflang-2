@@ -89,7 +89,9 @@ tokenizer_t* tokenizer_new_from_file(FILE* f) {
 void tokenizer_free(tokenizer_t* t) {
   free(t->source_str);
   t->source_str = NULL;
+  free(t);
 }
+
 
 int tokenizer_expect_t(tokenizer_t* t, token_type_t type) {
   return t->current.type == type;
