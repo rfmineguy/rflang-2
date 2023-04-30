@@ -1,6 +1,23 @@
-out/main: main.o io.o
-	ld main.o io.o -o main
-out/main.o: main.s
-	nasm -g -f elf64 -F dwarf main.s -o $@
-out/io.o: io.s
-	nasm -g -f elf64 -F dwarf io.s -o $@
+SOURCES := $(wildcard src/*.rf)
+ASM_FILE := $(patsubst src/%.rf, out/%.s, $(SOURCES))
+OBJECTS := $(patsubst out/%.o, out/%.s, $(ASM_FILE))
+
+default:
+	@echo "Default make target"
+
+.PHONY: always clean build
+build: always out/main
+always:
+	mkdir -p out/
+
+#clean:
+#	rm -r out
+
+out/main: $(OBJECTS)
+	ld $^ -o $@
+
+out/%.o: $(ASM_FILE)
+	nasm -g -f elf64 -F dwarf $^ -o $@
+
+out/%.s: src/%.rf
+	rfc -f $^ -o $@ -p x86_64-linux

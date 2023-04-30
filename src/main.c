@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
+#include <unistd.h>       //getcwd
 #include "parser2.h"
 #include "tokenizer2.h"
 #include "argparse.h"
@@ -24,7 +26,14 @@ static const char *const usages[] = {
 };
 
 typedef struct {
-  const char* file;
+  char cwd[PATH_MAX];  //current working directory
+  char input_file_path[PATH_MAX];
+  char output_file_path[PATH_MAX];
+} compilation_info;
+
+typedef struct {
+  const char* in_file;
+  const char* out_file;
   const char* comp_platform;
   int test, comp_platform_list;
 } args;
@@ -47,12 +56,41 @@ FILE* openf(const char* f, const char* perm) {
   return pf;
 }
 
+compilation_info get_compilation_info(args* a) {
+  compilation_info info = {0};
+  if (getcwd(info.cwd, PATH_MAX) != NULL) {}
+  else {
+    fprintf(stderr, "getcwd() error\n");
+    exit(1);
+  }
+  strncat(info.cwd, "/", PATH_MAX);
+  
+  if (a->in_file == NULL) {
+    fprintf(stderr, "No input file specified\n");
+    exit(1);
+  }
+
+  if (a->out_file == NULL) {
+    fprintf(stderr, "No output file specified\n");
+    exit(2);
+  }
+
+  strncpy(info.input_file_path, info.cwd, PATH_MAX);
+  strncat(info.input_file_path, a->in_file, PATH_MAX);
+
+  strncpy(info.output_file_path, info.cwd, PATH_MAX);
+  strncat(info.output_file_path, a->out_file, PATH_MAX);
+  return info;
+}
+
 int compile(args* a) {
-  FILE* input_file  = openf(a->file, "r");
-  char outfile[100] = {0};
-  strncpy(outfile, a->file, 100);
-  strncat(outfile, ".out", 100);
-  FILE* output_file = openf(outfile, "w");
+  compilation_info info = get_compilation_info(a);
+  printf("CWD: %s\n", info.cwd);
+  printf("OutFile: %s\n", info.output_file_path);
+  printf("InFile: %s\n", info.input_file_path);
+
+  FILE* input_file = openf(info.input_file_path, "r");
+  FILE* output_file = openf(info.output_file_path, "w");
   tokenizer_t* t = tokenizer_new_from_file(input_file);
   program_t* prog = parse(t);
   show_program(prog, 1);
@@ -78,7 +116,7 @@ int compile(args* a) {
   // Close files
   fclose(input_file);
   fclose(output_file);
-  return 1;
+  return 0;
 }
 
 int test(args* a) {
@@ -109,7 +147,8 @@ int main(int argc, const char** argv) {
   struct argparse_option options[] = {
     OPT_HELP(),
     OPT_GROUP("Compilation options"),
-    OPT_STRING('f', "file", &a.file, "File to compile", NULL , 0, 0),
+    OPT_STRING('f', "file", &a.in_file, "File to compile", NULL , 0, 0),
+    OPT_STRING('o', "output", &a.out_file, "Name of output asm file", NULL, 0, 0),
     OPT_STRING('p', "platform", &a.comp_platform, "Platform to compile for", NULL, 0, 0),
     OPT_BOOLEAN('l', "platform-list", &a.comp_platform_list, "List supported platforms", NULL, 0, 0),
     OPT_GROUP("Testing options"),
@@ -131,7 +170,7 @@ int main(int argc, const char** argv) {
     exit(89);
   }
   /// ================================================================================================
-  if (a.file == NULL) {
+  if (a.in_file == NULL) {
     fprintf(stderr, "You must supply a file to compile\n");
     exit(90);
   }
