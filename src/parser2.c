@@ -105,12 +105,13 @@ asm_block_t* parse_asm_block(tokenizer_t* t) {
   if (!is_asm_type_specifier(tok.type)) {
     ERROR("Expected ASM type specifier, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
+  ab->asm_type = (asm_type_t) tok.type;
   tokenizer_advance_t(t);
   if (!tokenizer_expect_t(t, T_LB)) {
     ERROR("Expected T_LB, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
-  tokenizer_advance_t(t);
   ab->asm_source_code_begin = t->cursor;
+  // tokenizer_advance_t(t);
   while (tokenizer_get_t(t).type != T_RB) {
     tokenizer_advance_t(t);
   }
@@ -469,6 +470,7 @@ void free_block(block_t* block) {
 }
 
 void free_asm_block(asm_block_t* asm_block) {
+  // nothing to free (yet)
 }
 
 void free_var(var_t* var) {
@@ -611,6 +613,7 @@ void show_asm_block(asm_block_t* asm_block, int level) {
     tabs(level + 1); printf("\\_ NULL\n");
     return;
   }
+  tabs(level); printf("\\_ asm_type: %s\n", token_type_stringify(asm_block->asm_type));
   tabs(level); printf("\\_ begin: %p\n", asm_block->asm_source_code_begin);
   tabs(level); printf("\\_ end: %p\n", asm_block->asm_source_code_end);
   tabs(level); printf("\\_ length: %zu\n", asm_block->asm_source_code_end - asm_block->asm_source_code_begin);

@@ -9,6 +9,8 @@
 
 #if defined(__linux__) // any linux distribution
     #define PLATFORM "linux"
+#elif defined(__APPLE__)
+    #define PLATFORM "apple"
 #elif defined(_WIN32) // any windows system
     #define PLATFORM "windows"
 #else
@@ -23,7 +25,8 @@ static const char *const usages[] = {
 
 typedef struct {
   const char* file;
-  int test;
+  const char* comp_platform;
+  int test, comp_platform_list;
 } args;
 
 void execute(const char* cmd, ...) {
@@ -55,12 +58,11 @@ int compile(args* a) {
   show_program(prog, 1);
 
   // Now codegen the program
-  codegen_program(prog, output_file);
-
-  // Run nasm and ld
-  if (strcmp(PLATFORM, "linux") == 0) {
-    printf("Linux\n");
-    execute("nasm -g -f elf64 -F dwarf %s -o %s", outfile, "test_out");
+  if (a->comp_platform) {
+    codegen_select(prog, output_file, a->comp_platform);
+  }
+  else {
+    fprintf(stderr, "Must select a target platform to compile for\n");
   }
 
   // Free the program
@@ -102,12 +104,14 @@ int test(args* a) {
 
 // https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
-  args a = {};
+  args a = {0};
   /// ================================================================================================
   struct argparse_option options[] = {
     OPT_HELP(),
     OPT_GROUP("Compilation options"),
     OPT_STRING('f', "file", &a.file, "File to compile", NULL , 0, 0),
+    OPT_STRING('p', "platform", &a.comp_platform, "Platform to compile for", NULL, 0, 0),
+    OPT_BOOLEAN('l', "platform-list", &a.comp_platform_list, "List supported platforms", NULL, 0, 0),
     OPT_GROUP("Testing options"),
     OPT_BOOLEAN('t', "test", &a.test, "Run tests", NULL, 0, 0), 
     OPT_END()
@@ -118,6 +122,13 @@ int main(int argc, const char** argv) {
   /// ================================================================================================
   if (a.test) {
     return test(&a);
+  }
+  if (a.comp_platform_list) {
+    printf("Platforms:\n");
+    printf(" - x86_32-linux\n");
+    printf(" - x86_64-linux\n");
+    printf(" - arm64\n");
+    exit(89);
   }
   /// ================================================================================================
   if (a.file == NULL) {

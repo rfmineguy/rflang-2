@@ -9,7 +9,6 @@ fn putc(c: char) {
 
 fn puts(s: char*) {
   asm x86_64-linux {
-    ;x86-64
     push qword [rbp + 16]
     call strlen
     mov rdx, rax
@@ -18,4 +17,5 @@ fn puts(s: char*) {
     mov rsi, [rbp + 16]
     syscall
   };
+  asm arm64 {};
 }
