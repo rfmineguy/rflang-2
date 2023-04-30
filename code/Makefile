@@ -1,6 +1,6 @@
 SOURCES := $(wildcard src/*.rf)
 ASM_FILE := $(patsubst src/%.rf, out/%.s, $(SOURCES))
-OBJECTS := $(patsubst out/%.o, out/%.s, $(ASM_FILE))
+OBJECTS := $(patsubst out/%.s, out/%.o, $(ASM_FILE))
 
 default:
 	@echo "Default make target"
@@ -16,7 +16,7 @@ always:
 out/main: $(OBJECTS)
 	ld $^ -o $@
 
-out/%.o: $(ASM_FILE)
+out/%.o: out/%.s
 	nasm -g -f elf64 -F dwarf $^ -o $@
 
 out/%.s: src/%.rf
