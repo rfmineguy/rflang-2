@@ -20,6 +20,7 @@ typedef struct expression_t expression_t;
 typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
 typedef struct condition_t  condition_t;
+typedef struct arg_list_t   arg_list_t;
 
 typedef enum {
   X86_32_LINUX_ASM = 142, X86_64_LINUX_ASM, ARM64_ASM  // the order here needs to match the order of the normal token_type_t enum
@@ -78,9 +79,6 @@ struct param_list_t {
   var_t** params;
   int params_count;
 };
-struct arg_list_t {
-  // ? not sure about this one yet
-};
 struct expression_t {
   expr_type_t type;             // single value (number or id), or composed expression (expr '+' expr)
   union {
@@ -89,6 +87,10 @@ struct expression_t {
     char s[30];
   } value;
   expression_t *left, *right; // ?
+};
+struct arg_list_t {
+  expression_t** args;
+  int arg_count;
 };
 struct statement_t {
   if_t* iff;

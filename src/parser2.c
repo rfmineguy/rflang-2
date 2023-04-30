@@ -211,7 +211,32 @@ param_list_t* parse_param_list(tokenizer_t* t) {
 }
 
 arg_list_t* parse_arg_list(tokenizer_t* t) {
-  return NULL;
+  arg_list_t* arg_list = calloc(1, sizeof(arg_list_t));
+  arg_list->args = calloc(10, sizeof(expression_t));
+  if (!tokenizer_expect_t(t, T_LP)) {
+    ERROR("Expected T_LP, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  tokenizer_advance_t(t);
+  while (tokenizer_get_t(t).type != T_RP) {
+    expression_t* e = parse_expression(t);
+    show_expression(e, 1);
+    arg_list->args[arg_list->arg_count++] = e;
+    printf("Next: "); tokenizer_show_next_t(t); printf("\n");
+    if (tokenizer_expect_t(t, T_COMMA)) {
+      tokenizer_advance_t(t);
+      continue;
+    }
+    else {
+      tokenizer_rewind_t(t);
+      if (tokenizer_expect_t(t, T_RP)) {
+        break;
+      }
+    }
+    ERROR("Expected T_COMMA, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+
+  tokenizer_advance_t(t);
+  return arg_list;
 }
 
 func_decl_t* parse_func_decl(tokenizer_t* t) {
@@ -261,7 +286,18 @@ func_t* parse_func(tokenizer_t* t) {
 }
 
 func_call_t* parse_func_call(tokenizer_t* t) {
-  return NULL;
+  func_call_t* func_call = calloc(1, sizeof(func_call_t));
+  printf("Parsing func_call\n");
+  tokenizer_show_next_t(t);
+  if (!tokenizer_expect_t(t, T_ID)) {
+    ERROR("Expected id, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  strncpy(func_call->name, tokenizer_get_t(t).value.s, 30);
+  tokenizer_advance_t(t);
+  arg_list_t* arg_list = parse_arg_list(t);
+  func_call->args = arg_list;
+
+  return func_call;
 }
 
 /*
@@ -382,7 +418,11 @@ statement_t* parse_statement(tokenizer_t* t) {
   if (tokenizer_expect_t(t, T_ID)) {
     tokenizer_advance_t(t);
     if (tokenizer_expect_t(t, T_LP)) {
-      assert(0 && "Encountered function call");
+      // assert(0 && "Encountered function call");
+      tokenizer_rewind_t(t);
+      tokenizer_rewind_t(t);
+      func_call_t* func_call = parse_func_call(t);
+      s->func_call = func_call;
     }
     else {
       //assign
@@ -526,7 +566,13 @@ void free_param_list(param_list_t* param_list) {
 }
 
 void free_arg_list(arg_list_t* arg_list) {
-
+  for (int i = 0; i < arg_list->arg_count; i++) {
+    free_expression(arg_list->args[i]);
+    free(arg_list->args[i]);
+    arg_list->args[i] = NULL;
+  }
+  free(arg_list->args);
+  arg_list->args = NULL;
 }
 
 void free_expression(expression_t* expr) {
@@ -535,7 +581,6 @@ void free_expression(expression_t* expr) {
   free(expr->left);
   free_expression(expr->right);
   free(expr->right);
-  printf("Freed expression\n");
 }
 
 void tabs(int count) {
@@ -644,6 +689,8 @@ void show_func_call(func_call_t* func_call, int level) {
     tabs(level); printf("\\_ NULL\n");
     return;
   }
+  tabs(level); printf("\\_ name: %s\n", func_call->name);
+  show_arg_list(func_call->args, level + 1);
 }
 
 void show_assign(assign_t* assign, int level) {
@@ -673,6 +720,17 @@ void show_param_list(param_list_t* params, int level) {
   }
   for (int i = 0; i < params->params_count; i++) {
     show_var(params->params[i], level + 1);
+  }
+}
+
+void show_arg_list(arg_list_t* arg_list, int level) {
+  tabs(level); printf("\\_ ArgList\n");
+  if (!arg_list) {
+    tabs(level+1); printf("\\_ NULL\n");
+    return;
+  }
+  for (int i = 0; i < arg_list->arg_count; i++) {
+    show_expression(arg_list->args[i], level + 1);
   }
 }
 
