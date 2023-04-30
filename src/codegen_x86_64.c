@@ -11,7 +11,7 @@ void x86_64_codegen_program(program_t* p, FILE* f) {
 }
 
 void x86_64_codegen_use(use_t* u, FILE* f) {
-  fprintf(f, "%%include %s", u->name);
+  fprintf(f, "%%include \"%s\"\n", u->name);
 }
 
 void x86_64_codegen_func(func_t* func, FILE* f) {
@@ -63,19 +63,19 @@ void x86_64_codegen_statement(statement_t* stmt, FILE* f) {
 }
 
 void x86_64_codegen_if(if_t* iff, FILE* f) {
-  fprintf(f, "<if goes here>\n");
+  // fprintf(f, "<if goes here>\n");
 }
 
 void x86_64_codegen_return(return_t* ret, FILE* f) {
-  fprintf(f, "<ret goes here>\n");
+  // fprintf(f, "<ret goes here>\n");
 }
 
 void x86_64_codegen_func_call(func_call_t* func_call, FILE* f) {
-  fprintf(f, "<func_call goes here>\n");
+  // fprintf(f, "<func_call goes here>\n");
 }
 
 void x86_64_codegen_assign(assign_t* assign, FILE* f) {
-  fprintf(f, "<assign goes here>\n");
+  // fprintf(f, "<assign goes here>\n");
 }
 
 // NOTE: Conditionally generate this one based on platform
