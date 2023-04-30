@@ -16,7 +16,7 @@ clean:
 	rm -r out/
 
 out/main: $(OBJECTS)
-	ld $^ -o $@
+	ld $^ -o $@ -arch x86_64
 
 out/%.o: out/%.s
 	nasm -g -f elf64 -F dwarf $^ -o $@

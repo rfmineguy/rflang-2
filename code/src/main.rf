@@ -9,6 +9,8 @@ fn sub(a: int, b: int): int {
 }
 
 fn main(argc: int, argv: char**): int {
-  putc(333 + 43, argc + 3, 43 - 42 * 3);
+  s: char* = "Hikagfjakhd";
+  putc(54);
+  puts(s);
   return 9;
 }

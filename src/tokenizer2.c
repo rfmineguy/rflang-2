@@ -174,7 +174,7 @@ void tokenizer_advance_t(tokenizer_t* t) {
     t->current.value.i = value;
     return;
   }
-  if (*t->cursor == '_' || isalpha(*t->cursor)) {
+  if (*t->cursor == '_' || isalpha(*t->cursor) || isdigit(*t->cursor)) {
     int length = 0;
     tokenizer_process_id(t, &length);
     t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
@@ -204,8 +204,9 @@ token_t tokenizer_get_t(tokenizer_t* t) {
 void tokenizer_show_next_t(tokenizer_t* t) {
 #if 1
   token_t token = tokenizer_get_t(t);
-  printf("%s", token_type_stringify(token.type));
+  printf("%s   ", token_type_stringify(token.type));
   switch (token.type) {
+  case T_ID:
   case T_NUM: printf("%.*s", token.loc.length, t->source_str + token.loc.begin_index); break;
   default:    printf("..."); break;
   }

@@ -12,6 +12,7 @@ typedef struct func_t       func_t;
 typedef struct func_decl_t  func_decl_t;
 typedef struct func_call_t  func_call_t;
 typedef struct var_t        var_t;
+typedef struct string_lit_t string_lit_t;
 typedef struct assign_t     assign_t;
 typedef struct return_t     return_t;
 typedef struct param_list_t param_list_t;
@@ -28,6 +29,9 @@ typedef enum {
 typedef enum {
   EXPR_NUM = 0, EXPR_STRING, EXPR_COMPOUND
 } expr_type_t;
+typedef enum {
+  ASSIGN_EXPR = 0, ASSIGN_STR_LIT
+} assign_type_t;
 
 struct program_t {
   use_t**     use_list;
@@ -68,9 +72,17 @@ struct var_t {
   int type;
   int indirection;
 };
+struct string_lit_t {
+  char* str_lit_begin;
+  char* str_lit_end;
+};
 struct assign_t {
+  assign_type_t type;
   var_t* var;
-  expression_t* expr;
+  union {
+    expression_t* expr;
+    string_lit_t* str_lit;
+  } value;
 };
 struct return_t {
   expression_t* expr;
@@ -115,6 +127,7 @@ program_t*    parse_program(tokenizer_t*);
 use_t*        parse_use(tokenizer_t*);
 block_t*      parse_block(tokenizer_t*);
 asm_block_t*  parse_asm_block(tokenizer_t*);
+string_lit_t* parse_string_lit(tokenizer_t*);
 var_t*        parse_var(tokenizer_t*);
 func_decl_t*  parse_func_decl(tokenizer_t*);
 func_t*       parse_func(tokenizer_t*);
@@ -136,6 +149,7 @@ void          free_program(program_t*);
 void          free_use(use_t*);
 void          free_block(block_t*);
 void          free_asm_block(asm_block_t*);
+void          free_string_lit(string_lit_t*);
 void          free_var(var_t*);
 void          free_func_decl(func_decl_t*);
 void          free_func(func_t*);
@@ -153,6 +167,7 @@ void          show_program(program_t*, int);
 void          show_use(use_t*, int);
 void          show_block(block_t*, int);
 void          show_asm_block(asm_block_t*, int);
+void          show_string_lit(string_lit_t*, int);
 void          show_var(var_t*, int);
 void          show_func_decl(func_decl_t*, int);
 void          show_func(func_t*, int);

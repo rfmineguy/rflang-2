@@ -112,6 +112,7 @@ asm_block_t* parse_asm_block(tokenizer_t* t) {
   ab->asm_source_code_begin = t->cursor;
   // tokenizer_advance_t(t);
   while (tokenizer_get_t(t).type != T_RB) {
+    // token_print(tokenizer_get_t(t), t);
     tokenizer_advance_t(t);
   }
   ab->asm_source_code_end = t->cursor;
@@ -125,6 +126,35 @@ asm_block_t* parse_asm_block(tokenizer_t* t) {
   }
   tokenizer_advance_t(t);
   return ab;
+}
+
+string_lit_t* parse_string_lit(tokenizer_t* t) {
+  string_lit_t* slit = calloc(1, sizeof(string_lit_t));
+  if (!tokenizer_expect_t(t, T_DQT)) {
+    //NOTE: This is redundant
+    ERROR("Expected T_DQT, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+
+  // tokenizer_advance_t(t);
+  printf("\tbegin: %p = %c\n", t->cursor, *t->cursor);
+  slit->str_lit_begin = t->cursor; 
+  do {
+    tokenizer_advance_t(t);
+  } while (tokenizer_get_t(t).type != T_DQT);
+  tokenizer_rewind_t(t);
+
+  slit->str_lit_end = t->cursor - 1;
+  printf("\tend: %p = %c\n", t->cursor - 1, *(t->cursor - 1));
+  printf("%*.s\n", (int)(slit->str_lit_end - slit->str_lit_begin), slit->str_lit_begin);
+  tokenizer_advance_t(t);
+
+
+  if (!tokenizer_expect_t(t, T_DQT)) {
+    ERROR("Expected T_DQT, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
+  }
+  tokenizer_advance_t(t);
+
+  return slit;
 }
 
 var_t* parse_var(tokenizer_t* t) {
@@ -171,9 +201,19 @@ assign_t* parse_assign(tokenizer_t* t) {
     ERROR("Expected T_EQ, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   tokenizer_advance_t(t);
-  expression_t* e = parse_expression(t);
+  printf("Next: "); tokenizer_show_next_t(t); printf("\n");
+  if (tokenizer_expect_t(t, T_DQT)) {
+    tokenizer_rewind_t(t);
+    string_lit_t* s = parse_string_lit(t);
+    a->value.str_lit = s;
+    a->type = ASSIGN_STR_LIT;
+  }
+  else {
+    expression_t* e = parse_expression(t);
+    a->value.expr = e;
+    a->type = ASSIGN_EXPR;
+ }
   a->var = v;
-  a->expr = e;
   return a;
 }
 
@@ -515,6 +555,10 @@ void free_asm_block(asm_block_t* asm_block) {
   // nothing to free (yet)
 }
 
+void free_string_lit(string_lit_t* string_lit) {
+  // nothing to free (yet)
+}
+
 void free_var(var_t* var) {
   // nothing to free (yet)
 }
@@ -544,9 +588,16 @@ void free_assign(assign_t* assign) {
   free_var(assign->var);
   free(assign->var);
   assign->var = NULL;
-  free_expression(assign->expr);
-  free(assign->expr);
-  assign->expr = NULL;
+  if (assign->type == ASSIGN_EXPR) {
+    free_expression(assign->value.expr);
+    free(assign->value.expr);
+  }
+  else if (assign->type == ASSIGN_STR_LIT) {
+    free_string_lit(assign->value.str_lit);
+    free(assign->value.str_lit);
+  }
+  assign->value.str_lit = NULL;
+  assign->value.expr = NULL;
 }
 
 void free_return(return_t* returnp) {
@@ -666,6 +717,19 @@ void show_asm_block(asm_block_t* asm_block, int level) {
   tabs(level); printf("\\_ length: %zu\n", asm_block->asm_source_code_end - asm_block->asm_source_code_begin);
 }
 
+void show_string_lit(string_lit_t* str_lit, int level) {
+  tabs(level - 1); printf("\\_ StringLit\n");
+  if (!str_lit) {
+    tabs(level + 1); printf("\\_ NULL\n");
+    return;
+  }
+  size_t length = str_lit->str_lit_end - str_lit->str_lit_begin;
+  tabs(level); printf("\\_ begin: %p\n", str_lit->str_lit_begin);
+  tabs(level); printf("\\_ end: %p\n", str_lit->str_lit_end);
+  tabs(level); printf("\\_ length: %zu\n", length);
+  tabs(level); printf("\\_ str: %*.s\n", (int)length, str_lit->str_lit_begin);
+}
+
 void show_func(func_t* func, int level) {
   tabs(level); printf("\\_ Func\n");
   tabs(level - 1); show_func_decl(func->decl, level + 1);
@@ -700,7 +764,16 @@ void show_assign(assign_t* assign, int level) {
     return;
   }
   show_var(assign->var, level);
-  show_expression(assign->expr, level);
+  switch (assign->type) {
+  case ASSIGN_EXPR:
+    show_expression(assign->value.expr, level);
+    break;
+  case ASSIGN_STR_LIT:
+    show_string_lit(assign->value.str_lit, level);
+    break;
+  default:
+    break;
+  }
 }
 
 void show_return(return_t* _return, int level) {
