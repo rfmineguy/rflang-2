@@ -106,6 +106,11 @@ void tokenizer_consume_whitespace(tokenizer_t* t) {
   while (*t->cursor == ' ' || *t->cursor == '\t') {
     t->cursor++;
   }
+  if (strncmp(t->cursor, "//", 2) == 0) {
+    while (*(t->cursor + 1) != '\n') {
+      t->cursor++;
+    }
+  }
 }
 
 void tokenizer_advance_t_internal(tokenizer_t* t) {
@@ -169,7 +174,7 @@ void tokenizer_advance_t(tokenizer_t* t) {
     t->current.value.i = value;
     return;
   }
-  if (isalpha(*t->cursor)) {
+  if (*t->cursor == '_' || isalpha(*t->cursor)) {
     int length = 0;
     tokenizer_process_id(t, &length);
     t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
@@ -225,7 +230,7 @@ int tokenizer_process_digit(tokenizer_t* tokenizer, int* digit_length) {
 void tokenizer_process_id(tokenizer_t* tokenizer, int* id_length) {
   int length = 0;
   char* temp_curs = tokenizer->cursor;
-  while (isalpha(*temp_curs) != 0) {
+  while (*temp_curs == '_' || isalpha(*temp_curs) != 0) {
     temp_curs++;
     length++;
   }

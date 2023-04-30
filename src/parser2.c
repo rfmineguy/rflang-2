@@ -44,8 +44,7 @@ program_t* parse_program(tokenizer_t* t) {
   p->func_list = calloc(p->func_list_max, sizeof(func_t));
   p->use_list = calloc(p->use_list_max, sizeof(use_t));
 
-  /// PROGRAM PARSING
-  // Expect use statements first (use statements are only allowed at the start)
+  // Expect use statements second (use statements are only allowed at the start)
   while (tokenizer_get_t(t).type == T_USE) {
     use_t* use = parse_use(t);
     p->use_list[p->use_list_count++] = use;
@@ -217,10 +216,13 @@ arg_list_t* parse_arg_list(tokenizer_t* t) {
 
 func_decl_t* parse_func_decl(tokenizer_t* t) {
   func_decl_t* f = calloc(1, sizeof(func_decl_t));
+  tokenizer_show_next_t(t);
   if (!tokenizer_expect_t(t, T_ID)) {
     ERROR("Expected T_ID, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
-  strncpy(f->name, t->source_str + tokenizer_get_t(t).loc.begin_index, tokenizer_get_t(t).loc.length);
+  strncpy(f->name, tokenizer_get_t(t).value.s, 30);
+  //strncpy(f->name, t->source_str + tokenizer_get_t(t).loc.begin_index, tokenizer_get_t(t).loc.length);
+  printf("name: %s\n", f->name);
   tokenizer_advance_t(t);
 
   // Expect param list

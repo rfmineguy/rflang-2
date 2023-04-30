@@ -1,4 +1,5 @@
 #include "codegen_x86_64.h"
+#include <string.h>
 
 void x86_64_codegen_program(program_t* p, FILE* f) {
   for (int i = 0; i < p->use_list_count; i++) {
@@ -23,6 +24,11 @@ void x86_64_codegen_func(func_t* func, FILE* f) {
 }
 
 int x86_64_codegen_func_decl(func_decl_t* decl, FILE* f) {
+  if (strcmp(decl->name, "_start") == 0) {
+    // generate the entry stub
+    fprintf(f, "extern main\n");
+  }
+  fprintf(f, "global %s\n", decl->name);
   fprintf(f, "%s:\n", decl->name);
   return decl->params->params_count;
 }

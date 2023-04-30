@@ -2,6 +2,8 @@
 #define CODEGEN_x86_64_H
 #include "parser2.h"
 
+void x86_64_codegen_entry_stub(FILE*);
+
 void x86_64_codegen_program(program_t*, FILE*); 
 void x86_64_codegen_use(use_t* u, FILE* f);
 void x86_64_codegen_asm_block(asm_block_t*, FILE*);

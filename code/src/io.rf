@@ -1,3 +1,6 @@
+fn strlen(s: char*): int {
+}
+
 fn putc(c: char) {
   asm x86_32-linux {
   };

@@ -29,10 +29,10 @@ typedef enum {
 } expr_type_t;
 
 struct program_t {
-  use_t**  use_list;
-  int      use_list_count, use_list_max;
-  func_t** func_list;
-  int      func_list_count, func_list_max;
+  use_t**     use_list;
+  int         use_list_count, use_list_max;
+  func_t**    func_list;
+  int         func_list_count, func_list_max;
 };
 struct use_t {
   char name[30];

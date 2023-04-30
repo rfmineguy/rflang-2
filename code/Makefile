@@ -5,13 +5,14 @@ OBJECTS := $(patsubst out/%.s, out/%.o, $(ASM_FILE))
 default:
 	@echo "Default make target"
 
+.PRECIOUS: out/%.o out/%.s
 .PHONY: always clean build
 build: always out/main
 always:
 	mkdir -p out/
 
-#clean:
-#	rm -r out
+clean:
+	rm -r out/
 
 out/main: $(OBJECTS)
 	ld $^ -o $@
