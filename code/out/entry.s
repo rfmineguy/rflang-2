@@ -1,3 +1,5 @@
+section .data
+section .text
 extern main
 global _start
 _start:
@@ -17,7 +19,7 @@ push rbp
 mov rbp, rsp
 
   mov rax, 60
-  mov rdi, 45
+  mov rdi, [rbp + 8]
   syscall
   
 mov rsp, rbp

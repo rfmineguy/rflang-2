@@ -1,3 +1,7 @@
+section .data
+section .text
+%include "io"
+%include "stdlib"
 global add
 add:
 push rbp

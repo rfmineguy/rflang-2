@@ -1,3 +1,5 @@
+section .data
+section .text
 global strlen
 strlen:
 push rbp

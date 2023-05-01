@@ -1,3 +1,6 @@
+use io
+use stdlib
+
 fn add(a: int, b: int, c: short): int {
   sum: int = a + b + c;
   return sum;
@@ -11,6 +14,5 @@ fn sub(a: int, b: int): int {
 fn main(argc: int, argv: char**): int {
   s: char* = "Hikagfjakhd";
   putc(54);
-  puts(s);
   return 9;
 }
