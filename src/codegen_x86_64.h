@@ -6,6 +6,7 @@ typedef struct {
   int scope_depth;
   char* code_segment_source; int currently_written_code;
   char* data_segment_source; int currently_written_data;
+  // var_dict_t var_dictionary;
 } x86_64_codegen_context;
 
 void x86_64_codegen_entry_stub(x86_64_codegen_context*);
@@ -17,6 +18,7 @@ void x86_64_codegen_block       (block_t*, x86_64_codegen_context*);
 void x86_64_codegen_func        (func_t*, x86_64_codegen_context*);
 int  x86_64_codegen_func_decl   (func_decl_t*, x86_64_codegen_context*);
 void x86_64_codegen_func_call   (func_call_t*, x86_64_codegen_context*);
+void x86_64_codegen_strlit      (string_lit_t*, x86_64_codegen_context*);
 void x86_64_codegen_var         (var_t*, x86_64_codegen_context*);
 void x86_64_codegen_assign      (assign_t*, x86_64_codegen_context*);
 void x86_64_codegen_return      (return_t*, x86_64_codegen_context*);

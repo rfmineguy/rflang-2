@@ -6,7 +6,7 @@
   ctx->currently_written_code += snprintf(ctx->code_segment_source + ctx->currently_written_code, 1000, str, ##__VA_ARGS__)
 
 #define WRITE_DATA(str, ...) \
-  ctx->currently_writter_data += snprintf(ctx->data_segment_source + ctx->currently_writter_data, 1000, #str, ##__VA_ARGS__)
+  ctx->currently_written_data += snprintf(ctx->data_segment_source + ctx->currently_written_data, 1000, str, ##__VA_ARGS__)
 
 void x86_64_codegen_program(program_t* p, FILE* f) {
   x86_64_codegen_context ctx = {0};
@@ -50,6 +50,31 @@ int x86_64_codegen_func_decl(func_decl_t* decl, x86_64_codegen_context* ctx) {
   WRITE_CODE("global %s\n", decl->name);
   WRITE_CODE("%s:\n", decl->name);
   return decl->params->params_count;
+}
+
+void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
+  WRITE_DATA("%s: db ", "str");
+  char* c = str_lit->str_lit_begin;
+  for (; c <= str_lit->str_lit_end; c++) {
+    if (*c == '\\') {
+      c++;
+      switch (*c) {
+        case '0': WRITE_DATA("0x00"); break;
+        case 'n': WRITE_DATA("0x0A"); break;
+        case 'r': WRITE_DATA("0x0D"); break;
+        case 't': WRITE_DATA("0x09"); break;
+        default:  WRITE_DATA("0x20"); break;
+      }
+    }
+    else {
+      WRITE_DATA("0x%02X", *c);
+    }
+    if (c != str_lit->str_lit_end) {
+      WRITE_DATA(", ");
+    }
+    printf("%c", *c);
+  }
+  WRITE_DATA("\n");
 }
 
 void x86_64_codegen_block(block_t* block, x86_64_codegen_context* ctx) {
@@ -101,6 +126,12 @@ void x86_64_codegen_func_call(func_call_t* func_call, x86_64_codegen_context* ct
 
 void x86_64_codegen_assign(assign_t* assign, x86_64_codegen_context* ctx) {
   // sprintf(ctx->code_segment_source, "<assign goes here>\n");
+  switch (assign->type) {
+  case ASSIGN_EXPR: break;
+  case ASSIGN_STR_LIT: x86_64_codegen_strlit(assign->value.str_lit, ctx); break;
+  break;
+
+  }
 }
 
 // NOTE: Conditionally generate this one based on platform

@@ -766,10 +766,10 @@ void show_assign(assign_t* assign, int level) {
   show_var(assign->var, level);
   switch (assign->type) {
   case ASSIGN_EXPR:
-    show_expression(assign->value.expr, level);
+    show_expression(assign->value.expr, level + 1);
     break;
   case ASSIGN_STR_LIT:
-    show_string_lit(assign->value.str_lit, level);
+    show_string_lit(assign->value.str_lit, level + 1);
     break;
   default:
     break;
