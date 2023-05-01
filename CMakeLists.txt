@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
+# file (COPY vim-syntax/rf.vim DESTINATION )
 # file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
 
 #
@@ -65,3 +66,5 @@ target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR})
 
 # cd buid; sudo make install
 install(TARGETS rfc)
+install(FILES vim-syntax/rf.vim DESTINATION ~/.vim/syntax/)
+install(FILES vim-syntax/ftdetect/rf.vim DESTINATION ~/.vim/ftdetect/)

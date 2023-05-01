@@ -196,7 +196,21 @@ var_t* parse_var(tokenizer_t* t) {
 assign_t* parse_assign(tokenizer_t* t) {
   printf("Parsing assign\n");
   assign_t* a = calloc(1, sizeof(assign_t));
-  var_t* v = parse_var(t);
+  var_t* v = NULL;
+  token_t id_token = tokenizer_get_t(t);
+  tokenizer_advance_t(t);
+  if (tokenizer_expect_t(t, T_EQ)) {
+    // tokenizer_advance_t(t);
+    a->type |= ASSIGN_LHS_ID;
+    strncpy(a->left_hand_side.id, t->source_str + id_token.loc.begin_index - 1, id_token.loc.length + 1);
+    // tokenizer_advance_t(t);
+  }
+  else {
+    tokenizer_rewind_t(t);
+    v = parse_var(t);
+    a->type |= ASSIGN_LHS_VAR;
+    a->left_hand_side.var = v;
+  }
   if (!tokenizer_expect_t(t, T_EQ)) {
     ERROR("Expected T_EQ, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
@@ -205,15 +219,16 @@ assign_t* parse_assign(tokenizer_t* t) {
   if (tokenizer_expect_t(t, T_DQT)) {
     tokenizer_rewind_t(t);
     string_lit_t* s = parse_string_lit(t);
-    a->value.str_lit = s;
-    a->type = ASSIGN_STR_LIT;
+    a->right_hand_side.str_lit = s;
+    a->type |= ASSIGN_RHS_STR_LIT;
+    // a->value.str_lit = s;
+    // a->type = ASSIGN_STR_LIT;
   }
   else {
     expression_t* e = parse_expression(t);
-    a->value.expr = e;
-    a->type = ASSIGN_EXPR;
+    a->right_hand_side.expr = e;
+    a->type |= ASSIGN_RHS_EXPR;
  }
-  a->var = v;
   return a;
 }
 
@@ -585,19 +600,35 @@ void free_func_call(func_call_t* func_call) {
 }
 
 void free_assign(assign_t* assign) {
-  free_var(assign->var);
-  free(assign->var);
-  assign->var = NULL;
-  if (assign->type == ASSIGN_EXPR) {
-    free_expression(assign->value.expr);
-    free(assign->value.expr);
+  if (assign->type & ASSIGN_LHS_VAR) {
+    free_var(assign->left_hand_side.var);
+    free(assign->left_hand_side.var);
+    assign->left_hand_side.var = NULL;
   }
-  else if (assign->type == ASSIGN_STR_LIT) {
-    free_string_lit(assign->value.str_lit);
-    free(assign->value.str_lit);
+  if (assign->type & ASSIGN_LHS_ID) {
+    // nothing to do
   }
-  assign->value.str_lit = NULL;
-  assign->value.expr = NULL;
+  if (assign->type & ASSIGN_RHS_STR_LIT) {
+    // nothing to do
+  }
+  if (assign->type & ASSIGN_RHS_EXPR) {
+    free_expression(assign->right_hand_side.expr);
+    free(assign->right_hand_side.expr);
+    assign->right_hand_side.expr = NULL;
+  }
+  // free_var(assign->var);
+  // free(assign->var);
+  // assign->var = NULL;
+  // if (assign->type == ASSIGN_EXPR) {
+  //   free_expression(assign->value.expr);
+  //   free(assign->value.expr);
+  // }
+  // else if (assign->type == ASSIGN_STR_LIT) {
+  //   free_string_lit(assign->value.str_lit);
+  //   free(assign->value.str_lit);
+  // }
+  // assign->value.str_lit = NULL;
+  // assign->value.expr = NULL;
 }
 
 void free_return(return_t* returnp) {
@@ -763,6 +794,20 @@ void show_assign(assign_t* assign, int level) {
     tabs(level); printf("\\_ NULL\n");
     return;
   }
+  if (assign->type & ASSIGN_LHS_VAR) {
+    show_var(assign->left_hand_side.var, level);
+  }
+  if (assign->type & ASSIGN_LHS_ID) {
+    tabs(level); printf("\\_ ID: %s\n", assign->left_hand_side.id);
+  }
+  if (assign->type & ASSIGN_RHS_STR_LIT) {
+    show_string_lit(assign->right_hand_side.str_lit, level + 1);
+    // nothing to do
+  }
+  if (assign->type & ASSIGN_RHS_EXPR) {
+    show_expression(assign->right_hand_side.expr, level);
+  }
+  /*
   show_var(assign->var, level);
   switch (assign->type) {
   case ASSIGN_EXPR:
@@ -774,6 +819,7 @@ void show_assign(assign_t* assign, int level) {
   default:
     break;
   }
+  */
 }
 
 void show_return(return_t* _return, int level) {

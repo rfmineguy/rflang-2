@@ -53,7 +53,8 @@ int x86_64_codegen_func_decl(func_decl_t* decl, x86_64_codegen_context* ctx) {
 }
 
 void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
-  WRITE_DATA("%s: db ", "str");
+  WRITE_DATA("str%d: db ", ctx->string_count); //str_lit->str_lit_end - str_lit->str_lit_begin, str_lit->str_lit_begin);
+  ctx->string_count++;
   char* c = str_lit->str_lit_begin;
   for (; c <= str_lit->str_lit_end; c++) {
     if (*c == '\\') {
@@ -69,11 +70,9 @@ void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
     else {
       WRITE_DATA("0x%02X", *c);
     }
-    if (c != str_lit->str_lit_end) {
-      WRITE_DATA(", ");
-    }
-    printf("%c", *c);
+    WRITE_DATA(", ");
   }
+  WRITE_DATA("0x0");
   WRITE_DATA("\n");
 }
 
@@ -122,15 +121,19 @@ void x86_64_codegen_return(return_t* ret, x86_64_codegen_context* ctx) {
 
 void x86_64_codegen_func_call(func_call_t* func_call, x86_64_codegen_context* ctx) {
   // sprintf(ctx->code_segment_source, "<func_call goes here>\n");
+  for (int i = 0; i < func_call->args->arg_count; i++) {
+    WRITE_CODE("push <arg #%d>\n", i);
+  }
+  WRITE_CODE("call %s\n", func_call->name);
 }
 
 void x86_64_codegen_assign(assign_t* assign, x86_64_codegen_context* ctx) {
   // sprintf(ctx->code_segment_source, "<assign goes here>\n");
-  switch (assign->type) {
-  case ASSIGN_EXPR: break;
-  case ASSIGN_STR_LIT: x86_64_codegen_strlit(assign->value.str_lit, ctx); break;
-  break;
-
+  // NOTE: This is getting ahead of yourself, we need to register variables and their data in a hashtable before any of this
+  if (assign->type & ASSIGN_RHS_STR_LIT) {
+     x86_64_codegen_strlit(assign->right_hand_side.str_lit, ctx);
+     WRITE_CODE("mov qword [rbp - %d], str%d\n", (ctx->var_count + 1) * 8, ctx->string_count);
+     ctx->var_count++;
   }
 }
 

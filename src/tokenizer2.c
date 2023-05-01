@@ -231,7 +231,7 @@ int tokenizer_process_digit(tokenizer_t* tokenizer, int* digit_length) {
 void tokenizer_process_id(tokenizer_t* tokenizer, int* id_length) {
   int length = 0;
   char* temp_curs = tokenizer->cursor;
-  while (*temp_curs == '_' || isalpha(*temp_curs) != 0) {
+  while (*temp_curs == '_' || isalpha(*temp_curs) != 0 || isdigit(*temp_curs)) {
     temp_curs++;
     length++;
   }

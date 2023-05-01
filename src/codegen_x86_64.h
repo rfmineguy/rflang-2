@@ -4,6 +4,8 @@
 
 typedef struct {
   int scope_depth;
+  int string_count;
+  int var_count;
   char* code_segment_source; int currently_written_code;
   char* data_segment_source; int currently_written_data;
   // var_dict_t var_dictionary;

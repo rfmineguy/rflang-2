@@ -3,6 +3,7 @@ use stdlib
 
 fn add(a: int, b: int, c: short): int {
   sum: int = a + b + c;
+  sum = sum + 1;
   return sum;
 }
 
@@ -13,7 +14,8 @@ fn sub(a: int, b: int): int {
 
 fn main(argc: int, argv: char**): int {
   s: char* = "Hikagfjakhd\n";
-  putc(54);
+  s2: char* = "fjkafhifoiafdafgag\r\n";
+  putc(54, 42);
   puts(s);
   return 9;
 }

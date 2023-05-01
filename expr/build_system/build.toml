@@ -1,5 +1,5 @@
 name = "helloworld"
-sources = ["src/main.rf", "src/"]
+sources = ["src/main.rf"]
 libs = ["math", "io"]
 features = ["show-parse-tree", ""]
 source_dir = "src"

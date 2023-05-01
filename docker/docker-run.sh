@@ -1,1 +1,0 @@
-docker run --cap-add=SYS_PTRACE --privileged --pid=host --security-opt seccomp=unconfined --security-opt apparmor=unconfined -e DISPLAY=192.168.0.11:0 --rm -it -w /root/workspace -v $(pwd):/root/workspace ubuntu-x86

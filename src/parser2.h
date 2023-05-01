@@ -30,7 +30,10 @@ typedef enum {
   EXPR_NUM = 0, EXPR_STRING, EXPR_COMPOUND
 } expr_type_t;
 typedef enum {
-  ASSIGN_EXPR = 0, ASSIGN_STR_LIT
+  ASSIGN_LHS_VAR     = 1,
+  ASSIGN_LHS_ID      = 2,
+  ASSIGN_RHS_STR_LIT = 4,
+  ASSIGN_RHS_EXPR    = 8,
 } assign_type_t;
 
 struct program_t {
@@ -78,11 +81,14 @@ struct string_lit_t {
 };
 struct assign_t {
   assign_type_t type;
-  var_t* var;
+  union {
+    var_t* var;
+    char id[30];
+  } left_hand_side;
   union {
     expression_t* expr;
     string_lit_t* str_lit;
-  } value;
+  } right_hand_side;
 };
 struct return_t {
   expression_t* expr;
