@@ -3,7 +3,6 @@ use stdlib
 
 fn add(a: int, b: int, c: short): int {
   sum: int = a + b + c;
-  sum = sum + 1;
   return sum;
 }
 
@@ -12,9 +11,15 @@ fn sub(a: int, b: int): int {
   return diff;
 }
 
+fn is_even(a: int): bool {
+  return a % 2 == 0;
+}
+
 fn main(argc: int, argv: char**): int {
   s: char* = "Hikagfjakhd\n";
-  s2: char* = "fjkafhifoiafdafgag\r\n";
+  s2: char* = "fjk\tafhifoiafdafgag\r\n";
+  s3: char* = "Hello World\n";
+  val: int = (4 % 3) * 7 / (9 - 8);
   putc(54, 42);
   puts(s);
   return 9;

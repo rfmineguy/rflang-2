@@ -9,6 +9,7 @@
   ctx->currently_written_data += snprintf(ctx->data_segment_source + ctx->currently_written_data, 1000, str, ##__VA_ARGS__)
 
 void x86_64_codegen_program(program_t* p, FILE* f) {
+  printf("Beginning codegen for x86_64-linux\n");
   x86_64_codegen_context ctx = {0};
   ctx.code_segment_source = calloc(1000, 1);
   ctx.data_segment_source = calloc(1000, 1);
@@ -20,15 +21,13 @@ void x86_64_codegen_program(program_t* p, FILE* f) {
     x86_64_codegen_func(p->func_list[i], &ctx);
   }
 
-  printf("%s\n", ctx.code_segment_source);
-
   // generate the segments
   fprintf(f, "section .data\n");
   fprintf(f, "%s", ctx.data_segment_source);
   fprintf(f, "section .text\n");
   fprintf(f, "%s", ctx.code_segment_source);;
 
-  printf("Codegened x86-64\n");
+  printf("Ending codegen for x86_64-linux\n");
 }
 
 void x86_64_codegen_use(use_t* u, x86_64_codegen_context* ctx) {
@@ -60,11 +59,11 @@ void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
     if (*c == '\\') {
       c++;
       switch (*c) {
-        case '0': WRITE_DATA("0x00"); break;
-        case 'n': WRITE_DATA("0x0A"); break;
-        case 'r': WRITE_DATA("0x0D"); break;
-        case 't': WRITE_DATA("0x09"); break;
-        default:  WRITE_DATA("0x20"); break;
+        case '0': WRITE_DATA("0x00"); break; // Null
+        case 'n': WRITE_DATA("0x0A"); break; // New line
+        case 'r': WRITE_DATA("0x0D"); break; // Carraige Return
+        case 't': WRITE_DATA("0x09"); break; // Tab
+        default:  WRITE_DATA("0xFE"); break; // Solid Square (Extended ascii)
       }
     }
     else {
@@ -72,7 +71,7 @@ void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
     }
     WRITE_DATA(", ");
   }
-  WRITE_DATA("0x0");
+  WRITE_DATA("0x00");
   WRITE_DATA("\n");
 }
 
@@ -130,7 +129,7 @@ void x86_64_codegen_func_call(func_call_t* func_call, x86_64_codegen_context* ct
 void x86_64_codegen_assign(assign_t* assign, x86_64_codegen_context* ctx) {
   // sprintf(ctx->code_segment_source, "<assign goes here>\n");
   // NOTE: This is getting ahead of yourself, we need to register variables and their data in a hashtable before any of this
-  if (assign->type & ASSIGN_RHS_STR_LIT) {
+  if ((assign->type & ASSIGN_LHS_VAR) && (assign->type & ASSIGN_RHS_STR_LIT)) {
      x86_64_codegen_strlit(assign->right_hand_side.str_lit, ctx);
      WRITE_CODE("mov qword [rbp - %d], str%d\n", (ctx->var_count + 1) * 8, ctx->string_count);
      ctx->var_count++;

@@ -21,7 +21,6 @@ typedef struct expression_t expression_t;
 typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
 typedef struct condition_t  condition_t;
-typedef struct arg_list_t   arg_list_t;
 
 typedef enum {
   X86_32_LINUX_ASM = 142, X86_64_LINUX_ASM, ARM64_ASM  // the order here needs to match the order of the normal token_type_t enum
@@ -122,7 +121,7 @@ struct if_t {
   block_t* block;
 };
 struct condition_t {
-  
+  char warning_suppression; // NOTE: Purely to supress compiler warnings  
 };
 
 int           is_operator(token_type_t);

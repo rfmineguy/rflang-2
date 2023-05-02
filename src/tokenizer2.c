@@ -278,6 +278,7 @@ void token_print(token_t t, tokenizer_t* tokenizer) {
     case T_MINUS:         PRINT_TOKEN("MINUS", t);            break;
     case T_MUL:           PRINT_TOKEN("MUL", t);              break;
     case T_DIV:           PRINT_TOKEN("DIV", t);              break;
+    case T_MOD:           PRINT_TOKEN("MOD", t);              break;
     case T_NUM:           PRINT_TOKEN("NUM", t);              break;
     case T_ID:            PRINT_TOKEN("ID", t);               break;
     case T_X86_32_LINUX:  PRINT_TOKEN("X86_32_ASM_LINUX", t); break;

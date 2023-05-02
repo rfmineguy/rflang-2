@@ -1,6 +1,7 @@
 name = "helloworld"
 sources = ["src/main.rf"]
 libs = ["math", "io"]
-features = ["show-parse-tree", ""]
+features = ["show-parse-tree", "gen-object-files", "gen-asm-files", "static-lib"]
 source_dir = "src"
-output_dir = "out"   #just an override for the default
+output_dir = "bin"
+install = {lib_dir = "/usr/lib", include_dir = "/usr/local/rflang/include"}

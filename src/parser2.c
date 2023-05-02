@@ -891,7 +891,7 @@ void show_expression(expression_t* expr, int level) {
         case T_MINUS: printf("{-}\n"); break;
         case T_MUL:   printf("{*}\n"); break;
         case T_DIV:   printf("{/}\n"); break;
-        case T_MOD:   printf("{*}\n"); break;
+        case T_MOD:   printf("{%%}\n"); break;
         default: break;
       }
       if (expr->left) show_expression(expr->left, level + 1);
