@@ -370,19 +370,56 @@ void show_stack(expression_t** stack, int length) {
   }
 }
 
+expression_t* parse_expression_v3(token_t* postfix, int postfix_len) {
+  expression_t* exprs[postfix_len];
+  int top = -1;
+  for (int i = 0; i < postfix_len; i++) {
+    expression_t* e = calloc(1, sizeof(expression_t));
+    if (postfix[i].type == T_ID) {
+      e->type = EXPR_STRING;
+      strncpy(e->value.s, postfix[i].value.s, 30);
+      exprs[++top] = e;
+    }
+    else if (postfix[i].type == T_NUM) {
+      e->type = EXPR_NUM;
+      e->value.i = postfix[i].value.i;
+      exprs[++top] = e;
+    }
+    else {
+      expression_t* l = exprs[top - 1];
+      expression_t* r = exprs[top];
+      
+      top -= 2;
+      e->type = EXPR_COMPOUND;
+      e->value.operation = postfix[i].type;
+      e->left = l;
+      e->right = r;
+      exprs[++top] = e;
+    }
+  }
+  return exprs[0];
+}
+
 expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
   expression_t* exprs[postfix_len];
   int main_counter = 0;
   int stack_top = 0;
   while (main_counter < postfix_len) {
     expression_t* e = calloc(1, sizeof(expression_t));
-    if (postfix[main_counter].type == T_ID) {
+    token_type_t tt = postfix[main_counter].type; 
+    int is_id             = tt == T_ID;
+    int is_num            = tt == T_NUM;
+    int is_math_operator  = tt == T_PLUS || tt == T_MINUS || tt == T_MUL || tt == T_DIV || tt == T_MOD;
+    int is_comp_operator  = tt == T_GT   || tt == T_GTEQ || tt == T_LT || tt == T_LTEQ || tt == T_NEQ || tt == T_DEQ;
+    int is_logic_operator = tt == T_DAND || tt == T_DOR;
+
+    if (is_id) {
       e->type = EXPR_STRING;
       strncpy(e->value.s, postfix[main_counter].value.s, 30);
       exprs[stack_top] = e;
       stack_top++;
     }
-    else if (postfix[main_counter].type == T_NUM) {
+    else if (is_num) {
       e->type = EXPR_NUM;
       e->value.i = postfix[main_counter].value.i;
       exprs[stack_top] = e;
@@ -413,13 +450,79 @@ expression_t* parse_expression(tokenizer_t* t) {
   // convert entire expression to postfix
   token_t postfix[100] = {0};
   int postfix_len = 0;
-  get_postfix_rep(t, postfix, &postfix_len);
+  // get_postfix_rep(t, postfix, &postfix_len);
+  
+  get_postfix_rep_v2(t, postfix, &postfix_len);
   printf("postfix_len: %d\n", postfix_len);
   for (int i = 0; i < postfix_len; i++) {
     token_print(postfix[i], t);
   }
   //return parse_expression_ex(t, NULL, postfix, postfix_len - 1, -1);
-  return parse_expression_v2(postfix, postfix_len);
+  return parse_expression_v3(postfix, postfix_len);
+}
+
+void get_postfix_rep_v2(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
+  int i, j;
+  token_t stack[100];
+  int top = -1;
+  
+  while (1) {
+    int is_id_or_num      = tokenizer_expect_t(t, T_ID) || tokenizer_expect_t(t, T_NUM);
+    int is_math_operator  = tokenizer_expect_t(t, T_PLUS) || tokenizer_expect_t(t, T_MINUS) || tokenizer_expect_t(t, T_MUL) || tokenizer_expect_t(t, T_DIV) || tokenizer_expect_t(t, T_MOD);
+    int is_comp_operator  = 
+      tokenizer_expect_t(t, T_GT) || tokenizer_expect_t(t, T_GTEQ) || tokenizer_expect_t(t, T_LT) || tokenizer_expect_t(t, T_LTEQ) || tokenizer_expect_t(t, T_NEQ) || tokenizer_expect_t(t, T_DEQ);
+    int is_logic_operator = tokenizer_expect_t(t, T_DAND) || tokenizer_expect_t(t, T_DOR);
+    int is_lparen         = tokenizer_expect_t(t, T_LP);
+    int is_rparen         = tokenizer_expect_t(t, T_RP);
+
+    if (is_id_or_num) {
+      postfix_out[j++] = tokenizer_get_t(t);
+    }
+    else if (is_math_operator) {
+      while (top > -1 && get_precedence(stack[top].type) >= get_precedence(tokenizer_get_t(t).type)) {
+        postfix_out[j++] = stack[top--];
+      }
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else if (is_comp_operator) {
+      while (top > -1 && (stack[top].type != T_DAND && stack[top].type != T_DOR)) {
+        postfix_out[j++] = stack[top--];
+      }
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else if (is_logic_operator) {
+      while (top > -1) {
+        postfix_out[j++] = stack[top--];
+      }
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else if (is_lparen) {
+      stack[++top] = tokenizer_get_t(t);
+    }
+    else if (is_rparen) {
+      while (stack[top].type != T_LP) {
+        postfix_out[j++] = stack[top--];
+      }
+      if (top > -1 && stack[top].type != T_LP) {
+        // error
+      }
+      else {
+        top--;
+      }
+    }
+    else {
+      break;
+    }
+    tokenizer_advance_t(t);
+  }
+
+  while (top > -1) {
+    if (stack[top].type == T_LP) {
+      // error
+    }
+    postfix_out[j++] = stack[top--];
+  }
+  *postfix_length = j;
 }
 
 void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
@@ -892,6 +995,16 @@ void show_expression(expression_t* expr, int level) {
         case T_MUL:   printf("{*}\n"); break;
         case T_DIV:   printf("{/}\n"); break;
         case T_MOD:   printf("{%%}\n"); break;
+        case T_DEQ:   printf("{==}\n"); break;
+        case T_LTEQ:  printf("{<=}\n"); break;
+        case T_GTEQ:  printf("{>=}\n"); break;
+        case T_NEQ:   printf("{!=}\n"); break;
+        case T_GT:    printf("{>}\n"); break;
+        case T_LT:    printf("{<}\n"); break;
+        case T_DOR:   printf("{||}\n"); break;
+        case T_DAND:  printf("{&&}\n"); break;
+        case T_OR:    printf("{|}\n"); break;
+        case T_AND:   printf("{|}\n"); break;
         default: break;
       }
       if (expr->left) show_expression(expr->left, level + 1);

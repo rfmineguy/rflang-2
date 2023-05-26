@@ -19,6 +19,7 @@ void x86_64_codegen_program(program_t* p, FILE* f) {
   }
   for (int i = 0; i < p->func_list_count; i++) {
     x86_64_codegen_func(p->func_list[i], &ctx);
+    x86_64_codegen_func(p->func_list[i], &ctx);
   }
 
   // generate the segments
@@ -136,8 +137,7 @@ void x86_64_codegen_assign(assign_t* assign, x86_64_codegen_context* ctx) {
   }
 }
 
-// NOTE: Conditionally generate this one based on platform
 void x86_64_codegen_asm_block(asm_block_t* asm_block, x86_64_codegen_context* ctx) {
   int length = asm_block->asm_source_code_end - asm_block->asm_source_code_begin;
-  WRITE_CODE("%.*s\n", length - 1, asm_block->asm_source_code_begin); 
+  WRITE_CODE("%.*s\n", length - 1, asm_block->asm_source_code_begin);
 }

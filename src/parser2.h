@@ -105,6 +105,10 @@ struct expression_t {
   } value;
   expression_t *left, *right; // ?
 };
+struct condition_t {
+  token_type_t comparison;
+  expression_t *left, *right;
+};
 struct arg_list_t {
   expression_t** args;
   int arg_count;
@@ -119,9 +123,6 @@ struct statement_t {
 struct if_t {
   condition_t* condition;
   block_t* block;
-};
-struct condition_t {
-  char warning_suppression; // NOTE: Purely to supress compiler warnings  
 };
 
 int           is_operator(token_type_t);
@@ -147,6 +148,7 @@ expression_t* parse_expression(tokenizer_t*);
 expression_t* parse_expression_v2(token_t*, int);
 
 void          get_postfix_rep(tokenizer_t*, token_t*, int*);
+void          get_postfix_rep_v2(tokenizer_t*, token_t*, int*);
 statement_t*  parse_statement(tokenizer_t*);
 if_t*         parse_if(tokenizer_t*);
 

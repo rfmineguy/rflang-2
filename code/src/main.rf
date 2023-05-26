@@ -12,7 +12,8 @@ fn sub(a: int, b: int): int {
 }
 
 fn is_even(a: int): bool {
-  return a % 2 == 0;
+  res: bool = a % 2 == 0;
+  return res;
 }
 
 fn main(argc: int, argv: char**): int {

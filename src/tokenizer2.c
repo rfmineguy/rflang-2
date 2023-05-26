@@ -144,6 +144,14 @@ void tokenizer_advance_t(tokenizer_t* t) {
   TOK_CHECK_STR("use", 3, T_USE)
   TOK_CHECK_STR("return", 6, T_RETURN)
   TOK_CHECK_STR("->", 2, T_ARROW)
+  TOK_CHECK_STR("==", 2, T_DEQ)
+  TOK_CHECK_STR("<=", 2, T_LTEQ)
+  TOK_CHECK_STR(">=", 2, T_GTEQ)
+  TOK_CHECK_STR("!=", 2, T_NEQ)
+  TOK_CHECK_STR(">", 1, T_GT)
+  TOK_CHECK_STR("<", 1, T_LT)
+  TOK_CHECK_STR("||", 2, T_DOR)
+  TOK_CHECK_STR("&&", 2, T_DAND)
   TOK_CHECK_CH(' ', T_SPC)
   TOK_CHECK_CH('\t', T_TAB)
   TOK_CHECK_CH('>', T_GT)
@@ -161,6 +169,8 @@ void tokenizer_advance_t(tokenizer_t* t) {
   TOK_CHECK_CH('*', T_MUL)
   TOK_CHECK_CH('/', T_DIV)
   TOK_CHECK_CH('%', T_MOD)
+  TOK_CHECK_CH('&', T_AND)
+  TOK_CHECK_CH('|', T_OR)
   TOK_CHECK_CH('\'', T_SQT)
   TOK_CHECK_CH('\"', T_DQT)
   TOK_CHECK_CH('\\', T_BACKSLASH)
@@ -269,8 +279,16 @@ void token_print(token_t t, tokenizer_t* tokenizer) {
     case T_DBL:           PRINT_TOKEN("DBL", t);              break;
     case T_FLT:           PRINT_TOKEN("FLT", t);              break;
     case T_BOOL:          PRINT_TOKEN("BOOL", t);             break;
+    case T_DEQ:           PRINT_TOKEN("DEQ", t);              break;
+    case T_LTEQ:          PRINT_TOKEN("LTEQ", t);             break;
+    case T_GTEQ:          PRINT_TOKEN("GTEQ", t);             break;
+    case T_NEQ:           PRINT_TOKEN("NEQ", t);              break;
     case T_GT:            PRINT_TOKEN("GT", t);               break;
     case T_LT:            PRINT_TOKEN("LT", t);               break;
+    case T_DOR:           PRINT_TOKEN("DOR", t);              break;
+    case T_DAND:          PRINT_TOKEN("DAND", t);             break;
+    case T_OR:            PRINT_TOKEN("OR", t);               break;
+    case T_AND:           PRINT_TOKEN("AND", t);              break;
     case T_SQT:           PRINT_TOKEN("SQT", t);              break;
     case T_DQT:           PRINT_TOKEN("DQT", t);              break;
     case T_BACKSLASH:     PRINT_TOKEN("BACKSLASH", t);        break;

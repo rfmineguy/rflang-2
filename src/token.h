@@ -20,23 +20,24 @@ typedef enum {
   T_INT = 90, T_SHT, T_CHR, T_DBL, T_FLT, T_BOOL,
 
   // Comparison
-  T_GT = 100, T_LT,
+  T_DEQ = 100, T_LTEQ, T_GTEQ, T_NEQ,
+  T_GT = 110, T_LT,
+  T_DOR = 120, T_DAND,
+  T_OR = 130, T_AND,
   
   // Quotes
-  T_DQT = 110, T_SQT,
+  T_DQT = 140, T_SQT,
   
   // Escape
-  T_BACKSLASH = 120,
+  T_BACKSLASH = 150,
 
   // Binary ops
-  T_PLUS = 130, T_MINUS, T_MUL, T_DIV, T_MOD,
+  T_PLUS = 160, T_MINUS, T_MUL, T_DIV, T_MOD,
 
   // Other
-  T_NUM = 140,
+  T_NUM = 170,
   T_ID,
-  T_X86_32_LINUX,
-  T_X86_64_LINUX,
-  T_ARM64,
+  T_X86_32_LINUX = 180, T_X86_64_LINUX, T_ARM64,
   T_EOF
 } token_type_t;
 

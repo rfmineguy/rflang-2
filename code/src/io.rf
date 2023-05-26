@@ -1,4 +1,19 @@
 fn strlen(s: char*): int {
+  len: int = 0;
+  while (*s) {
+    s++;
+    len++;
+  }
+  return len;
+}
+
+fn strnlen(s: char*, l: int): int {
+  len: int = 0;
+  while (*s && len < l) {
+    s++;
+    len++;
+  }
+  return len;
 }
 
 fn putc(c: char) {
@@ -17,5 +32,7 @@ fn puts(s: char*) {
     mov rsi, [rbp + 16]
     syscall
   };
-  asm arm64 {};
+  asm arm64 {
+    ; comment
+  };
 }
