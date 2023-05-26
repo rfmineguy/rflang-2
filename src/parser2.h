@@ -172,6 +172,8 @@ void          free_return(return_t*);
 void          free_param_list(param_list_t*);
 void          free_arg_list(arg_list_t*);
 void          free_expression(expression_t*);
+void          free_iff(if_t*);
+void          free_while(while_t*);
 void          free_statement(statement_t*);
 
 void          tabs(int);

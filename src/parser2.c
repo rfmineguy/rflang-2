@@ -54,9 +54,11 @@ program_t* parse_program(tokenizer_t* t) {
   
   // Expect functions
   while (tokenizer_get_t(t).type == T_FN) {
+    printf("Func\n");
     tokenizer_advance_t(t);
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
+    printf("Next -> "); tokenizer_show_next_t(t); printf("\n");
     // show_func(func, 0);
   }
 
@@ -736,19 +738,6 @@ void free_assign(assign_t* assign) {
     free(assign->right_hand_side.expr);
     assign->right_hand_side.expr = NULL;
   }
-  // free_var(assign->var);
-  // free(assign->var);
-  // assign->var = NULL;
-  // if (assign->type == ASSIGN_EXPR) {
-  //   free_expression(assign->value.expr);
-  //   free(assign->value.expr);
-  // }
-  // else if (assign->type == ASSIGN_STR_LIT) {
-  //   free_string_lit(assign->value.str_lit);
-  //   free(assign->value.str_lit);
-  // }
-  // assign->value.str_lit = NULL;
-  // assign->value.expr = NULL;
 }
 
 void free_return(return_t* returnp) {
@@ -785,6 +774,22 @@ void free_expression(expression_t* expr) {
   free(expr->right);
 }
 
+void free_iff(if_t* iff) {
+  if (!iff) return;
+  free_expression(iff->condition);
+  free(iff->condition);
+  free_block(iff->block);
+  free(iff->block);
+}
+
+void free_while(while_t* whle) {
+  if (!whle) return;
+  free_expression(whle->condition);
+  free(whle->condition);
+  free_block(whle->block);
+  free(whle->block);
+}
+
 void tabs(int count) {
   for (int i = 0; i < count; i++) {
     printf("  ");
@@ -793,7 +798,14 @@ void tabs(int count) {
 
 void free_statement(statement_t* stmt) {
   if (stmt->iff) {
-    // free_iff(stmt->iff);
+    free_iff(stmt->iff);
+    free(stmt->iff);
+    stmt->iff = NULL;
+  }
+  if (stmt->whle) {
+    free_while(stmt->whle);
+    free(stmt->whle);
+    stmt->whle = NULL;
   }
   if (stmt->ret) {
     free_return(stmt->ret);

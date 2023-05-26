@@ -212,17 +212,13 @@ token_t tokenizer_get_t(tokenizer_t* t) {
 }
 
 void tokenizer_show_next_t(tokenizer_t* t) {
-#if 1
   token_t token = tokenizer_get_t(t);
-  printf("%s   ", token_type_stringify(token.type));
+  printf("(%d, %s)   ", token.type, token_type_stringify(token.type));
   switch (token.type) {
   case T_ID:
   case T_NUM: printf("%.*s", token.loc.length, t->source_str + token.loc.begin_index); break;
   default:    printf("..."); break;
   }
-#else
-  printf(".");
-#endif
 }
 
 // processing
