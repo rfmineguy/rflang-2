@@ -92,7 +92,7 @@ block_t* parse_block(tokenizer_t* t) {
     tokenizer_advance_t(t);
   }
   tokenizer_advance_t(t);
-  tokenizer_advance_t(t);
+  // tokenizer_advance_t(t);
   printf("\n");
   return b;
 }
@@ -400,6 +400,7 @@ expression_t* parse_expression_v3(token_t* postfix, int postfix_len) {
   return exprs[0];
 }
 
+/*
 expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
   expression_t* exprs[postfix_len];
   int main_counter = 0;
@@ -445,25 +446,25 @@ expression_t* parse_expression_v2(token_t* postfix, int postfix_len) {
 
   return exprs[0];
 }
+*/
 
 expression_t* parse_expression(tokenizer_t* t) {
   // convert entire expression to postfix
   token_t postfix[100] = {0};
   int postfix_len = 0;
-  // get_postfix_rep(t, postfix, &postfix_len);
   
   get_postfix_rep_v2(t, postfix, &postfix_len);
   printf("postfix_len: %d\n", postfix_len);
   for (int i = 0; i < postfix_len; i++) {
+    printf("%d, ", i);
     token_print(postfix[i], t);
   }
-  //return parse_expression_ex(t, NULL, postfix, postfix_len - 1, -1);
   return parse_expression_v3(postfix, postfix_len);
 }
 
 void get_postfix_rep_v2(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
-  int i, j;
-  token_t stack[100];
+  int i, j = 0;
+  token_t stack[100] = {0};
   int top = -1;
   
   while (1) {
@@ -525,6 +526,7 @@ void get_postfix_rep_v2(tokenizer_t* t, token_t* postfix_out, int* postfix_lengt
   *postfix_length = j;
 }
 
+/*
 void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) {
   int j = 0;
   token_t stack[100];
@@ -569,6 +571,7 @@ void get_postfix_rep(tokenizer_t* t, token_t* postfix_out, int* postfix_length) 
   }
   *postfix_length = j;
 }
+*/
 
 statement_t* parse_statement(tokenizer_t* t) {
   printf("Parsing statement\n");
@@ -592,13 +595,27 @@ statement_t* parse_statement(tokenizer_t* t) {
     }
   }
   else if (tokenizer_expect_t(t, T_IF)) {
-    assert(0 && "Encountered if");
+    // assert(0 && "Encountered if");
+    tokenizer_advance_t(t);
+    expression_t* e = parse_expression(t);
+    block_t* b = parse_block(t);
+    if_t* iff = calloc(1, sizeof(if_t));
+    iff->condition = e;
+    iff->block = b;
+    s->iff = iff;
   }
   else if (tokenizer_expect_t(t, T_FOR)) {
     assert(0 && "Encountered for (UNSUPPORTED FOR NOW)");
   }
   else if (tokenizer_expect_t(t, T_WHILE)) {
-    assert(0 && "Encountered while");
+    // assert(0 && "Encountered while");
+    tokenizer_advance_t(t);
+    expression_t* e = parse_expression(t);
+    block_t* b = parse_block(t);
+    while_t* w = calloc(1, sizeof(while_t));
+    w->condition = e;
+    w->block = b;
+    s->whle = w;
   }
   else if (tokenizer_expect_t(t, T_RETURN)) {
     printf("Parse return\n");
@@ -1020,8 +1037,18 @@ void show_iff(if_t* iff, int level) {
      tabs(level + 1); printf("\\_ NULL\n");
      return;
   }
-  // tabs(level + 1); show_condition(iff->condition, level + 1);
-  tabs(level + 1); show_block(iff->block, level + 1);
+  show_expression(iff->condition, level + 1);
+  show_block(iff->block, level + 1);
+}
+
+void show_while(while_t* whle, int level) {
+  tabs(level); printf("\\_ While\n");
+  if (!whle) {
+    tabs(level); printf("\\_ NULL\n");
+    return;
+  }
+  show_expression(whle->condition, level + 1);
+  show_block(whle->block, level + 1);
 }
 
 void show_statement(statement_t* stmt, int level) {
@@ -1032,6 +1059,9 @@ void show_statement(statement_t* stmt, int level) {
   }
   if (stmt->iff) {
     show_iff(stmt->iff, level + 2); 
+  }
+  else if (stmt->whle) {
+    show_while(stmt->whle, level + 1);
   }
   else if (stmt->ret) {
     show_return(stmt->ret, level + 2);

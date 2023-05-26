@@ -20,6 +20,7 @@ typedef struct arg_list_t   arg_list_t;
 typedef struct expression_t expression_t;
 typedef struct statement_t  statement_t;
 typedef struct if_t         if_t;
+typedef struct while_t      while_t;
 typedef struct condition_t  condition_t;
 
 typedef enum {
@@ -119,9 +120,14 @@ struct statement_t {
   func_call_t* func_call;
   assign_t* assign;
   asm_block_t* asm_block;
+  while_t* whle;
 };
 struct if_t {
-  condition_t* condition;
+  expression_t* condition;
+  block_t* block;
+};
+struct while_t {
+  expression_t* condition;
   block_t* block;
 };
 
@@ -185,6 +191,7 @@ void          show_param_list(param_list_t*, int);
 void          show_arg_list(arg_list_t*, int);
 void          show_expression(expression_t*, int);
 void          show_iff(if_t*, int);
+void          show_while(while_t*, int);
 void          show_statement(statement_t*, int);
 
 program_t*    parse(tokenizer_t*);
