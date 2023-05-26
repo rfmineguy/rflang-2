@@ -234,8 +234,15 @@ int tokenizer_process_digit(tokenizer_t* tokenizer, int* digit_length) {
     digits++;
     temp_curs++;
   }
+
+  //reverse value
+  int reversed = 0;
+  while (value > 0) {
+    reversed = reversed * 10 + value % 10;
+    value /= 10;
+  }
   *digit_length = digits;
-  return value;
+  return reversed;
 }
 
 void tokenizer_process_id(tokenizer_t* tokenizer, int* id_length) {

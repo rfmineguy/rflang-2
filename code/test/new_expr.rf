@@ -1,5 +1,7 @@
 fn main(): int {
   a: int = 4;
+  if a == 4 {
+  };
   while a != 4 {
   };
   while x > 0 && x < 20 {
