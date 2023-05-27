@@ -28,6 +28,7 @@ void x86_64_codegen_program(program_t* p, FILE* f) {
   fprintf(f, "section .text\n");
   fprintf(f, "%s", ctx.code_segment_source);;
 
+  // free memory
   free(ctx.data_segment_source);
   ctx.data_segment_source = NULL;
   free(ctx.code_segment_source);

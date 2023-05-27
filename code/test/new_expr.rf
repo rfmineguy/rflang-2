@@ -1,10 +1,24 @@
-fn main(): int {
-  a: int = 4;
-  if a == 4 {
+use io
+use string
+
+fn add(a: int, b: int): int {
+  return a + b;
+}
+fn pow(base: int, exp: int): int {
+  result: int = 1;
+  while exp > 0 {
+    result = result * base;
+    exp = exp - 1;
   };
-  while a != 4 {
+  return result;
+}
+fn main(argc: int, argv: char**): int {
+  if argc != 0 && argv {
+    a: int = 0;
   };
-  while x > 0 && x < 20 {
-  };
-  return x + 3 < 49 && a > 3;
+  a: int = 4 + 3 * (x - 4);
+  return x + 3 < 4 && a > 3;
+}
+fn func(): bool {
+  return 1;
 }

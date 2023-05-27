@@ -35,7 +35,6 @@ typedef enum {
   ASSIGN_RHS_STR_LIT = 4,
   ASSIGN_RHS_EXPR    = 8,
 } assign_type_t;
-
 struct program_t {
   use_t**     use_list;
   int         use_list_count, use_list_max;
@@ -135,6 +134,8 @@ int           is_operator(token_type_t);
 int           get_precedence(token_type_t);
 int           is_type_token(token_type_t);
 
+program_t*    parse(tokenizer_t*);
+
 program_t*    parse_program(tokenizer_t*);
 use_t*        parse_use(tokenizer_t*);
 block_t*      parse_block(tokenizer_t*);
@@ -152,9 +153,9 @@ arg_list_t*   parse_arg_list(tokenizer_t*);
 expression_t* parse_expression_ex(tokenizer_t*, expression_t*, token_t*, int, int);
 expression_t* parse_expression(tokenizer_t*);
 expression_t* parse_expression_v2(token_t*, int);
-
 void          get_postfix_rep(tokenizer_t*, token_t*, int*);
 void          get_postfix_rep_v2(tokenizer_t*, token_t*, int*);
+
 statement_t*  parse_statement(tokenizer_t*);
 if_t*         parse_if(tokenizer_t*);
 
@@ -195,7 +196,5 @@ void          show_expression(expression_t*, int);
 void          show_iff(if_t*, int);
 void          show_while(while_t*, int);
 void          show_statement(statement_t*, int);
-
-program_t*    parse(tokenizer_t*);
 
 #endif

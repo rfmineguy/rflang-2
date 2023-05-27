@@ -6,6 +6,7 @@
 #include <unistd.h>       //getcwd
 #include "parser2.h"
 #include "tokenizer2.h"
+#include "analysis.h"
 #include "argparse.h"
 #include "codegen.h"
 
@@ -35,7 +36,7 @@ typedef struct {
   const char* in_file;
   const char* out_file;
   const char* comp_platform;
-  int test, comp_platform_list;
+  int list_comp_platforms;
 } args;
 
 void execute(const char* cmd, ...) {
@@ -95,6 +96,9 @@ int compile(args* a) {
   program_t* prog = parse(t);
   show_program(prog, 1);
 
+  // Now analyze the program
+  analyze_program(prog);
+
   // Now codegen the program
   if (a->comp_platform) {
     codegen_select(prog, output_file, a->comp_platform);
@@ -119,27 +123,6 @@ int compile(args* a) {
   return 0;
 }
 
-int test(args* a) {
-  printf("============== TESTING ==============\n");
-  const char* test_file = "code/test.rf";
-  FILE* f = fopen(test_file, "r");
-  if (!f) {
-    fprintf(stderr, "Failed to open file \'%s\'\n", test_file);
-    exit(0);
-  }
-  else {
-    printf("TEST: Compiling \'%s\'\n", test_file); 
-  }
-  tokenizer_t* t = tokenizer_new_from_file(f);
-  program_t* p = parse_program(t);
-  show_program(p, 1);
-
-  free_program(p);
-  tokenizer_free(t);
-  fclose(f);
-  return 1;
-}
-
 // https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
   args a = {0};
@@ -150,19 +133,15 @@ int main(int argc, const char** argv) {
     OPT_STRING('f', "file", &a.in_file, "File to compile", NULL , 0, 0),
     OPT_STRING('o', "output", &a.out_file, "Name of output asm file", NULL, 0, 0),
     OPT_STRING('p', "platform", &a.comp_platform, "Platform to compile for", NULL, 0, 0),
-    OPT_BOOLEAN('l', "platform-list", &a.comp_platform_list, "List supported platforms", NULL, 0, 0),
+    OPT_BOOLEAN('l', "platform-list", &a.list_comp_platforms, "List supported platforms", NULL, 0, 0),
     OPT_GROUP("Testing options"),
-    OPT_BOOLEAN('t', "test", &a.test, "Run tests", NULL, 0, 0), 
     OPT_END()
   };
   struct argparse argparse;
   argparse_init(&argparse, options, usages, 0);
   argc = argparse_parse(&argparse, argc, argv);
   /// ================================================================================================
-  if (a.test) {
-    return test(&a);
-  }
-  if (a.comp_platform_list) {
+  if (a.list_comp_platforms) {
     printf("Platforms:\n");
     printf(" - x86_32-linux\n");
     printf(" - x86_64-linux\n");

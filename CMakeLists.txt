@@ -48,7 +48,9 @@ set (SOURCES
   src/codegen.c
   src/codegen_x86_64.c
   src/errors.c
-  src/tokenizer2.c)
+  src/tokenizer2.c
+  src/chaining_ht.c
+  src/analysis.c)
 
 add_executable(rfc-tests
   tests/test.cpp
