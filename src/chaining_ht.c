@@ -3,6 +3,14 @@
 #include <stdio.h>
 #include <string.h>
 
+const char* map_type_to_string(int type) {
+  switch (type) {
+    case 1:  return "FUNC_ID";
+    case 2:  return "VAR_ID";
+    default: return "INVALID_TYPE";
+  }
+}
+
 chaining_ht_t chaining_ht_alloc(int max_size) {
   chaining_ht_t ht = {0};
   ht.buffer = malloc(sizeof(chaining_node_t*) * max_size);
@@ -26,20 +34,21 @@ int chaining_ht_hash(chaining_ht_t ht, char* key) {
 }
 
 void chaining_ht_show_entry_data(chaining_entry_data_t entry) {
-  printf("{key: %s, scope_depth: %d, scope_number: %d, type: %d}", entry.key, entry.scope_depth, entry.scope_number, entry.type);
+  printf("{key: %7s, scope_depth: %d, scope_number: %d, type: %s}", entry.key, entry.scope_depth, entry.scope_number, map_type_to_string(entry.type));
 }
 
-void chaining_ht_show(chaining_ht_t ht) {
+void chaining_ht_show(chaining_ht_t ht, int context) {
   printf("Showing chaining hash table {%d}\n", ht.M);
   for (int i = 0; i < ht.M; i++) {
     chaining_node_t* e = ht.buffer[i];
-    printf("%d: ", i);
+    if (context) printf("%d:\n", i);
     while (e != NULL) {
+      printf("\t");
       chaining_ht_show_entry_data(e->value);
-      printf(" -> ");
+      printf("\n");
       e = e->next;
     }
-    printf("NULL\n");
+    if (context) printf("NULL\n");
   }
 }
 

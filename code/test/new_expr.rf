@@ -5,20 +5,16 @@ fn add(a: int, b: int): int {
   return a + b;
 }
 fn pow(base: int, exp: int): int {
-  result: int = 1;
-  while exp > 0 {
-    result = result * base;
-    exp = exp - 1;
-  };
-  return result;
+  return 1;
 }
 fn main(argc: int, argv: char**): int {
   if argc != 0 && argv {
     a: int = 0;
   };
   a: int = 4 + 3 * (x - 4);
+  a = (4 - 1) * 5;
   return x + 3 < 4 && a > 3;
 }
-fn func(): bool {
+fn func(a: int): bool {
   return 1;
 }

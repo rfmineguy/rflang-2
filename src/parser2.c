@@ -638,7 +638,7 @@ statement_t* parse_statement(tokenizer_t* t) {
     return NULL;
   }
   else {
-    ERROR("Unexpected token: %s\n", token_type_stringify(tokenizer_get_t(t).type));
+    ERROR("Unexpected token: %s %d\n", token_type_stringify(tokenizer_get_t(t).type), tokenizer_get_t(t).type);
   }
 
   // printf("Next\n");
