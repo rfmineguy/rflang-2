@@ -1,4 +1,5 @@
 build/
+code/
 .DS_Store
 *.swp
 src/*.swp
