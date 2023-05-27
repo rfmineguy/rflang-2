@@ -173,14 +173,6 @@ var_t* parse_var(tokenizer_t* t) {
   tokenizer_advance_t(t);
   tokenizer_show_next_t(t);
   token_t token = tokenizer_get_t(t);
-  /*
-  int is_type = token.type == T_INT || 
-                token.type == T_SHT ||
-                token.type == T_CHR ||
-                token.type == T_DBL ||
-                token.type == T_FLT ||
-                token.type == T_BOOL;
-  */
   if (is_type_token(token.type)) {
     v->type = tokenizer_get_t(t).type;
     v->type_name = token_type_stringify(tokenizer_get_t(t).type);
@@ -196,28 +188,38 @@ var_t* parse_var(tokenizer_t* t) {
 }
 
 assign_t* parse_assign(tokenizer_t* t) {
-  printf("Parsing assign\n");
+  // printf("Parsing assign -> ");
+  // tokenizer_show_next_t(t);
+  // printf("\n");
   assign_t* a = calloc(1, sizeof(assign_t));
   var_t* v = NULL;
   token_t id_token = tokenizer_get_t(t);
+
+  printf("Next 2: "); tokenizer_show_next_t(t); printf("\n");
+  printf("id_token: "); token_print(id_token, t);
   tokenizer_advance_t(t);
-  if (tokenizer_expect_t(t, T_EQ)) {
-    // tokenizer_advance_t(t);
-    a->type |= ASSIGN_LHS_ID;
-    strncpy(a->left_hand_side.id, t->source_str + id_token.loc.begin_index - 1, id_token.loc.length + 1);
-    // tokenizer_advance_t(t);
-  }
-  else {
+  int was_colon = 0;
+  if (tokenizer_expect_t(t, T_COLON)) {
     tokenizer_rewind_t(t);
+    printf("==== var = <expr> ====\n");
     v = parse_var(t);
     a->type |= ASSIGN_LHS_VAR;
     a->left_hand_side.var = v;
+    was_colon = 1;
   }
-  if (!tokenizer_expect_t(t, T_EQ)) {
+  else if (tokenizer_expect_t(t, T_EQ)) {
+    printf("==== id = <expr> ====\n");
+    
+    printf("no type\n");
+    a->type |= ASSIGN_LHS_ID;
+    strncpy(a->left_hand_side.id, t->source_str + id_token.loc.begin_index - 1, id_token.loc.length + 1);
+  }
+  if (was_colon && !tokenizer_expect_t(t, T_EQ)) {
     ERROR("Expected T_EQ, got %s\n", token_type_stringify(tokenizer_get_t(t).type));
   }
   tokenizer_advance_t(t);
-  printf("Next: "); tokenizer_show_next_t(t); printf("\n");
+  
+  printf("Next 3: "); tokenizer_show_next_t(t); printf("\n");
   if (tokenizer_expect_t(t, T_DQT)) {
     tokenizer_rewind_t(t);
     string_lit_t* s = parse_string_lit(t);
@@ -230,7 +232,7 @@ assign_t* parse_assign(tokenizer_t* t) {
     expression_t* e = parse_expression(t);
     a->right_hand_side.expr = e;
     a->type |= ASSIGN_RHS_EXPR;
- }
+  }
   return a;
 }
 
@@ -587,10 +589,10 @@ statement_t* parse_statement(tokenizer_t* t) {
       func_call_t* func_call = parse_func_call(t);
       s->func_call = func_call;
     }
-    else {
-      //assign
-      printf("Parsing assign\n");
+    else if (tokenizer_expect_t(t, T_COLON) || tokenizer_expect_t(t, T_EQ)) {
       tokenizer_rewind_t(t);
+      tokenizer_rewind_t(t);
+      // printf("Next 1: "); tokenizer_show_next_t(t);
       assign_t* a = parse_assign(t);
       s->assign = a;
       // tokenizer_advance_t(t);

@@ -204,6 +204,9 @@ void tokenizer_rewind_t(tokenizer_t* t) {
   t->col -= t->current.loc.length;
   t->cursor -= t->prev.loc.length;
   t->col -= t->prev.loc.length;
+  t->current = t->prev;
+  while (*t->cursor == ' ')
+    t->cursor--;
   tokenizer_advance_t(t);
 }
 
