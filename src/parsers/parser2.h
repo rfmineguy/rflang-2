@@ -1,7 +1,7 @@
 #ifndef PARSER2_H
 #define PARSER2_H
 #include "tokenizer2.h"
-#include "parser_util.h"    //contains all the basic parser constructs (i.e. struct program_t)
+#include "parse_tree.h"    //contains all the basic parser constructs (i.e. struct program_t)
 
 int           is_operator(token_type_t);
 int           get_precedence(token_type_t);

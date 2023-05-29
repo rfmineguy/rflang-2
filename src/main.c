@@ -4,11 +4,11 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <unistd.h>       //getcwd
-#include "parsers/parser2.h"
+#include "parsers/parser3.h"
 #include "tokenizer3.h"
-#include "analysis.h"
+// #include "analysis.h"
 #include "argparse.h"
-#include "codegen.h"
+// #include "codegen.h"
 
 #if defined(__linux__) // any linux distribution
     #define PLATFORM "linux"
@@ -85,7 +85,6 @@ compilation_info get_compilation_info(args* a) {
   return info;
 }
 
-/*
 int compile(args* a) {
   compilation_info info = get_compilation_info(a);
   printf("CWD: %s\n", info.cwd);
@@ -94,20 +93,22 @@ int compile(args* a) {
 
   FILE* input_file = openf(info.input_file_path, "r");
   FILE* output_file = openf(info.output_file_path, "w");
-  tokenizer_t* t = tokenizer_new_from_file(input_file);
-  program_t* prog = parse(t);
+
+  tokenizer3_t t = tokenizer3_new(input_file);
+
+  program_t* prog = parse(&t);
   show_program(prog, 1);
 
   // Now analyze the program
-  analyze_program(prog);
+  // analyze_program(prog);
 
   // Now codegen the program
-  if (a->comp_platform) {
-    codegen_select(prog, output_file, a->comp_platform);
-  }
-  else {
-    fprintf(stderr, "Must select a target platform to compile for\n");
-  }
+  // if (a->comp_platform) {
+  //   codegen_select(prog, output_file, a->comp_platform);
+  // }
+  // else {
+  //   fprintf(stderr, "Must select a target platform to compile for\n");
+  // }
 
   // Free the program
   free_program(prog);
@@ -115,16 +116,13 @@ int compile(args* a) {
   prog = NULL;
 
   // Free the tokenizer
-  tokenizer_free(t);
-  free(t);
-  t = NULL;
+  tokenizer3_free(&t);
 
   // Close files
   fclose(input_file);
   fclose(output_file);
   return 0;
 }
-*/
 
 int test_new_tokenizer() {
   const char* file = "code/test/new_expr.rf";
@@ -188,10 +186,7 @@ int main(int argc, const char** argv) {
     exit(90);
   }
   else {
-    printf("Compilation disabled currently\n");
-    test_new_tokenizer();
-    return 4075;
-    // return compile(&a);
+    return compile(&a);
   }
   /// ================================================================================================
 }

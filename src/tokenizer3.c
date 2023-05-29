@@ -167,6 +167,10 @@ identifier_t tokenizer3_as_id(tokenizer3_t* t) {
   return id;
 }
 
+void tokenizer3_show_token_offset(tokenizer3_t* t, int offset) {
+  tokenizer3_token_print(t->history[offset], t);
+}
+
 void tokenizer3_token_print(token_t t, tokenizer3_t* tokenizer) {
 #define PRINT_TOKEN(type_s, t) \
     printf("{%10s, %.*s }\n", type_s, t.loc.length, tokenizer->source_code + t.loc.begin_index);

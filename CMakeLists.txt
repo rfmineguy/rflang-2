@@ -45,6 +45,8 @@ endif()
 set (SOURCES 
   # src/parser2.c
   src/token.c
+  src/parsers/parser3.c
+  src/parsers/parse_tree.c
   src/codegen.c
   src/codegen_x86_64.c
   src/errors.c

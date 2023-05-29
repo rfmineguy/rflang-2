@@ -58,7 +58,7 @@ program_t* parse_program(tokenizer_t* t) {
     tokenizer_advance_t(t);
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
-    printf("Next -> "); tokenizer_show_next_t(t); printf("\n");
+    // printf("Next -> "); tokenizer_show_next_t(t); printf("\n");
     // show_func(func, 0);
   }
 
@@ -374,7 +374,7 @@ void show_stack(expression_t** stack, int length) {
   }
 }
 
-expression_t* parse_expression_v3(token_t* postfix, int postfix_len) {
+expression_t* parse_expression(token_t* postfix, int postfix_len) {
   expression_t* exprs[postfix_len];
   int top = -1;
   for (int i = 0; i < postfix_len; i++) {

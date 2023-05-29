@@ -71,7 +71,8 @@ number_t     tokenizer3_as_number(tokenizer3_t*);
 identifier_t tokenizer3_as_id(tokenizer3_t*);
 
 void         tokenizer3_consume_whitespace(tokenizer3_t*);
-void         tokenizer3_token_print(token_t, tokenizer3_t*);
 
+void         tokenizer3_show_token_offset(tokenizer3_t*, int);
+void         tokenizer3_token_print(token_t, tokenizer3_t*);
 
 #endif
