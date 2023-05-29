@@ -75,6 +75,7 @@ struct var_t {
 struct string_lit_t {
   char* str_lit_begin;
   char* str_lit_end;
+  int length;
 };
 struct assign_t {
   assign_type_t type;
@@ -138,7 +139,8 @@ void          free_var(var_t*);
 void          free_func_decl(func_decl_t*);
 void          free_func(func_t*);
 void          free_func_call(func_call_t*);
-void          free_assign(assign_t*);
+void          free_var_assign(assign_t*);
+void          free_id_assign(assign_t*);
 void          free_return(return_t*);
 void          free_param_list(param_list_t*);
 void          free_arg_list(arg_list_t*);

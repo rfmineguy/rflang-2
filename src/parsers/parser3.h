@@ -25,6 +25,7 @@ param_list_t* parse_param_list(tokenizer3_t*);
 arg_list_t*   parse_arg_list(tokenizer3_t*);
 statement_t*  parse_statement(tokenizer3_t*);
 if_t*         parse_if(tokenizer3_t*);
+while_t*      parse_while(tokenizer3_t*);
 
 expression_t* parse_expression_postfix(token_t* postfix, int postfix_len); 
 expression_t* parse_expression(tokenizer3_t*);

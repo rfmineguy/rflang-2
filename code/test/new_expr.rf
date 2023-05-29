@@ -1,7 +1,7 @@
 use io
 use string
 
-fn add(a: int, b: int): int {
+fn add(a: int*, b: int): int {
   sum: int = a + b;
   return sum;
 }

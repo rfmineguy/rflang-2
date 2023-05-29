@@ -107,6 +107,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
   if (isdigit(*t->cursor)) {
     number_t number = tokenizer3_as_number(t);
     t->history[4] = (token_t) {.type = T_NUM, LOC_FIELD(t, number.length)};
+    t->history[4].value.i = number.value.i; 
     t->cursor += number.length;
     t->col += number.length;
     return;
@@ -114,6 +115,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
   if (*t->cursor == '_' || isalpha(*t->cursor) || isdigit(*t->cursor)) {
     identifier_t id = tokenizer3_as_id(t);
     t->history[4] = (token_t) {.type = T_ID, LOC_FIELD(t, id.length)};
+    strncpy(t->history[4].value.s, id.begin, id.length < 30 ? id.length : 30);
     t->cursor += id.length;
     t->col += id.length;
     return;
