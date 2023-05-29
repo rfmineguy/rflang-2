@@ -1,6 +1,7 @@
 #include "parse_tree.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <locale.h>
 
 void free_program(program_t* p) {
   for (int i = 0; i < p->use_list_count; i++) {
@@ -75,6 +76,8 @@ void free_assign(assign_t* assign) {
     // nothing to do
   }
   if (assign->type & ASSIGN_RHS_STR_LIT) {
+    free(assign->right_hand_side.str_lit);
+    assign->right_hand_side.str_lit = NULL;
     // nothing to do
   }
   if (assign->type & ASSIGN_RHS_EXPR) {
@@ -134,12 +137,6 @@ void free_while(while_t* whle) {
   free(whle->block);
 }
 
-void tabs(int count) {
-  for (int i = 0; i < count; i++) {
-    printf("  ");
-  }
-}
-
 void free_statement(statement_t* stmt) {
   if (stmt->iff) {
     free_iff(stmt->iff);
@@ -175,36 +172,47 @@ void free_statement(statement_t* stmt) {
   stmt = NULL;
 }
 
+void tabs(int count) {
+#define UP_DOWN 0x2503
+#define UP_RIGHT_DOWN 0x2523
+#define LEFT_RIGHT 0x2501
+  setlocale(LC_ALL, "en_US.UTF-8");
+  for (int i = 0; i < count; i++) {
+    printf("%lc ", UP_DOWN);
+  }
+  printf("%lc%lc ", UP_RIGHT_DOWN, LEFT_RIGHT);
+}
+
 void show_program(program_t* p, int level) {
-  tabs(level - 1); printf("\\_ Program\n");
+  tabs(level - 1); printf("Program\n");
   if (!p) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level); printf("NULL\n");
     return;
   }
-  tabs(level); printf("\\_ UseList\n");
+  tabs(level); printf("UseList\n");
   for (int i = 0; i < p->use_list_count; i++) {
     show_use(p->use_list[i], level + 1);
   }
-  tabs(level); printf("\\_ FuncList\n");
+  tabs(level); printf("FuncList\n");
   for (int i = 0; i < p->func_list_count; i++) {
     show_func(p->func_list[i], level + 1);
   }
 }
 
 void show_use(use_t* u, int level) {
-  tabs(level); printf("\\_ Use\n");
-  tabs(level); printf("  \\_ name: %s\n", u->name);
+  tabs(level); printf("Use\n");
+  tabs(level + 1); printf("name: %s\n", u->name);
 }
 
 void show_block(block_t* block, int level) {
-  tabs(level - 1); printf("\\_ Block\n");
+  tabs(level - 1); printf("Block\n");
   if (!block) {
-    tabs(level + 1); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
-  tabs(level + 1); printf("\\_ Statements\n");
+  tabs(level + 1); printf("Statements\n");
   if (block->statement_count == 0) {
-    tabs(level + 2); printf("\\_ NULL\n"); 
+    tabs(level + 2); printf("NULL\n"); 
     return;
   }
   for (int i = 0; i < block->statement_count; i++) {
@@ -213,68 +221,68 @@ void show_block(block_t* block, int level) {
 }
 
 void show_asm_block(asm_block_t* asm_block, int level) {
-  tabs(level - 1); printf("\\_ AsmBlock\n");
+  tabs(level - 1); printf("AsmBlock\n");
   if (!asm_block) {
-    tabs(level + 1); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
-  tabs(level); printf("\\_ asm_type: %s\n", token_type_stringify(asm_block->asm_type));
-  tabs(level); printf("\\_ begin: %p\n", asm_block->asm_source_code_begin);
-  tabs(level); printf("\\_ end: %p\n", asm_block->asm_source_code_end);
-  tabs(level); printf("\\_ length: %zu\n", asm_block->asm_source_code_end - asm_block->asm_source_code_begin);
+  tabs(level); printf("asm_type: %s\n", token_type_stringify(asm_block->asm_type));
+  tabs(level); printf("begin: %p\n", asm_block->asm_source_code_begin);
+  tabs(level); printf("end: %p\n", asm_block->asm_source_code_end);
+  tabs(level); printf("length: %zu\n", asm_block->asm_source_code_end - asm_block->asm_source_code_begin);
 }
 
 void show_string_lit(string_lit_t* str_lit, int level) {
-  tabs(level - 1); printf("\\_ StringLit\n");
+  tabs(level - 1); printf("StringLit\n");
   if (!str_lit) {
-    tabs(level + 1); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
   size_t length = str_lit->str_lit_end - str_lit->str_lit_begin;
-  tabs(level); printf("\\_ begin: %p\n", str_lit->str_lit_begin);
-  tabs(level); printf("\\_ end: %p\n", str_lit->str_lit_end);
-  tabs(level); printf("\\_ length: %zu\n", length);
-  tabs(level); printf("\\_ str: %*.s\n", (int)length, str_lit->str_lit_begin);
+  tabs(level); printf("begin: %p\n", str_lit->str_lit_begin);
+  tabs(level); printf("end: %p\n", str_lit->str_lit_end);
+  tabs(level); printf("length: %zu\n", length);
+  tabs(level); printf("str: %*.s\n", (int)length, str_lit->str_lit_begin);
 }
 
 void show_func(func_t* func, int level) {
-  tabs(level); printf("\\_ Func\n");
-  tabs(level - 1); show_func_decl(func->decl, level + 1);
-  tabs(level + 1); printf("\\_ Return Type : %d = %s\n", func->return_type, func->has_return_type ? func->return_type_str : "N/A");
-  tabs(level - 1); show_block(func->block, level + 1);
+  tabs(level); printf("Func\n");
+  show_func_decl(func->decl, level + 1);
+  tabs(level + 1); printf("Return Type : %d = %s\n", func->return_type, func->has_return_type ? func->return_type_str : "N/A");
+  show_block(func->block, level + 2);
 }
 
 void show_func_decl(func_decl_t* decl, int level) {
-  tabs(level - 1); printf("\\_ FuncDecl\n");
+  tabs(level); printf("FuncDecl\n");
   if (!decl) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
-  tabs(level + 1); printf("\\_ name: %s\n", decl->name);
+  tabs(level + 1); printf("name: %s\n", decl->name);
   show_param_list(decl->params, level + 1);
 }
 
 void show_func_call(func_call_t* func_call, int level) {
-  tabs(level - 1); printf("\\_ FuncCall\n");
+  tabs(level - 1); printf("FuncCall\n");
   if (!func_call) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level); printf("NULL\n");
     return;
   }
-  tabs(level); printf("\\_ name: %s\n", func_call->name);
+  tabs(level); printf("name: %s\n", func_call->name);
   show_arg_list(func_call->args, level + 1);
 }
 
 void show_assign(assign_t* assign, int level) {
-  tabs(level - 1); printf("\\_ Assign\n");
+  tabs(level - 1); printf("Assign\n");
   if (!assign) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level); printf("NULL\n");
     return;
   }
   if (assign->type & ASSIGN_LHS_VAR) {
     show_var(assign->left_hand_side.var, level);
   }
   if (assign->type & ASSIGN_LHS_ID) {
-    tabs(level); printf("\\_ ID: %s\n", assign->left_hand_side.id);
+    tabs(level); printf("ID: %s\n", assign->left_hand_side.id);
   }
   if (assign->type & ASSIGN_RHS_STR_LIT) {
     show_string_lit(assign->right_hand_side.str_lit, level + 1);
@@ -299,18 +307,18 @@ void show_assign(assign_t* assign, int level) {
 }
 
 void show_return(return_t* _return, int level) {
-  tabs(level - 1); printf("\\_ Return\n");
+  tabs(level - 1); printf("Return\n");
   if (!_return) {
-    tabs(level + 1); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
   show_expression(_return->expr, level);
 }
 
 void show_param_list(param_list_t* params, int level) {
-  tabs(level); printf("\\_ Params\n");
+  tabs(level); printf("Params\n");
   if (!params) {
-    tabs(level + 1); printf("\\_ NULL\n");
+    tabs(level + 1); printf("NULL\n");
     return;
   }
   for (int i = 0; i < params->params_count; i++) {
@@ -319,9 +327,9 @@ void show_param_list(param_list_t* params, int level) {
 }
 
 void show_arg_list(arg_list_t* arg_list, int level) {
-  tabs(level); printf("\\_ ArgList\n");
+  tabs(level); printf("ArgList\n");
   if (!arg_list) {
-    tabs(level+1); printf("\\_ NULL\n");
+    tabs(level+1); printf("NULL\n");
     return;
   }
   for (int i = 0; i < arg_list->arg_count; i++) {
@@ -330,34 +338,34 @@ void show_arg_list(arg_list_t* arg_list, int level) {
 }
 
 void show_var(var_t* var, int level) {
-  tabs(level); printf("\\_ Var\n");
+  tabs(level); printf("Var\n");
   if (!var) {
-    tabs(level+1); printf("\\_ NULL\n");
+    tabs(level+1); printf("NULL\n");
     return;
   }
-  tabs(level + 1); printf("\\_ name: %s\n", var->name);
-  tabs(level + 1); printf("\\_ type: %s\n", var->type_name);
-  tabs(level + 1); printf("\\_ indirection: %d\n", var->indirection);
+  tabs(level + 1); printf("name: %s\n", var->name);
+  tabs(level + 1); printf("type: %s\n", var->type_name);
+  tabs(level + 1); printf("indirection: %d\n", var->indirection);
 }
 
 void show_expression(expression_t* expr, int level) {
-  tabs(level); printf("\\_ Expr");
+  tabs(level); printf("Expr");
   if (!expr) {
     // printf("\n");
-    tabs(level+1); printf("\\_ NULL\n");
+    tabs(level+1); printf("NULL\n");
     return;
   }
   switch (expr->type) {
     case EXPR_NUM: {
       printf("\n");
       tabs(level + 1); 
-      printf("\\_Value {num: %d}\n", expr->value.i);
+      printf("Value {num: %d}\n", expr->value.i);
       break;
     }
     case EXPR_STRING: {
       printf("\n");
       tabs(level + 1); 
-      printf("\\_Value {str: %s}\n", expr->value.s); 
+      printf("Value {str: %s}\n", expr->value.s); 
       break;
     }
     case EXPR_COMPOUND: {
@@ -388,9 +396,9 @@ void show_expression(expression_t* expr, int level) {
 }
 
 void show_iff(if_t* iff, int level) {
-  tabs(level); printf("\\_ If\n");
+  tabs(level); printf("If\n");
   if (!iff) {
-     tabs(level + 1); printf("\\_ NULL\n");
+     tabs(level + 1); printf("NULL\n");
      return;
   }
   show_expression(iff->condition, level + 1);
@@ -398,9 +406,9 @@ void show_iff(if_t* iff, int level) {
 }
 
 void show_while(while_t* whle, int level) {
-  tabs(level); printf("\\_ While\n");
+  tabs(level); printf("While\n");
   if (!whle) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level); printf("NULL\n");
     return;
   }
   show_expression(whle->condition, level + 1);
@@ -408,9 +416,9 @@ void show_while(while_t* whle, int level) {
 }
 
 void show_statement(statement_t* stmt, int level) {
-  tabs(level); printf("\\_ Statement\n");
+  tabs(level); printf("Statement\n");
   if (!stmt) {
-    tabs(level); printf("\\_ NULL\n");
+    tabs(level); printf("NULL\n");
     return;
   }
   if (stmt->iff) {
@@ -432,7 +440,7 @@ void show_statement(statement_t* stmt, int level) {
     show_asm_block(stmt->asm_block, level + 2);
   }
   else {
-    tabs(level); printf("\\_ %p\n", stmt->ret);
-    tabs(level); printf("\\_ Statement empty\n");
+    tabs(level + 1); printf("%p\n", stmt->ret);
+    tabs(level + 1); printf("Statement empty\n");
   }
 }
