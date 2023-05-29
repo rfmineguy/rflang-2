@@ -210,13 +210,13 @@ void show_block(block_t* block, int level) {
     tabs(level + 1); printf("NULL\n");
     return;
   }
-  tabs(level + 1); printf("Statements\n");
+  tabs(level); printf("Statements\n");
   if (block->statement_count == 0) {
-    tabs(level + 2); printf("NULL\n"); 
+    tabs(level + 1); printf("NULL\n"); 
     return;
   }
   for (int i = 0; i < block->statement_count; i++) {
-    show_statement(block->statements[i], level + 2);
+    show_statement(block->statements[i], level + 1);
   }
 }
 
@@ -440,7 +440,7 @@ void show_statement(statement_t* stmt, int level) {
     show_asm_block(stmt->asm_block, level + 2);
   }
   else {
-    tabs(level + 1); printf("%p\n", stmt->ret);
-    tabs(level + 1); printf("Statement empty\n");
+    tabs(level); printf("%p\n", stmt->ret);
+    tabs(level); printf("Statement empty\n");
   }
 }

@@ -308,6 +308,7 @@ statement_t* parse_statement(tokenizer3_t* t) {
       s->assign = parse_id_assign(t);
     }
     else if (tokenizer3_expect_offset(t, 3, T_LP)) {
+      assert(0 && "Function calls unsupported right now");
       // func call
     }
   }
@@ -340,6 +341,7 @@ if_t* parse_if(tokenizer3_t* t) {
   tokenizer3_advance(t);
   iff->condition = parse_expression(t);
   iff->block = parse_block(t);
+  printf("=> Parsed if\n");
   return iff;
 }
 
@@ -348,6 +350,7 @@ while_t* parse_while(tokenizer3_t* t) {
   tokenizer3_advance(t);
   whle->condition = parse_expression(t);
   whle->block = parse_block(t);
+  printf("=> Parsed while\n");
   return whle;
 }
 
