@@ -12,7 +12,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
 # file (COPY vim-syntax/rf.vim DESTINATION )
-# file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
+file (COPY code DESTINATION ${CMAKE_BINARY_DIR})
 
 #
 # LIBRARIES
@@ -43,21 +43,21 @@ if (NOT gtest_POPULATED)
 endif()
 
 set (SOURCES 
-  src/parser2.c
+  # src/parser2.c
   src/token.c
   src/codegen.c
   src/codegen_x86_64.c
   src/errors.c
-  src/tokenizer2.c
+  src/tokenizer3.c
   src/chaining_ht.c
   src/analysis.c)
 
-add_executable(rfc-tests
-  tests/test.cpp
-  ${SOURCES})
-
-target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
-target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
+# add_executable(rfc-tests
+#   tests/test.cpp
+#   ${SOURCES})
+# 
+# target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
+# target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
 
 add_executable(rfc
   src/main.c

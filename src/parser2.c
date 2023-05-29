@@ -212,7 +212,7 @@ assign_t* parse_assign(tokenizer_t* t) {
     
     printf("no type\n");
     a->type |= ASSIGN_LHS_ID;
-    strncpy(a->left_hand_side.id, t->source_str + id_token.loc.begin_index - 1, id_token.loc.length + 1);
+    strncpy(a->left_hand_side.id, t->source_str + id_token.loc.begin_index, id_token.loc.length);
   }
   if (was_colon && !tokenizer_expect_t(t, T_EQ)) {
     ERROR("Expected T_EQ, got %s\n", token_type_stringify(tokenizer_get_t(t).type));

@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <unistd.h>       //getcwd
 #include "parser2.h"
-#include "tokenizer2.h"
+#include "tokenizer3.h"
 #include "analysis.h"
 #include "argparse.h"
 #include "codegen.h"
@@ -37,6 +37,7 @@ typedef struct {
   const char* out_file;
   const char* comp_platform;
   int list_comp_platforms;
+  int test;
 } args;
 
 void execute(const char* cmd, ...) {
@@ -84,6 +85,7 @@ compilation_info get_compilation_info(args* a) {
   return info;
 }
 
+/*
 int compile(args* a) {
   compilation_info info = get_compilation_info(a);
   printf("CWD: %s\n", info.cwd);
@@ -122,6 +124,32 @@ int compile(args* a) {
   fclose(output_file);
   return 0;
 }
+*/
+
+int test_new_tokenizer() {
+  const char* file = "code/test/new_expr.rf";
+  FILE* f = fopen(file, "r");
+  if (!f) {
+    fprintf(stderr, "'%s' not present\n", file);
+    return -1;
+  }
+  printf("Testing tokenizer3\n");
+  tokenizer3_t t = tokenizer3_new(f);
+  
+  while (tokenizer3_get(&t, 0).type != T_EOF) {
+    tokenizer3_advance(&t);
+    printf("========================\n");
+    tokenizer3_token_print(t.history[0], &t);
+    tokenizer3_token_print(t.history[1], &t);
+    tokenizer3_token_print(t.history[2], &t);
+    tokenizer3_token_print(t.history[3], &t);
+    tokenizer3_token_print(t.history[4], &t);
+  }
+
+  printf("Tested tokenizer3\n");
+  tokenizer3_free(&t);
+  fclose(f);
+}
 
 // https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
@@ -135,11 +163,17 @@ int main(int argc, const char** argv) {
     OPT_STRING('p', "platform", &a.comp_platform, "Platform to compile for", NULL, 0, 0),
     OPT_BOOLEAN('l', "platform-list", &a.list_comp_platforms, "List supported platforms", NULL, 0, 0),
     OPT_GROUP("Testing options"),
+    OPT_BOOLEAN('t', "test", &a.test, "Run active test", NULL, 0, 0),
     OPT_END()
   };
   struct argparse argparse;
   argparse_init(&argparse, options, usages, 0);
   argc = argparse_parse(&argparse, argc, argv);
+  /// ================================================================================================
+  if (a.test) {
+    return test_new_tokenizer();
+  }
+
   /// ================================================================================================
   if (a.list_comp_platforms) {
     printf("Platforms:\n");
@@ -154,7 +188,10 @@ int main(int argc, const char** argv) {
     exit(90);
   }
   else {
-    return compile(&a);
+    printf("Compilation disabled currently\n");
+    test_new_tokenizer();
+    return 4075;
+    // return compile(&a);
   }
   /// ================================================================================================
 }

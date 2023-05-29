@@ -1,128 +1,54 @@
-#include "tokenizer2.h"
-#include <stdio.h>
+#include "tokenizer3.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
+#include <math.h>
 
-// MACROS
-#define LOC_FIELD(tokenizer, len) \
-  .loc = (token_loc_t) {\
-    .begin_index = t->cursor - t->source_str,\
-    .length = len,\
-    .line = t->line,\
-    .column = t->col } 
-
-#define TOK_CHECK_CH(ch, tp) \
-  if (*t->cursor == ch) {\
-    t->current = (token_t) {.type = tp, LOC_FIELD(t, 1) };\
-    t->cursor++;\
-    t->col++;\
-    return;\
-  }
-
-#define TOK_CHECK_STR(str, len, tp) \
-  if (strncmp(t->cursor, str, len) == 0) {\
-    t->current = (token_t) {.type = tp, LOC_FIELD(t, len) };\
-    t->cursor+=len;\
-    t->col+=len;\
-    return;\
-  }
-
-#define TOK_CHECK_EOF(tok) \
-  if (t->cursor == t->source_str + t->source_length) {\
-    t->current = (token_t) {.type = T_EOF, LOC_FIELD(t, 1) };\
-    t->cursor++;\
-    t->col++;\
-    return;\
-  }
-
-int tokenizer_process_digit(tokenizer_t*, int*);
-void tokenizer_process_id(tokenizer_t*, int*);
-
-// FUNCTIONS
-tokenizer_t* tokenizer_new_from_str(const char* str) {
-  tokenizer_t* t = calloc(1, sizeof(tokenizer_t));
-  int len = strlen(str) + 1;
-  t->source_str = malloc(len);
-  strcpy(t->source_str, str);
-  t->source_str[len - 1] = 0;
-  t->cursor = t->source_str;
-  tokenizer_advance_t(t);
-  return t;
-}
-
-tokenizer_t* tokenizer_new_from_file(FILE* f) {
-  tokenizer_t* t = calloc(1, sizeof(tokenizer_t));
+//assume file is open
+tokenizer3_t tokenizer3_new(FILE* f) {
+  tokenizer3_t t = {0};
 
   fseek(f, 0, SEEK_END);
-  long size = ftell(f);
+  t.source_length = ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  t->source_length = size;
-  t->source_str = malloc(sizeof(char) * size + 2);
-  if (!t->source_str) {
-    fprintf(stderr, "Failed to allocate memory\n");
-    free(t->source_str);
-    t->source_str = NULL;
-    exit(1);
-  }
+  t.source_code = malloc(sizeof(char) * t.source_length);
+  fread(t.source_code, sizeof(char), t.source_length, f);
+  t.cursor = t.source_code;
 
-  size_t read = 0;
-  if ((read = fread(t->source_str, 1, size, f)) != size) {
-    fprintf(stderr, "Failed to read entire file. Only read %lu bytes\n", read); 
-    free(t->source_str);
-    t->source_str = NULL;
-    exit(1);
+  for (int i = 0; i < 5; i++) {
+    t.history[i].type = T_INVALID;
   }
-  t->source_str[read] = '\0'; //add null term (fread doesn't add this)
-  printf("%lu\n", read);
-  printf("%p\n", t->source_str);
-
-  t->cursor = t->source_str;
-#if 1
-  printf("%s\n", t->source_str);
-#endif
-  tokenizer_advance_t(t);
   return t;
 }
 
-void tokenizer_free(tokenizer_t* t) {
-  free(t->source_str);
-  t->source_str = NULL;
+void tokenizer3_free(tokenizer3_t* t) {
+  free(t->source_code);
+  t->source_code = NULL;
 }
 
-int tokenizer_expect_t(tokenizer_t* t, token_type_t type) {
-  return t->current.type == type;
-}
-
-void tokenizer_consume_whitespace(tokenizer_t* t) {
-  if (*t->cursor == '\n') {
+void tokenizer3_consume_whitespace(tokenizer3_t* t) {
+  while (*t->cursor == '\n') {
     t->cursor++;
     t->line++;
     t->col = 0;
-    t->current = (token_t) {.type = T_NL, LOC_FIELD(t, 1) };
   }
   while (*t->cursor == ' ' || *t->cursor == '\t') {
     t->cursor++;
   }
-  if (strncmp(t->cursor, "//", 2) == 0) {
-    while (*(t->cursor + 1) != '\n') {
-      t->cursor++;
-    }
-  }
 }
 
-void tokenizer_advance_t(tokenizer_t* t) {
-  t->prev = t->current;
-  tokenizer_consume_whitespace(t);
-  // if (*t->cursor == '\n') {
-  //   t->cursor++;
-  //   t->line++;
-  //   t->col = 0;
-  //   t->current = (token_t) {.type = T_NL, LOC_FIELD(t, 1) };
-  //   return;
-  // }
+void tokenizer3_advance(tokenizer3_t* t) {
+  // ensure any whitespace is skipped
+  tokenizer3_consume_whitespace(t);
+
+  // 1. Shift the history array left (discard the leftmost)
+  for (int i = 1; i < 5; i++) {
+    t->history[i - 1] = t->history[i];
+  }
+
+  // 2. Replace the last element with the next token
   TOK_CHECK_STR("fn", 2, T_FN)
   TOK_CHECK_STR("if", 2, T_IF)
   TOK_CHECK_STR("for", 3, T_FOR)
@@ -172,92 +98,75 @@ void tokenizer_advance_t(tokenizer_t* t) {
   TOK_CHECK_CH('\\', T_BACKSLASH)
   TOK_CHECK_EOF(t)
   if (isdigit(*t->cursor)) {
-    int digit_len = 0;
-    int value = tokenizer_process_digit(t, &digit_len);
-    t->current = (token_t) {.type = T_NUM, LOC_FIELD(t, digit_len)}; 
-    t->cursor += digit_len;
-    t->col += digit_len;
-    t->current.value.i = value;
+    number_t number = tokenizer3_as_number(t);
+    t->history[4] = (token_t) {.type = T_NUM, LOC_FIELD(t, number.length)};
+    t->cursor += number.length;
+    t->col += number.length;
     return;
   }
   if (*t->cursor == '_' || isalpha(*t->cursor) || isdigit(*t->cursor)) {
-    int length = 0;
-    tokenizer_process_id(t, &length);
-    t->current = (token_t) {.type = T_ID, LOC_FIELD(t, length)};
-    strncpy(t->current.value.s, t->cursor, length);
-    t->cursor += length;
-    t->col += length;
+    identifier_t id = tokenizer3_as_id(t);
+    t->history[4] = (token_t) {.type = T_ID, LOC_FIELD(t, id.length)};
+    t->cursor += id.length;
+    t->col += id.length;
     return;
   }
-  t->current = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
+  t->history[4] = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
   t->cursor += 1;
   t->col += 1;
-  // printf("missed everything\n");
 }
 
-void tokenizer_rewind_t(tokenizer_t* t) {
-  t->cursor -= t->current.loc.length;
-  t->col -= t->current.loc.length;
-  t->cursor -= t->prev.loc.length;
-  t->col -= t->prev.loc.length;
-  t->current = t->prev;
-  while (*t->cursor == ' ')
-    t->cursor--;
-  tokenizer_advance_t(t);
-}
-
-token_t tokenizer_get_t(tokenizer_t* t) {
-  return t->current;
-}
-
-void tokenizer_show_next_t(tokenizer_t* t) {
-  token_t token = tokenizer_get_t(t);
-  printf("(%d, %s)   ", token.type, token_type_stringify(token.type));
-  switch (token.type) {
-  case T_ID:
-  case T_NUM: printf("%.*s", token.loc.length, t->source_str + token.loc.begin_index); break;
-  default:    printf("..."); break;
+token_t tokenizer3_get(tokenizer3_t* t, int offset) {
+  int index = offset;
+  if (index > 4 || index < 0) {
+    fprintf(stderr, "Out of bounds offset\n");
+    return (token_t) {};
   }
+  return t->history[index];
 }
 
-// processing
-int tokenizer_process_digit(tokenizer_t* tokenizer, int* digit_length) {
-  int value = 0, digits = 0;
-  char* temp_curs = tokenizer->cursor;
-  while (isdigit(*temp_curs) != 0) {
-    value += ((*temp_curs) - '0') * pow(10, digits);
-    digits++;
-    temp_curs++;
+int tokenizer3_expect_offset(tokenizer3_t* t, int offset, token_type_t type) {
+  int index = offset;
+  if (index > 4 || index < 0) {
+    fprintf(stderr, "Out of bounds offset\n");
+    return 0;
   }
-
-  //reverse value
-  int reversed = 0;
-  while (value > 0) {
-    reversed = reversed * 10 + value % 10;
-    value /= 10;
-  }
-  *digit_length = digits;
-  return reversed;
+  return t->history[index].type == type;
 }
 
-void tokenizer_process_id(tokenizer_t* tokenizer, int* id_length) {
-  int length = 0;
-  char* temp_curs = tokenizer->cursor;
+number_t tokenizer3_as_number(tokenizer3_t* t) {
+  number_t number = {0};
+  int digit_count = 0;
+  char* temp_cursor = t->cursor;
+  while (isdigit(*temp_cursor) != 0) {
+    number.value.i += ((*temp_cursor) - '0') * pow(10, digit_count);
+    digit_count++;
+    temp_cursor++;
+  }
+  number.type = 1;
+  number.length = digit_count;
+  return number;
+}
+
+identifier_t tokenizer3_as_id(tokenizer3_t* t) {
+  identifier_t id = {0};
+  id.begin = t->cursor;
+  char* temp_curs = t->cursor;
   while (*temp_curs == '_' || isalpha(*temp_curs) != 0 || isdigit(*temp_curs)) {
     temp_curs++;
-    length++;
+    id.length++;
   }
-  *id_length = length;
+  id.end = id.begin + id.length;
+  return id;
 }
 
-void token_print(token_t t, tokenizer_t* tokenizer) {
-  /*#define PRINT_TOKEN(type_s, t) \
-    printf("%10s,  begin: %3d, len: %3d, line: %3d, col: %3d, text: %.*s", type_s, t.loc.begin_index, t.loc.length, t.loc.line, t.loc.column, t.loc.length, tokenizer->source_str + t.loc.begin_index);
-    */
+void tokenizer3_token_print(token_t t, tokenizer3_t* tokenizer) {
 #define PRINT_TOKEN(type_s, t) \
-    printf("{%7s, %.*s}\n", type_s, t.loc.length, tokenizer->source_str + t.loc.begin_index);
+    printf("{%10s, %.*s }\n", type_s, t.loc.length, tokenizer->source_code + t.loc.begin_index);
+  printf("Token (%3d) ", t.type);
+
   switch (t.type) {
-    case T_NL:      /*PRINT_TOKEN("NL", t);*/                 break;
+    case T_NL:            PRINT_TOKEN("NL", t);               break;
     case T_SPC:           PRINT_TOKEN("SPC", t);              break;
     case T_TAB:           PRINT_TOKEN("TAB", t);              break;
     case T_FN:            PRINT_TOKEN("FN", t);               break;
@@ -275,6 +184,8 @@ void token_print(token_t t, tokenizer_t* tokenizer) {
     case T_SEMICOLON:     PRINT_TOKEN("SEMICOLON", t);        break;
     case T_COMMA:         PRINT_TOKEN("COMMA", t);            break;
     case T_ARROW:         PRINT_TOKEN("ARROW", t);            break;
+    case T_USE:           PRINT_TOKEN("USE", t);              break;
+    case T_RETURN:        PRINT_TOKEN("RETURN", t);           break;
     case T_INT:           PRINT_TOKEN("INT", t);              break;
     case T_CHR:           PRINT_TOKEN("CHR", t);              break;
     case T_SHT:           PRINT_TOKEN("SHT", t);              break;

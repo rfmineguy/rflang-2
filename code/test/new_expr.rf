@@ -2,17 +2,15 @@ use io
 use string
 
 fn add(a: int, b: int): int {
-  return a + b;
+  sum: int = a + b;
+  return sum;
 }
 fn pow(base: int, exp: int): int {
   return 1;
 }
 fn main(argc: int, argv: char**): int {
-  if argc != 0 && argv {
-    a: int = 0;
-  };
-  a: int = 4 + 3 * (x - 4);
-  a = (4 - 1) * 5;
+  affa: int = 4 + 3 * (x - 4);
+  affa = (4 - 1) * 5;
   return x + 3 < 4 && a > 3;
 }
 fn func(a: int): bool {
