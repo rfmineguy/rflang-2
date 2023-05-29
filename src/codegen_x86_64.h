@@ -1,6 +1,6 @@
 #ifndef CODEGEN_x86_64_H
 #define CODEGEN_x86_64_H
-#include "parser2.h"
+#include "parsers/parser2.h"
 
 typedef struct {
   int scope_depth;

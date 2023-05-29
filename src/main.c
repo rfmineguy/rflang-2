@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <unistd.h>       //getcwd
-#include "parser2.h"
+#include "parsers/parser2.h"
 #include "tokenizer3.h"
 #include "analysis.h"
 #include "argparse.h"
@@ -136,7 +136,7 @@ int test_new_tokenizer() {
   printf("Testing tokenizer3\n");
   tokenizer3_t t = tokenizer3_new(f);
   
-  while (tokenizer3_get(&t, 0).type != T_EOF) {
+  while (tokenizer3_get(&t, 2).type != T_EOF) {
     tokenizer3_advance(&t);
     printf("========================\n");
     tokenizer3_token_print(t.history[0], &t);

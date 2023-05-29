@@ -64,7 +64,7 @@ add_executable(rfc
   ${SOURCES})
 
 target_link_libraries(rfc PRIVATE argparse m)
-target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR})
+target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR} src/)
 
 # cd buid; sudo make install
 install(TARGETS rfc)

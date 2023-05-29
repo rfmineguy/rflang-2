@@ -8,17 +8,24 @@
 //assume file is open
 tokenizer3_t tokenizer3_new(FILE* f) {
   tokenizer3_t t = {0};
+  if (!f) {
+    fprintf(stderr, "Problem with file argument\n");
+    return t;
+  }
 
+  // get length of the file
   fseek(f, 0, SEEK_END);
   t.source_length = ftell(f);
   fseek(f, 0, SEEK_SET);
 
+  // setup initial values of tokenizer
   t.source_code = malloc(sizeof(char) * t.source_length);
   fread(t.source_code, sizeof(char), t.source_length, f);
   t.cursor = t.source_code;
 
-  for (int i = 0; i < 5; i++) {
-    t.history[i].type = T_INVALID;
+  // make sure the history buffer starts off half full, so our center is at index 2
+  for (int i = 0; i < 2; i++) {
+    tokenizer3_advance(&t);
   }
   return t;
 }
@@ -166,6 +173,7 @@ void tokenizer3_token_print(token_t t, tokenizer3_t* tokenizer) {
   printf("Token (%3d) ", t.type);
 
   switch (t.type) {
+    case T_UNKNOWN:       PRINT_TOKEN("UNKNOWN", t);          break;
     case T_NL:            PRINT_TOKEN("NL", t);               break;
     case T_SPC:           PRINT_TOKEN("SPC", t);              break;
     case T_TAB:           PRINT_TOKEN("TAB", t);              break;
