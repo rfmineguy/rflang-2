@@ -5,22 +5,26 @@ fn add(a: int*, b: int): int {
   sum: int = a + b;
   return sum;
 };
+
 fn pow(base: int, exp: int): int {
   result: int = 1;
   return 1;
 };
+
 fn main(argc: int, argv: char**): int {
   affa: int = 4 + 3 * (x - 4);
   affa = (4 - 1) * 5;
   return x + 3 < 4 && a > 3;
 };
+
 fn func(a: int, b: bool): bool {
   if a == 3 {
     a = 6;
   };
-  a = pow(3, 2 + 2) - add(3, sub(5, pow(2, 3)));
+  a = pow(3, 2 + 2) - add(3, sub(5, pow(a, 3)));
   while a < 10 {
     a = a - 1;
   };
+  b = 4;
   return 1;
 };

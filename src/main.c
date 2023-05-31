@@ -8,6 +8,8 @@
 #include "tokenizer3.h"
 #include "analysis.h"
 #include "argparse.h"
+#include "args.h"
+#include "compile.h"
 // #include "codegen.h"
 
 #if defined(__linux__) // any linux distribution
@@ -26,10 +28,9 @@ static const char *const usages[] = {
     NULL,
 };
 
+/*
 typedef struct {
-  char cwd[PATH_MAX];  //current working directory
-  char input_file_path[PATH_MAX];
-  char output_file_path[PATH_MAX];
+  
 } compilation_info;
 
 typedef struct {
@@ -124,6 +125,7 @@ int compile(args* a) {
   fclose(output_file);
   return 0;
 }
+*/
 
 int test_new_tokenizer() {
   const char* file = "code/test/new_expr.rf";
@@ -152,6 +154,7 @@ int test_new_tokenizer() {
 
 // https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
+  /*
   args a = {0};
   /// ================================================================================================
   struct argparse_option options[] = {
@@ -190,4 +193,26 @@ int main(int argc, const char** argv) {
     return compile(&a);
   }
   /// ================================================================================================
+  */
+  arg_handle_result_t r = args_handle(argc, argv);
+  if (!(r.errors |= ERR_NO_IN_FILE)) {
+    fprintf(stderr, "ERROR: No input source file supplied. Try -f\n");
+  }
+  if (!(r.errors |= ERR_NO_OUT_FILE)) {
+    fprintf(stderr, "ERROR: No output filepath supplied. Try -o\n");
+  }
+  if (!(r.errors |= ERR_NO_PLATFORM)) {
+    fprintf(stderr, "ERROR: No platform supplied. Try -p. See -l for list\n");
+  }
+  if (r.args.test) {
+    return test_new_tokenizer();
+  }
+  if (r.args.list_comp_platforms) {
+    printf("Platforms:\n");
+    printf(" - x86_32-linux\n");
+    printf(" - x86_64-linux\n");
+    printf(" - arm64\n");
+    return 420;
+  }
+  return compile(r.args);
 }
