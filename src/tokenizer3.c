@@ -85,6 +85,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
   TOK_CHECK_STR("double", 6, T_DBL)
   TOK_CHECK_STR("float", 5, T_FLT)
   TOK_CHECK_STR("bool", 4, T_BOOL)
+  TOK_CHECK_STR("void", 4, T_VOID)
   TOK_CHECK_STR("use", 3, T_USE)
   TOK_CHECK_STR("return", 6, T_RETURN)
   TOK_CHECK_STR("->", 2, T_ARROW)

@@ -53,7 +53,6 @@ int test_new_tokenizer() {
   fclose(f);
 }
 
-// https://github.com/cofyc/argparse/blob/master/tests/basic.c
 int main(int argc, const char** argv) {
   arg_handle_result_t r = args_handle(argc, argv);
   if (!(r.errors |= ERR_NO_IN_FILE)) {

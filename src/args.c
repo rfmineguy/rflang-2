@@ -8,6 +8,7 @@ static const char *const usages[] = {
     NULL,
 };
 
+// https://github.com/cofyc/argparse/blob/master/tests/basic.c
 arg_handle_result_t args_handle(int argc, const char** argv) {
   arg_handle_result_t r = {0};
 

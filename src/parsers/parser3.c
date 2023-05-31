@@ -14,7 +14,7 @@ int is_operator(token_type_t type) {
 }
 
 int is_type_token(token_type_t type) {
-  return type == T_INT || type == T_SHT || type == T_CHR || type == T_DBL || type == T_FLT || type == T_BOOL;
+  return type == T_INT || type == T_SHT || type == T_CHR || type == T_DBL || type == T_FLT || type == T_BOOL || type == T_VOID;
 }
 
 int get_precedence(token_type_t type) {
@@ -45,6 +45,10 @@ program_t* parse_program(tokenizer3_t* t) {
 
   tokenizer3_advance(t);
 
+  if (tokenizer3_expect_offset(t, 2, T_ID)) {
+    fprintf(stderr, "Program starting with ID is invalid\n");
+    exit(1);
+  }
   // Expect use statements second (use statements are only allowed at the start)
   while (tokenizer3_get(t, 2).type == T_USE) {
     use_t* use = parse_use(t);
@@ -205,7 +209,8 @@ func_t* parse_func(tokenizer3_t* t) {
     tokenizer3_advance(t);
   }
   else {
-    f->has_return_type = 0;
+    f->has_return_type = 1;
+    f->return_type = T_VOID;
   }
   f->block = parse_block(t);
 

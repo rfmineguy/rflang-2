@@ -23,6 +23,18 @@ chaining_ht_t chaining_ht_alloc(int max_size) {
 
 void chaining_ht_free(chaining_ht_t ht) {
   //TODO: Free the linked lists then free the main buffer
+  for (int i = 0; i < ht.M; i++) {
+    // free ht.buffer[i];
+    chaining_node_t* e = ht.buffer[i];
+    while (e != NULL) {
+      chaining_node_t* t = e;
+      e = e->next;
+      free(t);
+      t = NULL;
+    }
+  }
+  free(ht.buffer);
+  ht.buffer = NULL;
 }
 
 int chaining_ht_hash(chaining_ht_t ht, char* key) {

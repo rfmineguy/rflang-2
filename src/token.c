@@ -31,6 +31,7 @@ const char* token_type_stringify(token_type_t t) {
     case T_DBL:         return "DBL";
     case T_FLT:         return "FLT";
     case T_BOOL:        return "BOOL";
+    case T_VOID:        return "VOID";
     case T_GT:          return "GT";
     case T_LT:          return "LT";
     case T_DQT:         return "DQT";

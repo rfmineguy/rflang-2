@@ -18,7 +18,7 @@ typedef enum {
   T_ARROW = 80, T_USE, T_RETURN,
   
   // Types
-  T_INT = 90, T_SHT, T_CHR, T_DBL, T_FLT, T_BOOL,
+  T_INT = 90, T_SHT, T_CHR, T_DBL, T_FLT, T_BOOL, T_VOID,
 
   // Comparison
   T_DEQ = 100, T_LTEQ, T_GTEQ, T_NEQ,

@@ -43,6 +43,7 @@ comp_info_t get_comp_info(args_t args) {
 }
 
 int compile(args_t args) {
+  printf(" ====== Compiling ======\n");
   comp_info_t info = get_comp_info(args);
   printf("CWD: %s\n", info.cwd);
   printf("OutFile: %s\n", info.output_file_path);

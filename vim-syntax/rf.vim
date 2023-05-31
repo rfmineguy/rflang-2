@@ -8,7 +8,8 @@ if exists("b:current_syntax")
 endif
 
 " Keywords
-syn keyword KeywordTypes int char short double float bool 
+syn keyword KeywordDataTypes int char short double float bool 
+syn keyword KeywordVoid void
 syn keyword KeywordFlow for if while return
 syn keyword LanguageConstructs asm fn 
 syn keyword Preproc use
@@ -23,7 +24,8 @@ syn match bNumber "\<[0-9]\+>"
 syn case match
 
 " Highlighting
-hi def link KeywordTypes Type
+hi def link KeywordDataTypes Type
+hi def link KeywordVoid Type
 hi def link KeywordFlow Repeat
 hi def link LanguageConstructs Statement
 hi def link bNumber Number

@@ -1,7 +1,7 @@
 use io
 use string
 
-fn add(a: int*, b: int): int {
+fn add(a: int*, b: int): void {
   sum: int = a + b;
   return sum;
 };
@@ -21,8 +21,14 @@ fn func(a: int, b: bool): bool {
   if a == 3 {
     a = 6;
   };
-  a = pow(3, 2 + 2) - add(3, sub(5, pow(a, 3)));
-  while a < 10 {
+  a = add(3, sub(5, 3));
+  if pow(3, 3) < 3 - 4 {
+  };
+  if pow(3, 3) < 3 - 4 + calc(4, 5) {
+  };
+  if adf(3, 3) < 3 {
+  };
+  while a(3 + 3,) < 10 - 4 {
     a = a - 1;
   };
   b = 4;

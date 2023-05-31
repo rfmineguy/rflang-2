@@ -430,7 +430,7 @@ void show_statement(statement_t* stmt, int level) {
     return;
   }
   if (stmt->iff) {
-    show_iff(stmt->iff, level + 2); 
+    show_iff(stmt->iff, level + 1); 
   }
   else if (stmt->whle) {
     show_while(stmt->whle, level + 1);
