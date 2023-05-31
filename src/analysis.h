@@ -1,6 +1,6 @@
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
-#include "parsers/parser2.h"
+#include "parsers/parser3.h"
 #include "chaining_ht.h"
 
 /* NOTES:

@@ -332,6 +332,9 @@ void show_arg_list(arg_list_t* arg_list, int level) {
     tabs(level+1); printf("NULL\n");
     return;
   }
+  if (arg_list->arg_count == 0) {
+    tabs(level + 1); printf("Empty\n");
+  }
   for (int i = 0; i < arg_list->arg_count; i++) {
     show_expression(arg_list->args[i], level + 1);
   }

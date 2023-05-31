@@ -101,6 +101,7 @@ struct expression_t {
     token_type_t operation;
     int i;
     char s[30];
+    func_call_t* func_call;
   } value;
   expression_t *left, *right; // ?
 };

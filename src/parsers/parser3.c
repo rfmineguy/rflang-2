@@ -203,8 +203,17 @@ func_t* parse_func(tokenizer3_t* t) {
 
 //TODO
 func_call_t* parse_func_call(tokenizer3_t* t) {
+  printf("=> Parsing func_call\n");
   func_call_t* func_call = calloc(1, sizeof(func_call_t));
+  if (!tokenizer3_expect_offset(t, 2, T_ID)) {
+    fprintf(stderr, "<%s>: %d, Expected ID, got something else\n", __FUNCTION__, __LINE__);
+    exit(1);
+  }
+  strncpy(func_call->name, t->source_code + tokenizer3_get(t, 2).loc.begin_index, tokenizer3_get(t, 2).loc.length);
+  tokenizer3_advance(t);
 
+  func_call->args = parse_arg_list(t);
+  printf("=> Parsed func_call\n");
   return func_call;
 }
 
@@ -212,7 +221,7 @@ assign_t* parse_var_assign(tokenizer3_t* t) {
   assign_t* a = calloc(1, sizeof(assign_t));
   a->type |= ASSIGN_LHS_VAR;
   a->left_hand_side.var = parse_var(t);
- if (!tokenizer3_expect_offset(t, 2, T_EQ)) {
+  if (!tokenizer3_expect_offset(t, 2, T_EQ)) {
     fprintf(stderr, "<%s>: %d, Expected LP, got something else\n", __FUNCTION__, __LINE__);
     exit(1);
   }
@@ -293,9 +302,37 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
   return p;
 }
 
-// TODO
 arg_list_t* parse_arg_list(tokenizer3_t* t) {
-  return NULL;
+  printf("=> Parsing arg_list\n");
+  arg_list_t* args = calloc(1, sizeof(arg_list_t));
+  args->args = calloc(10, sizeof(expression_t));
+  if (!tokenizer3_expect_offset(t, 2, T_LP)) {
+     fprintf(stderr, "<%s>: %d, Expected LP, got something else\n", __FUNCTION__, __LINE__);
+     exit(1);
+  }
+  tokenizer3_advance(t);
+  tokenizer3_show_token_offset(t, 2);
+  while (tokenizer3_get(t, 2).type != T_RP) {
+    expression_t* e = parse_expression(t);
+    args->args[args->arg_count++] = e;
+    if (tokenizer3_expect_offset(t, 2, T_COMMA)) {
+      tokenizer3_advance(t);
+      continue;
+    }
+    else if (tokenizer3_expect_offset(t, 2, T_RP)) {
+      tokenizer3_advance(t);
+      break;
+    } 
+    else {
+      fprintf(stderr, "<%s>: %d, Expected COMMA, got something else\n", __FUNCTION__, __LINE__);
+      exit(1);
+    }
+  }
+  // tokenizer3_advance(t);
+  printf("parse_arg_list: ");
+  tokenizer3_show_token_offset(t, 2);
+  printf("=> Parsed arg_list\n");
+  return args;
 }
 
 statement_t* parse_statement(tokenizer3_t* t) {
@@ -308,7 +345,9 @@ statement_t* parse_statement(tokenizer3_t* t) {
       s->assign = parse_id_assign(t);
     }
     else if (tokenizer3_expect_offset(t, 3, T_LP)) {
-      assert(0 && "Function calls unsupported right now");
+      s->func_call = parse_func_call(t);
+      // assert(0 && "Function calls unsupported right now");
+
       // func call
     }
   }
@@ -332,6 +371,12 @@ statement_t* parse_statement(tokenizer3_t* t) {
   }
   else {
     // something REALLY unexpected
+  }
+  printf("parse_statement: ");
+  tokenizer3_show_token_offset(t, 2);
+  if (!tokenizer3_expect_offset(t, 2, T_SEMICOLON)) {
+    fprintf(stderr, "<%s>: %d, Expected SEMICOLON, got something else %d\n", __FUNCTION__, __LINE__, tokenizer3_get(t, 2).type);
+    exit(1);
   }
   return s;
 }
@@ -387,12 +432,15 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len) {
 }
 
 expression_t* parse_expression(tokenizer3_t* t) {
+  printf("Parsing expression\n");
   // convert entire expression to postfix
   token_t postfix[100] = {0};
   int postfix_len = 0;
   
   get_postfix_rep(t, postfix, &postfix_len);
-  return parse_expression_postfix(postfix, postfix_len);
+  expression_t* e = parse_expression_postfix(postfix, postfix_len); 
+  printf("Parsed expression\n");
+  return e;
 }
 
 void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length) {
@@ -401,7 +449,8 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
   int top = -1;
   
   while (1) {
-    int is_id_or_num      = tokenizer3_expect_offset(t, 2, T_ID) || tokenizer3_expect_offset(t, 2, T_NUM);
+    int is_id             = tokenizer3_expect_offset(t, 2, T_ID);
+    int is_id_or_num      = is_id                                  || tokenizer3_expect_offset(t, 2, T_NUM);
     int is_math_operator  = tokenizer3_expect_offset(t, 2, T_PLUS) || tokenizer3_expect_offset(t, 2, T_MINUS) || tokenizer3_expect_offset(t, 2, T_MUL) || tokenizer3_expect_offset(t, 2, T_DIV) || tokenizer3_expect_offset(t, 2, T_MOD);
     int is_comp_operator  = 
       tokenizer3_expect_offset(t, 2, T_GT) || tokenizer3_expect_offset(t, 2, T_GTEQ) || tokenizer3_expect_offset(t, 2, T_LT) || tokenizer3_expect_offset(t, 2, T_LTEQ) || tokenizer3_expect_offset(t, 2, T_NEQ) || tokenizer3_expect_offset(t, 2, T_DEQ);

@@ -6,7 +6,7 @@
 #include <unistd.h>       //getcwd
 #include "parsers/parser3.h"
 #include "tokenizer3.h"
-// #include "analysis.h"
+#include "analysis.h"
 #include "argparse.h"
 // #include "codegen.h"
 
@@ -101,7 +101,7 @@ int compile(args* a) {
   show_program(prog, 1);
 
   // Now analyze the program
-  // analyze_program(prog);
+  analyze_program(prog);
 
   // Now codegen the program
   // if (a->comp_platform) {
