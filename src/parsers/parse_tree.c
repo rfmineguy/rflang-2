@@ -115,6 +115,11 @@ void free_arg_list(arg_list_t* arg_list) {
 
 void free_expression(expression_t* expr) {
   if (!expr) return;
+  if (expr->type == EXPR_FUNC_CALL) {
+    free_func_call(expr->value.func_call);
+    free(expr->value.func_call);
+    expr->value.func_call = NULL;
+  }
   free_expression(expr->left);
   free(expr->left);
   free_expression(expr->right);

@@ -309,7 +309,6 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
       continue;
     }
     else if (tokenizer3_expect_offset(t, 2, T_RP)) {
-      // tokenizer3_advance(t);
       break;
     }
     else {
