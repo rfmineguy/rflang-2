@@ -3,6 +3,7 @@
 
 // token_type_t
 typedef enum {
+  T_EXPR_FUNC_END = -3,
   T_INVALID = -2,
   T_UNKNOWN = -1,
   T_NL = 0, T_SPC, T_TAB,

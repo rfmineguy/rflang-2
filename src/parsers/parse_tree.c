@@ -371,6 +371,11 @@ void show_expression(expression_t* expr, int level) {
       printf("Value {str: %s}\n", expr->value.s); 
       break;
     }
+    case EXPR_FUNC_CALL: {
+       printf("\n");
+       show_func_call(expr->value.func_call, level + 2);
+       break;
+    }
     case EXPR_COMPOUND: {
       // tabs(level + 1);
       switch (expr->value.operation) {

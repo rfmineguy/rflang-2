@@ -25,7 +25,7 @@ typedef enum {
   X86_32_LINUX_ASM = 142, X86_64_LINUX_ASM, ARM64_ASM  // the order here needs to match the order of the normal token_type_t enum
 } asm_type_t;
 typedef enum {
-  EXPR_NUM = 0, EXPR_STRING, EXPR_COMPOUND
+  EXPR_NUM = 0, EXPR_STRING, EXPR_FUNC_CALL, EXPR_COMPOUND
 } expr_type_t;
 typedef enum {
   ASSIGN_LHS_VAR     = 1,

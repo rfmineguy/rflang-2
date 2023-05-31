@@ -19,8 +19,9 @@ tokenizer3_t tokenizer3_new(FILE* f) {
   fseek(f, 0, SEEK_SET);
 
   // setup initial values of tokenizer
-  t.source_code = malloc(sizeof(char) * t.source_length);
+  t.source_code = malloc(sizeof(char) * t.source_length + 1);
   fread(t.source_code, sizeof(char), t.source_length, f);
+  t.source_code[t.source_length] = 0;
   t.cursor = t.source_code;
 
   // make sure the history buffer starts off half full, so our center is at index 2
@@ -47,6 +48,20 @@ void tokenizer3_consume_whitespace(tokenizer3_t* t) {
 }
 
 void tokenizer3_advance(tokenizer3_t* t) {
+  // when we are in this case, we can't let the tokenizer try to analyze anymore
+  // just continually shift the history array until empty at this point
+  if (t->cursor > t->source_code + t->source_length) {
+    printf("Buffer overflow\n");
+    printf("t->cursor : %p\n", t->cursor);
+    printf("t->source_code + t->source_length : %p\n", t->source_code + t->source_length);
+    fprintf(stderr, "Something went wrong\n");
+    for (int i = 1; i < 5; i++) {
+      t->history[i - 1] = t->history[i];
+      t->history[i].type = T_EOF;
+    }
+    return;
+  }
+
   // ensure any whitespace is skipped
   tokenizer3_consume_whitespace(t);
 
@@ -169,16 +184,82 @@ identifier_t tokenizer3_as_id(tokenizer3_t* t) {
   return id;
 }
 
+void tokenizer3_show_history(tokenizer3_t* t) {
+  for (int i = 0; i < 5; i++) {
+    tokenizer3_token_print(t->history[i], t);
+  }
+}
+
 void tokenizer3_show_token_offset(tokenizer3_t* t, int offset) {
   tokenizer3_token_print(t->history[offset], t);
 }
 
+const char*  tokenizer3_get_token_offset_as_string(tokenizer3_t* t, int offset) {
+  switch(t->history[offset].type) {
+    case T_EXPR_FUNC_END: return "EXPR_FUNC_END";    break;
+    case T_UNKNOWN:       return "UNKNOWN";          break;
+    case T_NL:            return "NL";               break;
+    case T_SPC:           return "SPC";              break;
+    case T_TAB:           return "TAB";              break;
+    case T_FN:            return "FN";               break;
+    case T_IF:            return "IF";               break;
+    case T_FOR:           return "FOR";              break;
+    case T_WHILE:         return "WHILE";            break;
+    case T_ASM:           return "ASM";              break;
+    case T_RB:            return "RB";               break;
+    case T_LB:            return "LB";               break;
+    case T_RP:            return "RP";               break;
+    case T_LP:            return "LP";               break;
+    case T_EQ:            return "EQ";               break;
+    case T_NOT:           return "NOT";              break;
+    case T_COLON:         return "COLON";            break;
+    case T_SEMICOLON:     return "SEMICOLON";        break;
+    case T_COMMA:         return "COMMA";            break;
+    case T_ARROW:         return "ARROW";            break;
+    case T_USE:           return "USE";              break;
+    case T_RETURN:        return "RETURN";           break;
+    case T_INT:           return "INT";              break;
+    case T_CHR:           return "CHR";              break;
+    case T_SHT:           return "SHT";              break;
+    case T_DBL:           return "DBL";              break;
+    case T_FLT:           return "FLT";              break;
+    case T_BOOL:          return "BOOL";             break;
+    case T_DEQ:           return "DEQ";              break;
+    case T_LTEQ:          return "LTEQ";             break;
+    case T_GTEQ:          return "GTEQ";             break;
+    case T_NEQ:           return "NEQ";              break;
+    case T_GT:            return "GT";               break;
+    case T_LT:            return "LT";               break;
+    case T_DOR:           return "DOR";              break;
+    case T_DAND:          return "DAND";             break;
+    case T_OR:            return "OR";               break;
+    case T_AND:           return "AND";              break;
+    case T_SQT:           return "SQT";              break;
+    case T_DQT:           return "DQT";              break;
+    case T_BACKSLASH:     return "BACKSLASH";        break;
+    case T_PLUS:          return "PLUS";             break;
+    case T_MINUS:         return "MINUS";            break;
+    case T_MUL:           return "MUL";              break;
+    case T_DIV:           return "DIV";              break;
+    case T_MOD:           return "MOD";              break;
+    case T_NUM:           return "NUM";              break;
+    case T_ID:            return "ID";               break;
+    case T_X86_32_LINUX:  return "X86_32_ASM_LINUX"; break;
+    case T_X86_64_LINUX:  return "X86_64_ASM_LINUX"; break;
+    case T_ARM64:         return "ARM64_ASM";        break;
+    case T_EOF:           return "EOF";              break;
+    default:              return "unimplemented token\n"; break;
+
+  }
+}
+
 void tokenizer3_token_print(token_t t, tokenizer3_t* tokenizer) {
 #define PRINT_TOKEN(type_s, t) \
-    printf("{%10s, %.*s }\n", type_s, t.loc.length, tokenizer->source_code + t.loc.begin_index);
+    printf("{%14s, %.*s }\n", type_s, t.loc.length, tokenizer->source_code + t.loc.begin_index);
   printf("Token (%3d) ", t.type);
 
   switch (t.type) {
+    case T_EXPR_FUNC_END: PRINT_TOKEN("EXPR_FUNC_END", t);    break;
     case T_UNKNOWN:       PRINT_TOKEN("UNKNOWN", t);          break;
     case T_NL:            PRINT_TOKEN("NL", t);               break;
     case T_SPC:           PRINT_TOKEN("SPC", t);              break;

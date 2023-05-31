@@ -28,7 +28,7 @@
   }
 
 #define TOK_CHECK_EOF(tok) \
-  if (t->cursor == t->source_code + t->source_length) {\
+  if (t->cursor >= t->source_code + t->source_length) {\
     t->history[4] = (token_t) {.type = T_EOF, LOC_FIELD(t, 1) };\
     t->cursor++;\
     t->col++;\
@@ -72,7 +72,9 @@ identifier_t tokenizer3_as_id(tokenizer3_t*);
 
 void         tokenizer3_consume_whitespace(tokenizer3_t*);
 
+void         tokenizer3_show_history(tokenizer3_t*);
 void         tokenizer3_show_token_offset(tokenizer3_t*, int);
+const char*  tokenizer3_get_token_offset_as_string(tokenizer3_t*, int);
 void         tokenizer3_token_print(token_t, tokenizer3_t*);
 
 #endif

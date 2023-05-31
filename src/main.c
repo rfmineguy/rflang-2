@@ -95,7 +95,7 @@ int compile(args* a) {
   FILE* output_file = openf(info.output_file_path, "w");
 
   tokenizer3_t t = tokenizer3_new(input_file);
-  printf("%s\n", t.source_code);
+  // printf("%s\n", t.source_code);
 
   program_t* prog = parse(&t);
   show_program(prog, 1);

@@ -53,12 +53,22 @@ program_t* parse_program(tokenizer3_t* t) {
 
   // Expect functions
   while (tokenizer3_get(t, 2).type == T_FN) {
-    printf("Func\n");
-    // tokenizer3_advance(t);
     func_t* func = parse_func(t);
     p->func_list[p->func_list_count++] = func;
+    printf("History: \n");
+    tokenizer3_show_history(t);
+    tokenizer3_show_token_offset(t, 2);
+    if (!tokenizer3_expect_offset(t, 2, T_SEMICOLON)) {
+      fprintf(stderr, "Semicolon expected at end of function\n");
+      exit(1);
+    }
+    tokenizer3_advance(t);
+    // if (tokenizer3_get(t, 2).type == T_EOF) {
+    //   break;
+    // }
   }
 
+  // tokenizer3_show_history(t);
   return p;
 }
 
@@ -79,7 +89,7 @@ block_t* parse_block(tokenizer3_t* t) {
   const int MAX_STATEMENTS = 10;
   block_t* b = calloc(1, sizeof(block_t));
   if (!tokenizer3_expect_offset(t, 2, T_LB)) {
-     fprintf(stderr, "<%s>: %d, Expected LB, got something else\n", __FUNCTION__, __LINE__);
+     fprintf(stderr, "<%s>: %d, Expected LB, got something else => %s\n", __FUNCTION__, __LINE__, tokenizer3_get_token_offset_as_string(t, 2));
      exit(1);
   }
   b->statements = calloc(MAX_STATEMENTS, sizeof(statement_t)); //NOTE: This is VERY inflexible. Maybe use a linked list here?
@@ -90,6 +100,7 @@ block_t* parse_block(tokenizer3_t* t) {
        b->statements[b->statement_count++] = s;
     }
     tokenizer3_advance(t);
+    printf("block: "); tokenizer3_show_token_offset(t, 2);
   }
   tokenizer3_advance(t);    //consume last '}'
   printf("=> Parsed block\n");
@@ -175,6 +186,7 @@ func_decl_t* parse_func_decl(tokenizer3_t* t) {
   tokenizer3_advance(t);
 
   decl->params = parse_param_list(t);
+  printf("func_decl -> "); tokenizer3_show_token_offset(t, 2);
 
   printf("=> Parsed func_decl\n");
   return decl;
@@ -298,6 +310,8 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
       exit(1);
     }
   }
+  // tokenizer3_advance(t);
+  tokenizer3_show_token_offset(t, 2);
   printf("=> Parsed param_list\n");
   return p;
 }
@@ -414,6 +428,26 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len) {
       e->value.i = postfix[i].value.i;
       exprs[++top] = e;
     }
+    else if (postfix[i].type == T_EXPR_FUNC_END) {
+      // parse as an expr func
+      func_call_t* func_call = calloc(1, sizeof(func_call_t));
+      func_call->args = calloc(1, sizeof(arg_list_t));
+      func_call->args->args = calloc(10, sizeof(expression_t));
+      while (exprs[top]->type != EXPR_STRING) {
+        printf("top=%d\n",top);
+        show_expression(exprs[top], 0);
+        func_call->args->args[func_call->args->arg_count++] = exprs[top];
+        top--;
+      }
+      if (top < 0)
+        top = 0;
+      // printf("Made it to ID, top=%d\n", top);
+      strncpy(func_call->name, exprs[top]->value.s, 30);
+      e->value.func_call = func_call;
+      top--;
+      e->type = EXPR_FUNC_CALL;
+      exprs[++top] = e;
+    }
     else {
       expression_t* l = exprs[top - 1];
       expression_t* r = exprs[top];
@@ -426,20 +460,22 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len) {
       exprs[++top] = e;
     }
   }
-  // printf("=> Parsed expression\n");
   // show_expression(exprs[0], 0);
   return exprs[0];
 }
 
 expression_t* parse_expression(tokenizer3_t* t) {
-  printf("Parsing expression\n");
+  // printf("Parsing expression\n");
   // convert entire expression to postfix
   token_t postfix[100] = {0};
   int postfix_len = 0;
   
   get_postfix_rep(t, postfix, &postfix_len);
+  // for (int i = 0; i < postfix_len; i++) {
+  //   tokenizer3_token_print(postfix[i], t);
+  // }
   expression_t* e = parse_expression_postfix(postfix, postfix_len); 
-  printf("Parsed expression\n");
+  printf("=> Parsed expression\n");
   return e;
 }
 
@@ -450,6 +486,7 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
   
   while (1) {
     int is_id             = tokenizer3_expect_offset(t, 2, T_ID);
+    int is_comma          = tokenizer3_expect_offset(t, 2, T_COMMA);
     int is_id_or_num      = is_id                                  || tokenizer3_expect_offset(t, 2, T_NUM);
     int is_math_operator  = tokenizer3_expect_offset(t, 2, T_PLUS) || tokenizer3_expect_offset(t, 2, T_MINUS) || tokenizer3_expect_offset(t, 2, T_MUL) || tokenizer3_expect_offset(t, 2, T_DIV) || tokenizer3_expect_offset(t, 2, T_MOD);
     int is_comp_operator  = 
@@ -460,6 +497,9 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
 
     if (is_id_or_num) {
       postfix_out[j++] = tokenizer3_get(t, 2);
+    }
+    else if (is_comma) {
+      stack[++top] = tokenizer3_get(t, 2);
     }
     else if (is_math_operator) {
       while (top > -1 && get_precedence(stack[top].type) >= get_precedence(tokenizer3_get(t, 2).type)) {
@@ -483,8 +523,17 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
       stack[++top] = tokenizer3_get(t, 2);
     }
     else if (is_rparen) {
+      int comma_count = 0;
       while (stack[top].type != T_LP) {
+        if (stack[top].type == T_COMMA) {
+          top--;
+          comma_count++;
+          continue;
+        }
         postfix_out[j++] = stack[top--];
+      }
+      if (comma_count != 0) {
+        postfix_out[j++] = (token_t) { .type = T_EXPR_FUNC_END, .value.s = "@" };
       }
       if (top > -1 && stack[top].type != T_LP) {
         // error
