@@ -1,7 +1,10 @@
 use io
 use string
 
-fn add(a: int*, b: int): void {
+fn f(): void {
+};
+
+fn add(a: int*, b: int) {
   sum: int = a + b;
   return sum;
 };

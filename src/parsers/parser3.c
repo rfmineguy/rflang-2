@@ -182,6 +182,8 @@ var_t* parse_var(tokenizer3_t* t) {
 
 func_decl_t* parse_func_decl(tokenizer3_t* t) {
   func_decl_t* decl = calloc(1, sizeof(func_decl_t));
+  tokenizer3_show_token_offset(t, 2);
+  tokenizer3_show_history(t);
   if (!tokenizer3_expect_offset(t, 2, T_ID)) {
     fprintf(stderr, "<%s>: %d, Expected ID, got something else\n", __FUNCTION__, __LINE__);
     exit(1);
@@ -218,7 +220,6 @@ func_t* parse_func(tokenizer3_t* t) {
   return f;
 }
 
-//TODO
 func_call_t* parse_func_call(tokenizer3_t* t) {
   printf("=> Parsing func_call\n");
   func_call_t* func_call = calloc(1, sizeof(func_call_t));
@@ -299,7 +300,8 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
     exit(1);
   }
   tokenizer3_advance(t);
-  while (tokenizer3_get(t, 2).type != T_RP) {
+  printf("param_list -> "); tokenizer3_show_token_offset(t, 2);
+  while (!tokenizer3_expect_offset(t, 2, T_RP)) {
     var_t* v = parse_var(t);
     p->params[p->params_count++] = v;
     if (tokenizer3_expect_offset(t, 2, T_COMMA)) {
@@ -307,7 +309,7 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
       continue;
     }
     else if (tokenizer3_expect_offset(t, 2, T_RP)) {
-      tokenizer3_advance(t);
+      // tokenizer3_advance(t);
       break;
     }
     else {
@@ -315,7 +317,7 @@ param_list_t* parse_param_list(tokenizer3_t* t) {
       exit(1);
     }
   }
-  // tokenizer3_advance(t);
+  tokenizer3_advance(t);
   tokenizer3_show_token_offset(t, 2);
   printf("=> Parsed param_list\n");
   return p;
