@@ -158,10 +158,10 @@ void free_statement(statement_t* stmt) {
     free(stmt->ret);
     stmt->ret = NULL;
   }
-  if (stmt->func_call) {
-    free_func_call(stmt->func_call);
-    free(stmt->func_call);
-    stmt->func_call = NULL;
+  if (stmt->func_call_expr) {
+    free_expression(stmt->func_call_expr);
+    free(stmt->func_call_expr);
+    stmt->func_call_expr = NULL;
   }
   if (stmt->assign) {
     free_assign(stmt->assign);
@@ -443,8 +443,8 @@ void show_statement(statement_t* stmt, int level) {
   else if (stmt->ret) {
     show_return(stmt->ret, level + 2);
   }
-  else if (stmt->func_call) {
-    show_func_call(stmt->func_call, level + 2);
+  else if (stmt->func_call_expr) {
+    show_expression(stmt->func_call_expr, level + 2);
   }
   else if (stmt->assign) {
     show_assign(stmt->assign, level + 2);

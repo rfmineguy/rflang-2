@@ -83,8 +83,8 @@ int analyze_statement(statement_t* stmt, analyze_context_t* ctx) {
   if (stmt->ret) {
     analyze_return(stmt->ret, ctx);
   }
-  if (stmt->func_call) {
-    analyze_func_call(stmt->func_call, ctx);
+  if (stmt->func_call_expr) {
+    analyze_expression(stmt->func_call_expr, ctx);
   }
   if (stmt->assign) {
     analyze_assign(stmt->assign, ctx);

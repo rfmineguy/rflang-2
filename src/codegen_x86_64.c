@@ -94,6 +94,10 @@ void x86_64_codegen_block(block_t* block, x86_64_codegen_context* ctx) {
   WRITE_CODE("pop rbp\n");
 }
 
+void x86_64_codegen_expression(expression_t* expr, x86_64_codegen_context* ctx) {
+
+}
+
 void x86_64_codegen_statement(statement_t* stmt, x86_64_codegen_context* ctx) {
   if (stmt->iff) {
     x86_64_codegen_if(stmt->iff, ctx);
@@ -103,8 +107,8 @@ void x86_64_codegen_statement(statement_t* stmt, x86_64_codegen_context* ctx) {
     x86_64_codegen_return(stmt->ret, ctx);
     return;
   }
-  if (stmt->func_call) {
-    x86_64_codegen_func_call(stmt->func_call, ctx);
+  if (stmt->func_call_expr) {
+    x86_64_codegen_expression(stmt->func_call_expr, ctx);
     return;
   }
   if (stmt->assign) {

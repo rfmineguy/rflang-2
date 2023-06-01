@@ -70,6 +70,7 @@ int          tokenizer3_expect_offset(tokenizer3_t*, int, token_type_t);
 number_t     tokenizer3_as_number(tokenizer3_t*);
 identifier_t tokenizer3_as_id(tokenizer3_t*);
 
+void         tokenizer3_consume_comments(tokenizer3_t*);
 void         tokenizer3_consume_whitespace(tokenizer3_t*);
 
 void         tokenizer3_show_history(tokenizer3_t*);

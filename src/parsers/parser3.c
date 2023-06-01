@@ -54,6 +54,7 @@ program_t* parse_program(tokenizer3_t* t) {
     use_t* use = parse_use(t);
     p->use_list[p->use_list_count++] = use;
   }
+  tokenizer3_show_history(t);
 
   // Expect functions
   while (tokenizer3_get(t, 2).type == T_FN) {
@@ -365,7 +366,7 @@ statement_t* parse_statement(tokenizer3_t* t) {
       s->assign = parse_id_assign(t);
     }
     else if (tokenizer3_expect_offset(t, 3, T_LP)) {
-      s->func_call = parse_func_call(t);
+      s->func_call_expr = parse_expression(t);
       // assert(0 && "Function calls unsupported right now");
 
       // func call

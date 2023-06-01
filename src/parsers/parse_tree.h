@@ -116,7 +116,7 @@ struct arg_list_t {
 struct statement_t {
   if_t* iff;
   return_t* ret;
-  func_call_t* func_call;
+  expression_t* func_call_expr;
   assign_t* assign;
   asm_block_t* asm_block;
   while_t* whle;

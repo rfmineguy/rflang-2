@@ -36,6 +36,35 @@ void tokenizer3_free(tokenizer3_t* t) {
   t->source_code = NULL;
 }
 
+void tokenizer3_consume_comments(tokenizer3_t* t) {
+  // while (strncmp(t->cursor, "//", 2) == 0) {
+  //   while (*t->cursor != '\n') {
+  //     t->cursor++;
+  //   }
+  //   t->cursor++;
+  //   t->line++;
+  //   t->col = 0;
+  //   printf("Skipped single line comment, %c\n", *t->cursor);
+  // }
+  if (strncmp(t->cursor, "/*", 2) == 0) {
+    // printf("Comment\n");
+    t->cursor += 2;
+    do {
+      if (t->cursor == '\n') {
+        t->line++;
+        t->col = 0;
+      }
+      // printf("Comment skip loop %c\n", *t->cursor);
+      t->cursor++;
+    } while (strncmp(t->cursor, "*/", 2) != 0);
+    t->cursor += 2;
+
+    if (*t->cursor == '\n') {
+      t->cursor++;
+    }
+  }
+}
+
 void tokenizer3_consume_whitespace(tokenizer3_t* t) {
   while (*t->cursor == '\n') {
     t->cursor++;
@@ -51,24 +80,20 @@ void tokenizer3_advance(tokenizer3_t* t) {
   // when we are in this case, we can't let the tokenizer try to analyze anymore
   // just continually shift the history array until empty at this point
   if (t->cursor > t->source_code + t->source_length) {
-    printf("Buffer overflow\n");
-    printf("t->cursor : %p\n", t->cursor);
-    printf("t->source_code + t->source_length : %p\n", t->source_code + t->source_length);
-    fprintf(stderr, "Something went wrong\n");
     for (int i = 1; i < 5; i++) {
       t->history[i - 1] = t->history[i];
       t->history[i].type = T_EOF;
     }
     return;
   }
-
-  // ensure any whitespace is skipped
-  tokenizer3_consume_whitespace(t);
-
   // 1. Shift the history array left (discard the leftmost)
   for (int i = 1; i < 5; i++) {
     t->history[i - 1] = t->history[i];
   }
+
+  // ensure any whitespace is skipped
+  tokenizer3_consume_whitespace(t);
+  tokenizer3_consume_comments(t);
 
   // 2. Replace the last element with the next token
   TOK_CHECK_STR("fn", 2, T_FN)
@@ -136,6 +161,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
     t->col += id.length;
     return;
   }
+  printf("Unknown: %c\n", *t->cursor);
   t->history[4] = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
   t->cursor += 1;
   t->col += 1;
