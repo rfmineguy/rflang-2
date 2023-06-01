@@ -21,6 +21,7 @@ fn add(a: int*, b: int): int {
   return sum;
 };
 
+*/
 fn pow(base: int, exp: int): int {
   result: int = 1;
   return 1;

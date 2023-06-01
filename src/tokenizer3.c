@@ -37,15 +37,13 @@ void tokenizer3_free(tokenizer3_t* t) {
 }
 
 void tokenizer3_consume_comments(tokenizer3_t* t) {
-  // while (strncmp(t->cursor, "//", 2) == 0) {
-  //   while (*t->cursor != '\n') {
-  //     t->cursor++;
-  //   }
-  //   t->cursor++;
-  //   t->line++;
-  //   t->col = 0;
-  //   printf("Skipped single line comment, %c\n", *t->cursor);
-  // }
+  if (strncmp(t->cursor, "*/", 2) == 0) {
+    fprintf(stderr, "Ending comment block alone... skipping it\n");
+    t->cursor += 2;
+    if (*t->cursor == '\n') {
+      t->cursor++;
+    }
+  }
   if (strncmp(t->cursor, "/*", 2) == 0) {
     // printf("Comment\n");
     t->cursor += 2;
@@ -56,7 +54,7 @@ void tokenizer3_consume_comments(tokenizer3_t* t) {
       }
       // printf("Comment skip loop %c\n", *t->cursor);
       t->cursor++;
-    } while (strncmp(t->cursor, "*/", 2) != 0);
+    } while (t->cursor < t->source_code + t->source_length && strncmp(t->cursor, "*/", 2) != 0);
     t->cursor += 2;
 
     if (*t->cursor == '\n') {
