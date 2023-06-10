@@ -84,7 +84,7 @@ int analyze_statement(statement_t* stmt, analyze_context_t* ctx) {
     analyze_return(stmt->ret, ctx);
   }
   if (stmt->func_call_expr) {
-    analyze_expression(stmt->func_call_expr, ctx);
+    analyze_expression(stmt->func_call_expr, ctx, 0);
   }
   if (stmt->assign) {
     analyze_assign(stmt->assign, ctx);
@@ -99,18 +99,33 @@ int analyze_statement(statement_t* stmt, analyze_context_t* ctx) {
 }
 
 int analyze_iff(if_t* iff, analyze_context_t* ctx) {
-  int condition_status = analyze_expression(iff->condition, ctx);
+  int condition_status = analyze_expression(iff->condition, ctx, 0);
   int block_status = analyze_block(iff->block, ctx);
   return 1;  
 }
 
 int analyze_return(return_t* ret, analyze_context_t* ctx) {
-  int expression_status = analyze_expression(ret->expr, ctx);
+  int expression_status = analyze_expression(ret->expr, ctx, 0);
   return 1;  
 }
 
-int analyze_func_call(func_call_t* func_call, analyze_context_t* ctx) {
-
+int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int depth) {
+  func_call_t* func_call = func_call_expr->value.func_call;
+  if (!chaining_ht_contains(ctx->ht, func_call->name)) {
+    fprintf(stderr, "%s : '%s' not defined\n", __func__, func_call->name);
+  }
+  else {
+    for (int i = 0; i < depth; i++) {
+      printf("| ");
+    }
+    printf("============== ANALYZE FUNC_CALL ===============\n");
+    printf("  name/id : '%s'\n", func_call->name);
+    printf("  args : ");
+    arg_list_t* args = func_call->args;
+    for (int i = 0; i < args->arg_count; i++) {
+      analyze_expression(args->args[i], ctx, depth + 1);
+    }
+  }
   return 1;  
 }
 
@@ -136,7 +151,7 @@ int analyze_assign(assign_t* assign, analyze_context_t* ctx) {
     int rhs_str_status = analyze_string_lit(assign->right_hand_side.str_lit, ctx);
   }
   if (assign->type & ASSIGN_LHS_ID) {
-    int rhs_expr_status = analyze_expression(assign->right_hand_side.expr, ctx);
+    int rhs_expr_status = analyze_expression(assign->right_hand_side.expr, ctx, 0);
   }
   return 1;  
 }
@@ -151,9 +166,34 @@ int analyze_while(while_t* whle, analyze_context_t* ctx) {
   return 1;  
 }
 
-int analyze_expression(expression_t* expr, analyze_context_t* ctx) {
+int analyze_expression(expression_t* expr, analyze_context_t* ctx, int depth) {
   // figure out whether the expression is a constant expression recursively
   // NOTE: Its contstant if there is no identifiers in it
-  printf("analyze_expression not implemented\n");
+  for (int i = 0; i < depth; i++) {
+    printf("| ");
+  }
+  switch (expr->type) {
+    case EXPR_NUM: {
+      // printf("expression is NUM literal type\n");
+      printf("NUM - value = %d\n", expr->value.i);
+      break;
+    }
+    case EXPR_STRING: {
+      // printf("expression is ID type\n");
+      printf("ID - value = %s\n", expr->value.s);
+      break;
+    }
+    case EXPR_FUNC_CALL: {
+      printf("expression is FUNC_CALL type\n");
+      analyze_func_call(expr, ctx, depth + 1);
+      break;
+    }
+    case EXPR_COMPOUND: {
+      printf("expression is COMPOUND type [operator = %s]\n", token_type_stringify(expr->value.operation));
+      analyze_expression(expr->left, ctx, depth + 1);
+      analyze_expression(expr->right, ctx, depth + 1);
+      break;
+    } 
+  }
   return 1;
 }

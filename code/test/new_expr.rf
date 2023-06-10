@@ -2,26 +2,15 @@ use io
 use math
 use string
 
-/*
-  Func: function
-  Params: N/A
-  Return: N/A
-*/
 fn function(): void {
   putc(4,);
 };
 
-/*
-  Func: Add
-  Params: N/A
-  Return: int
-*/
 fn add(a: int*, b: int): int {
   sum: int = a + b;
   return sum;
 };
 
-*/
 fn pow(base: int, exp: int): int {
   result: int = 1;
   return 1;
@@ -38,9 +27,10 @@ fn func(a: int, b: bool): bool {
     a = 6;
   };
   a = add(3, sub(5, 3));
-  if pow(3, 3) < 3 - 4 {
+  if pow(3, 3, 5) < 3 - 4 {
+    return 0;
   };
-  while a(3 + 3,) < 101 - 4 {
+  while a(3 + 3) < 101 - 4 {
     a = a - 1;
   };
   b = 4;

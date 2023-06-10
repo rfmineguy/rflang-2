@@ -26,10 +26,10 @@ int analyze_string_lit(string_lit_t*, analyze_context_t*);
 int analyze_statement(statement_t*, analyze_context_t*);
 int analyze_iff(if_t*, analyze_context_t*);
 int analyze_return(return_t*, analyze_context_t*);
-int analyze_func_call(func_call_t*, analyze_context_t*);
+int analyze_func_call(expression_t*, analyze_context_t*, int);
 int analyze_assign(assign_t*, analyze_context_t*);
 int analyze_asm_block(asm_block_t*, analyze_context_t*);
 int analyze_while(while_t*, analyze_context_t*);
-int analyze_expression(expression_t*, analyze_context_t*);
+int analyze_expression(expression_t*, analyze_context_t*, int);
  
 #endif

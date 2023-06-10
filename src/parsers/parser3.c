@@ -478,9 +478,9 @@ expression_t* parse_expression(tokenizer3_t* t) {
   int postfix_len = 0;
   
   get_postfix_rep(t, postfix, &postfix_len);
-  // for (int i = 0; i < postfix_len; i++) {
-  //   tokenizer3_token_print(postfix[i], t);
-  // }
+  for (int i = 0; i < postfix_len; i++) {
+    tokenizer3_token_print(postfix[i], t);
+  }
   expression_t* e = parse_expression_postfix(postfix, postfix_len); 
   printf("=> Parsed expression\n");
   return e;
@@ -491,6 +491,7 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
   token_t stack[100] = {0};
   int top = -1;
   
+  int was_id_before = 0;      // used for function call detection
   while (1) {
     int is_id             = tokenizer3_expect_offset(t, 2, T_ID);
     int is_comma          = tokenizer3_expect_offset(t, 2, T_COMMA);
@@ -527,21 +528,25 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
       stack[++top] = tokenizer3_get(t, 2);
     }
     else if (is_lparen) {
+      was_id_before += tokenizer3_expect_offset(t, 1, T_ID);
       stack[++top] = tokenizer3_get(t, 2);
     }
     else if (is_rparen) {
-      int comma_count = 0;
       while (stack[top].type != T_LP) {
         if (stack[top].type == T_COMMA) {
           top--;
-          comma_count++;
+          // comma_count++;
           continue;
         }
         postfix_out[j++] = stack[top--];
       }
-      if (comma_count != 0) {
+      if (was_id_before > 0) {
         postfix_out[j++] = (token_t) { .type = T_EXPR_FUNC_END, .value.s = "@" };
+        was_id_before--;
       }
+      // if (comma_count != 0) {
+      //   postfix_out[j++] = (token_t) { .type = T_EXPR_FUNC_END, .value.s = "@" };
+      // }
       if (top > -1 && stack[top].type != T_LP) {
         // error
       }
