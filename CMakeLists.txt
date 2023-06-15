@@ -18,50 +18,53 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 # LIBRARIES
 #
 include (FetchContent)
-FetchContent_Declare(
-  argparse
-  GIT_REPOSITORY https://github.com/cofyc/argparse.git
-  GIT_TAG v1.1.0
-)
-FetchContent_GetProperties(argparse)
-if (NOT argparse_POPULATED)
-  FetchContent_Populate(argparse)
-  message(${argparse_SOURCE_DIR})
-  add_subdirectory(${argparse_SOURCE_DIR})
-endif()
+FetchContent_Declare(argparse  GIT_REPOSITORY https://github.com/cofyc/argparse.git GIT_TAG v1.1.0)
+FetchContent_MakeAvailable(argparse)
+#FetchContent_GetProperties(argparse)
+#if (NOT argparse_POPULATED)
+#  FetchContent_Populate(argparse)
+#  message(${argparse_SOURCE_DIR})
+#  add_subdirectory(${argparse_SOURCE_DIR})
+#endif()
 
-FetchContent_Declare(
-  gtest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG v1.13.0
-)
-FetchContent_GetProperties(gtest)
-if (NOT gtest_POPULATED)
-  FetchContent_Populate(gtest)
-  message(${gtest_SOURCE_DIR})
-  add_subdirectory(${gtest_SOURCE_DIR})
-endif()
+FetchContent_Declare(gtest  GIT_REPOSITORY https://github.com/google/googletest.git GIT_TAG v1.13.0)
+FetchContent_MakeAvailable(gtest)
+# FetchContent_GetProperties(gtest)
+# if (NOT gtest_POPULATED)
+#   FetchContent_Populate(gtest)
+#   message(${gtest_SOURCE_DIR})
+#   add_subdirectory(${gtest_SOURCE_DIR})
+# endif()
 
+## ============================================
+##   Source files
+## ============================================
 set (SOURCES 
-  # src/parser2.c
   src/token.c
   src/compile.c
   src/args.c
   src/parsers/parser3.c
   src/parsers/parse_tree.c
-  src/codegen.c
-  src/codegen_x86_64.c
-  src/errors.c
+  src/codegen/codegen.c
+  src/codegen/codegen_x86_64.c
+  src/error/errors2.c
   src/tokenizer3.c
   src/chaining_ht.c
   src/analysis.c)
 
-# add_executable(rfc-tests
-#   tests/test.cpp
-#   ${SOURCES})
-# 
-# target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
-# target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
+## ============================================
+##   Testing binary
+## ============================================
+set(TESTS OFF)
+if (TESTS)
+add_executable(rfc-tests
+  tests/test.cpp
+  ${SOURCES})
+
+target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
+target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
+endif()
+## ============================================
 
 add_executable(rfc
   src/main.c

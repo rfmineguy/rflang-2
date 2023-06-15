@@ -21,4 +21,5 @@ line_info_t get_line_from_str(char*, int);
 
 void error_print(error_t, tokenizer_t*, const char*, const char*, int, ...);
 
+
 #endif

@@ -2,6 +2,7 @@
 #define PARSE_TREE_H
 #include "../token.h"
 
+// Forward declarations
 typedef struct program_t    program_t;
 typedef struct use_t        use_t;
 typedef struct asm_block_t  asm_block_t;
@@ -21,6 +22,7 @@ typedef struct if_t         if_t;
 typedef struct while_t      while_t;
 typedef struct condition_t  condition_t;
 
+// Data constructs
 typedef enum {
   X86_32_LINUX_ASM = 142, X86_64_LINUX_ASM, ARM64_ASM  // the order here needs to match the order of the normal token_type_t enum
 } asm_type_t;
@@ -152,7 +154,6 @@ void          free_statement(statement_t*);
 
 // Show
 void          tabs(int);
-
 void          show_program(program_t*, int);
 void          show_use(use_t*, int);
 void          show_block(block_t*, int);

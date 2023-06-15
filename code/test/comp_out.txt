@@ -1,0 +1,249 @@
+ ====== Compiling ======
+CWD: /Users/rileyfischer/Documents/dev/languages/rf_lang_2/code/test/
+OutFile: /Users/rileyfischer/Documents/dev/languages/rf_lang_2/code/test/assign_id.s
+InFile: /Users/rileyfischer/Documents/dev/languages/rf_lang_2/code/test/simple_example.rf
+=> Parsed use
+Token ( 81) {           USE, use }
+Token (171) {            ID, io }
+Token ( 10) {            FN, fn }
+Token (171) {            ID, add }
+Token ( 51) {            LP, ( }
+Token (171) {            ID, add }
+Token (171) {            ID, io }
+Token ( 10) {            FN, fn }
+Token (171) {            ID, add }
+Token ( 51) {            LP, ( }
+Token (171) {            ID, a }
+param_list -> Token (171) {            ID, a }
+=> Parsed var
+=> Parsed var
+Token ( 70) {         COLON, : }
+=> Parsed param_list
+func_decl -> Token ( 70) {         COLON, : }
+=> Parsed func_decl
+offset(2): Token ( 82) {        RETURN, return }
+expr_last_t: Token ( 71) {     SEMICOLON, ; }
+=> Parsed expression
+=> Parsed return
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+=> Parsed block
+=> Parsed func
+Token (171) {            ID, main }
+Token ( 71) {     SEMICOLON, ; }
+Token ( 10) {            FN, fn }
+Token (171) {            ID, main }
+Token ( 51) {            LP, ( }
+Token ( 50) {            RP, ) }
+param_list -> Token ( 50) {            RP, ) }
+Token ( 70) {         COLON, : }
+=> Parsed param_list
+func_decl -> Token ( 70) {         COLON, : }
+=> Parsed func_decl
+offset(2): Token (171) {            ID, x }
+=> Parsed var
+expr_last_t: Token ( 71) {     SEMICOLON, ; }
+=> Parsed expression
+=> Parsed var_assign
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+offset(2): Token ( 20) {            IF, if }
+expr_last_t: Token ( 41) {            LB, { }
+=> Parsed expression
+=> Parsed block
+=> Parsed if
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+offset(2): Token ( 22) {         WHILE, while }
+expr_last_t: Token ( 41) {            LB, { }
+=> Parsed expression
+offset(2): Token (171) {            ID, putc }
+expr_last_t: Token ( 71) {     SEMICOLON, ; }
+top=1
+┣━ Expr
+┃ ┣━ Value {num: 34}
+=> Parsed expression
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+offset(2): Token (171) {            ID, x }
+expr_last_t: Token ( 71) {     SEMICOLON, ; }
+=> Parsed expression
+=> Parsed id_assign
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+=> Parsed block
+=> Parsed while
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+offset(2): Token ( 82) {        RETURN, return }
+expr_last_t: Token ( 71) {     SEMICOLON, ; }
+top=5
+┣━ Expr
+┃ ┣━ Value {num: 1}
+top=4
+┣━ Expr
+┃ ┣━ Value {num: 4}
+top=3
+┣━ Expr
+┃ ┣━ FuncCall
+┃ ┃ ┣━ name: add
+┃ ┃ ┃ ┣━ ArgList
+┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 1}
+┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+top=2
+┣━ Expr
+┃ ┣━ Value {num: 36}
+=> Parsed expression
+=> Parsed return
+parse_statement: offset(2): Token ( 71) {     SEMICOLON, ; }
+=> Parsed block
+=> Parsed func
+┣━ Program
+┃ ┣━ UseList
+┃ ┃ ┣━ Use
+┃ ┃ ┃ ┣━ name: io
+┃ ┣━ FuncList
+┃ ┃ ┣━ Func
+┃ ┃ ┃ ┣━ FuncDecl
+┃ ┃ ┃ ┃ ┣━ name: add
+┃ ┃ ┃ ┃ ┣━ Params
+┃ ┃ ┃ ┃ ┃ ┣━ Var
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: a
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ type: INT
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ indirection: 0
+┃ ┃ ┃ ┃ ┃ ┣━ Var
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: b
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ type: INT
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ indirection: 0
+┃ ┃ ┃ ┣━ Return Type : 90 = INT
+┃ ┃ ┃ ┣━ Block
+┃ ┃ ┃ ┃ ┣━ Statements
+┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ Return
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{+}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {str: a}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {str: b}
+┃ ┃ ┣━ Func
+┃ ┃ ┃ ┣━ FuncDecl
+┃ ┃ ┃ ┃ ┣━ name: main
+┃ ┃ ┃ ┃ ┣━ Params
+┃ ┃ ┃ ┣━ Return Type : 90 = INT
+┃ ┃ ┃ ┣━ Block
+┃ ┃ ┃ ┃ ┣━ Statements
+┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ Assign
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Var
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: x
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ type: (null)
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ indirection: 0
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{+}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{-}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{*}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 3}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 5}
+┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ If
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{>}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {str: x}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ Block
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Statements
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ NULL
+┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ While
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{>}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {str: x}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ Block
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Statements
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ FuncCall
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: putc
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ ArgList
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 34}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Assign
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ ID: x
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{-}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {str: x}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 1}
+┃ ┃ ┃ ┃ ┃ ┣━ statement
+┃ ┃ ┃ ┃ ┃ ┃ ┣━ Return
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{-}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{*}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 3}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr{/}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ FuncCall
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: add
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ ArgList
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ FuncCall
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ name: add
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ ArgList
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 1}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 4}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 36}
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Expr
+┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣━ Value {num: 3}
+... analyze_program
+expression is COMPOUND type [operator = PL]
+| ID - value = a
+| ID - value = b
+analyze_assign
+expression is COMPOUND type [operator = GT]
+| ID - value = x
+| NUM - value = 4
+expression is COMPOUND type [operator = MN]
+| expression is COMPOUND type [operator = MUL]
+| | NUM - value = 4
+| | NUM - value = 3
+| expression is COMPOUND type [operator = DIV]
+| | expression is FUNC_CALL type
+| | | ============== ANALYZE FUNC_CALL ===============
+  name/id : 'add'
+  args : | | | | expression is FUNC_CALL type
+| | | | | ============== ANALYZE FUNC_CALL ===============
+  name/id : 'add'
+  args : | | | | | | NUM - value = 1
+| | | | | | NUM - value = 4
+| | | | NUM - value = 36
+| | NUM - value = 3
+Showing chaining hash table {10}
+	{key:       x, scope_depth: 1, scope_number: 2, type: VAR_ID}
+	{key:    main, scope_depth: 0, scope_number: 1, type: FUNC_ID}
+	{key:       b, scope_depth: 0, scope_number: 0, type: VAR_ID}
+	{key:       a, scope_depth: 0, scope_number: 0, type: VAR_ID}
+	{key:     add, scope_depth: 0, scope_number: 0, type: FUNC_ID}
+CODEGEN: generating code for x86_64-linux
+Beginning codegen for x86_64-linux
+<---- EXPR_COMPOUND (PL)---->
+	<---- EXPR_STRING (var) (a)---->
+ <--- UNSUPPORTED --->
+	<---- EXPR_STRING (var) (b)---->
+ <--- UNSUPPORTED --->
+<---- EXPR_COMPOUND (MN)---->
+	<---- EXPR_COMPOUND (MUL)---->
+	<---- EXPR_NUM (4)---->
+	<---- EXPR_NUM (3)---->
+	<---- EXPR_COMPOUND (DIV)---->
+		<---- EXPR_NUM (3)---->
+Ending codegen for x86_64-linux

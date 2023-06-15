@@ -27,4 +27,5 @@ $ sudo make install
 $ rfc -f <input_file> -o <output_file> -p <target_platform>
 ```
 
-* Look into [ReadTheDocs](https://readthedocs.org) to create further language documentation
+# Docs
+[RF Lang Docs](https://rflang-rtd.readthedocs.io/en/latest/index.html)

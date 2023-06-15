@@ -6,10 +6,11 @@
 // MACROS
 #define LOC_FIELD(tokenizer, len) \
   .loc = (token_loc_t) {\
-    .begin_index = t->cursor - t->source_code,\
+    .begin_index = tokenizer->cursor - tokenizer->source_code,\
     .length = len,\
-    .line = t->line,\
-    .column = t->col } 
+    .line = tokenizer->line,\
+    .column = tokenizer->col,\
+    .line_start = tokenizer->line_start }
 
 #define TOK_CHECK_CH(ch, tp) \
   if (*t->cursor == ch) {\
@@ -52,15 +53,17 @@ typedef struct {
 
 typedef struct {
   char* source_code;
+  const char* source_filename;
   int source_length;
 
   char* cursor;
+  const char* line_start;
   int col, line;
 
   token_t history[5];     // [0-1]->prev, [2]->current, [3-4]->next
 } tokenizer3_t;
 
-tokenizer3_t tokenizer3_new(FILE*);
+tokenizer3_t tokenizer3_new(const char*);
 void         tokenizer3_free(tokenizer3_t*);
 
 void         tokenizer3_advance(tokenizer3_t*);

@@ -1,4 +1,5 @@
 #include "compile.h"
+#include "codegen/codegen.h"
 #include "parsers/parser3.h"
 #include "analysis.h"
 #include <stdio.h>
@@ -49,22 +50,24 @@ int compile(args_t args) {
   printf("OutFile: %s\n", info.output_file_path);
   printf("InFile: %s\n", info.input_file_path);
 
-  FILE* input_file = openf(info.input_file_path, "r");
+  // FILE* input_file = openf(info.input_file_path, "r");
   FILE* output_file = openf(info.output_file_path, "w");
 
-  tokenizer3_t t = tokenizer3_new(input_file);
+  tokenizer3_t t = tokenizer3_new(info.input_file_path);
 
   program_t* prog = parse(&t);
   show_program(prog, 1);
 
   analyze_program(prog);
+  
+  codegen_select(prog, output_file, args.comp_platform);
+
   free_program(prog);
   free(prog);
   prog = NULL;
 
   tokenizer3_free(&t);
 
-  fclose(input_file);
   fclose(output_file);
   return 0;
 }

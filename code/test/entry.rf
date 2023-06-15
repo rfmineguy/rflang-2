@@ -1,0 +1,14 @@
+fn exit(code: int) {
+  asm x86_64-linux {
+    mov rax, 0x3c
+    mov rdi, [rbp + 8]
+    syscall
+  };
+};
+
+fn _start() {
+  asm x86_64-linux {
+    call main
+    call exit
+  };
+};

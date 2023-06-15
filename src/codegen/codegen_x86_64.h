@@ -1,6 +1,6 @@
 #ifndef CODEGEN_x86_64_H
 #define CODEGEN_x86_64_H
-#include "parsers/parser2.h"
+#include "parsers/parser3.h"
 
 typedef struct {
   int scope_depth;
@@ -8,10 +8,9 @@ typedef struct {
   int var_count;
   char* code_segment_source; int currently_written_code;
   char* data_segment_source; int currently_written_data;
-  // var_dict_t var_dictionary;
 } x86_64_codegen_context;
 
-void x86_64_codegen_entry_stub(x86_64_codegen_context*);
+void x86_64_codegen_entry_stub  (x86_64_codegen_context*);
 
 void x86_64_codegen_program     (program_t*, FILE*); 
 void x86_64_codegen_use         (use_t* u, x86_64_codegen_context*);

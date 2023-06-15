@@ -44,6 +44,7 @@ typedef enum {
 
 // token_loc_t
 typedef struct {
+  const char* line_start;
   int begin_index, length;
   int line, column;
 } token_loc_t;

@@ -398,7 +398,7 @@ void show_expression(expression_t* expr, int level) {
         case T_DOR:   printf("{||}\n"); break;
         case T_DAND:  printf("{&&}\n"); break;
         case T_OR:    printf("{|}\n"); break;
-        case T_AND:   printf("{|}\n"); break;
+        case T_AND:   printf("{&}\n"); break;
         default: break;
       }
       if (expr->left) show_expression(expr->left, level + 1);
@@ -429,7 +429,7 @@ void show_while(while_t* whle, int level) {
 }
 
 void show_statement(statement_t* stmt, int level) {
-  tabs(level); printf("Statement\n");
+  tabs(level); printf("statement\n");
   if (!stmt) {
     tabs(level); printf("NULL\n");
     return;

@@ -6,7 +6,8 @@
 #include <math.h>
 
 //assume file is open
-tokenizer3_t tokenizer3_new(FILE* f) {
+tokenizer3_t tokenizer3_new(const char* filename) {
+  FILE* f = fopen(filename, "r");
   tokenizer3_t t = {0};
   if (!f) {
     fprintf(stderr, "Problem with file argument\n");
@@ -23,11 +24,16 @@ tokenizer3_t tokenizer3_new(FILE* f) {
   fread(t.source_code, sizeof(char), t.source_length, f);
   t.source_code[t.source_length] = 0;
   t.cursor = t.source_code;
+  t.line_start = t.source_code;
 
+  for (int i = 0; i < 5; i++) {
+    t.history[i].loc.line_start = t.source_code;
+  }
   // make sure the history buffer starts off half full, so our center is at index 2
   for (int i = 0; i < 2; i++) {
     tokenizer3_advance(&t);
   }
+  fclose(f);
   return t;
 }
 
@@ -42,23 +48,28 @@ void tokenizer3_consume_comments(tokenizer3_t* t) {
     t->cursor += 2;
     if (*t->cursor == '\n') {
       t->cursor++;
+      t->line_start = t->cursor;
     }
   }
   if (strncmp(t->cursor, "/*", 2) == 0) {
     // printf("Comment\n");
     t->cursor += 2;
     do {
-      if (t->cursor == '\n') {
+      t->cursor++;
+      if (*t->cursor == '\n') {
         t->line++;
         t->col = 0;
+        t->line_start = t->cursor;
       }
       // printf("Comment skip loop %c\n", *t->cursor);
-      t->cursor++;
     } while (t->cursor < t->source_code + t->source_length && strncmp(t->cursor, "*/", 2) != 0);
     t->cursor += 2;
 
     if (*t->cursor == '\n') {
+      t->line++;
+      t->col = 0;
       t->cursor++;
+      t->line_start = t->cursor;
     }
   }
 }
@@ -68,6 +79,7 @@ void tokenizer3_consume_whitespace(tokenizer3_t* t) {
     t->cursor++;
     t->line++;
     t->col = 0;
+    t->line_start = t->cursor + 1;
   }
   while (*t->cursor == ' ' || *t->cursor == '\t') {
     t->cursor++;

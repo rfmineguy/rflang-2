@@ -1,6 +1,8 @@
 #include "codegen_x86_64.h"
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 #define WRITE_CODE(str, ...) \
   ctx->currently_written_code += snprintf(ctx->code_segment_source + ctx->currently_written_code, 1000, str, ##__VA_ARGS__)
@@ -18,7 +20,6 @@ void x86_64_codegen_program(program_t* p, FILE* f) {
     x86_64_codegen_use(p->use_list[i], &ctx);
   }
   for (int i = 0; i < p->func_list_count; i++) {
-    x86_64_codegen_func(p->func_list[i], &ctx);
     x86_64_codegen_func(p->func_list[i], &ctx);
   }
 
@@ -45,7 +46,7 @@ void x86_64_codegen_func(func_t* func, x86_64_codegen_context* ctx) {
   int pop_size = x86_64_codegen_func_decl(func->decl, ctx);
 
   x86_64_codegen_block(func->block, ctx);
-
+  
   WRITE_CODE("ret %d\n", pop_size * 8);
 }
 
@@ -67,9 +68,15 @@ void x86_64_codegen_strlit(string_lit_t* str_lit, x86_64_codegen_context* ctx) {
       c++;
       switch (*c) {
         case '0': WRITE_DATA("0x00"); break; // Null
+        case '\\': WRITE_DATA("0x07"); break; // Backslash
         case 'n': WRITE_DATA("0x0A"); break; // New line
         case 'r': WRITE_DATA("0x0D"); break; // Carraige Return
-        case 't': WRITE_DATA("0x09"); break; // Tab
+        case 't': WRITE_DATA("0x09"); break; // Horizontal Tab
+        case 'v': WRITE_DATA("0x0B"); break; // Vertical Tab
+        case 'a': WRITE_DATA("0x07"); break; // Audible bell
+        case 'b': WRITE_DATA("0x08"); break; // Backspace
+        case '\"': WRITE_DATA("\""); break; // DQT
+        case '\'': WRITE_DATA("\'"); break; // SQT
         default:  WRITE_DATA("0xFE"); break; // Solid Square (Extended ascii)
       }
     }
@@ -86,16 +93,55 @@ void x86_64_codegen_block(block_t* block, x86_64_codegen_context* ctx) {
   WRITE_CODE("push rbp\n");
   WRITE_CODE("mov rbp, rsp\n");
 
+  int has_explicit_return = 0;
   for (int i = 0; i < block->statement_count; i++) {
     x86_64_codegen_statement(block->statements[i], ctx);
+    if (block->statements[i]->ret) {
+      has_explicit_return = 1;
+    }
   }
 
   WRITE_CODE("mov rsp, rbp\n");
   WRITE_CODE("pop rbp\n");
 }
 
-void x86_64_codegen_expression(expression_t* expr, x86_64_codegen_context* ctx) {
+expression_t* x86_64_codegen_expression_v2(expression_t* expr, x86_64_codegen_context* ctx) {
+  if (expr == NULL) {
+    return NULL;
+  }
+  // if (expr:w
+      
+  // expression_t* left_consolodated = x86_64_codegen_expression_v2(expr->left, ctx);
+  // expression_t* right_consolodated = x86_64_codegen_expression_v2(expr->right, ctx);
+}
 
+void x86_64_codegen_expression(expression_t* expr, x86_64_codegen_context* ctx) {
+  // basecase
+  if (expr == NULL) {
+    return;
+  }
+  switch (expr->type) {
+    case EXPR_NUM: {
+      printf("<---- EXPR_NUM (%d)---->\n", expr->value.i);
+      break;
+    }
+    case EXPR_STRING: {
+      printf("<---- EXPR_STRING (var) (%s)---->\n", expr->value.s);
+      printf(" <--- UNSUPPORTED --->\n");
+      break;
+    }
+    case EXPR_FUNC_CALL: {
+      x86_64_codegen_func_call(expr->value.func_call, ctx);
+      break;
+    }
+    case EXPR_COMPOUND: {
+      printf("<---- EXPR_COMPOUND (%s)---->\n", token_type_stringify(expr->value.operation));
+
+      printf("\t"); x86_64_codegen_expression(expr->left, ctx);
+      printf("\t"); x86_64_codegen_expression(expr->right, ctx);
+      break;                   
+    }
+  }
 }
 
 void x86_64_codegen_statement(statement_t* stmt, x86_64_codegen_context* ctx) {
@@ -126,6 +172,7 @@ void x86_64_codegen_if(if_t* iff, x86_64_codegen_context* ctx) {
 }
 
 void x86_64_codegen_return(return_t* ret, x86_64_codegen_context* ctx) {
+  x86_64_codegen_expression(ret->expr, ctx);
   // fprintf(ctx->code_segment_source, "<ret goes here>\n");
 }
 
@@ -149,5 +196,8 @@ void x86_64_codegen_assign(assign_t* assign, x86_64_codegen_context* ctx) {
 
 void x86_64_codegen_asm_block(asm_block_t* asm_block, x86_64_codegen_context* ctx) {
   int length = asm_block->asm_source_code_end - asm_block->asm_source_code_begin;
-  WRITE_CODE("%.*s\n", length - 1, asm_block->asm_source_code_begin);
+  for (int i = 1; i < length - 1; i++) {
+    char c = *(asm_block->asm_source_code_begin + i);
+    WRITE_CODE("%c", c);
+  }
 }

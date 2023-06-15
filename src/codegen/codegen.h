@@ -1,6 +1,6 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
-#include "parsers/parser2.h"
+#include "parsers/parser3.h"
 #include <stdio.h>
   
 void codegen_select(program_t*, FILE*, const char*);
