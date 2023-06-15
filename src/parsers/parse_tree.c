@@ -185,7 +185,7 @@ void tabs(int count) {
   for (int i = 0; i < count; i++) {
     printf("%lc ", UP_DOWN);
   }
-  printf("%lc%lc ", UP_RIGHT_DOWN, LEFT_RIGHT);
+  printf("%lc%lc", UP_RIGHT_DOWN, LEFT_RIGHT);
 }
 
 void show_program(program_t* p, int level) {

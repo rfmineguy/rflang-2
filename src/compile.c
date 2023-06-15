@@ -56,7 +56,8 @@ int compile(args_t args) {
   tokenizer3_t t = tokenizer3_new(info.input_file_path);
 
   program_t* prog = parse(&t);
-  show_program(prog, 1);
+  printf("Show program: DISABLED\n");
+  // show_program(prog, 1);
 
   analyze_program(prog);
   

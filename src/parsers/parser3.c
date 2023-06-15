@@ -439,7 +439,7 @@ while_t* parse_while(tokenizer3_t* t, error_context_t* ctx) {
   return whle;
 }
 
-expression_t* parse_expression_postfix(token_t* postfix, int postfix_len) {
+expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_context_t* ctx) {
   expression_t* exprs[postfix_len];
   int top = -1;
   for (int i = 0; i < postfix_len; i++) {
@@ -496,16 +496,16 @@ expression_t* parse_expression(tokenizer3_t* t, error_context_t* ctx) {
   token_t postfix[100] = {0};
   int postfix_len = 0;
   
-  get_postfix_rep(t, postfix, &postfix_len);
+  get_postfix_rep(t, postfix, &postfix_len, ctx);
   // for (int i = 0; i < postfix_len; i++) {
   //   tokenizer3_token_print(postfix[i], t);
   // }
-  expression_t* e = parse_expression_postfix(postfix, postfix_len); 
+  expression_t* e = parse_expression_postfix(postfix, postfix_len, ctx); 
   printf("=> Parsed expression\n");
   return e;
 }
 
-void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length) {
+void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length, error_context_t* ctx) {
   int j = 0;
   token_t stack[100] = {0};
   int top = -1;
@@ -580,10 +580,11 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length)
     }
     tokenizer3_advance(t);
   }
-  printf("expr_last_t: "); tokenizer3_show_token_offset(t, 2);
+  // printf("expr_last_t: "); tokenizer3_show_token_offset(t, 2);
 
   while (top > -1) {
     if (stack[top].type == T_LP) {
+      error_push(ctx, error_new(E_MISMATCHED_LP, tokenizer3_get(t, 2)));
       // error
     }
     postfix_out[j++] = stack[top--];

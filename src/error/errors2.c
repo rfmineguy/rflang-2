@@ -8,6 +8,7 @@ const char* error_type_str(error_type_t type) {
     case E_STATEMENT: return "Statement error";
     case E_MISSING_FUNC_RETURN_TYPE: return "Function missing return type";
     case E_MISSING_ASSIGN_EQ: return "Assignment missing '='";
+    case E_MISMATCHED_LP: return "Mismatched '('";
     default: return "error_type_str(...)";
   }
 }

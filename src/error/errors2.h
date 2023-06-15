@@ -25,7 +25,8 @@ typedef enum {
   E_MISSING_LB,
   E_STATEMENT,
   E_MISSING_FUNC_RETURN_TYPE,
-  E_MISSING_ASSIGN_EQ
+  E_MISSING_ASSIGN_EQ,
+  E_MISMATCHED_LP,
 } error_type_t;
 
 struct error_t {
@@ -42,7 +43,6 @@ struct error_t {
 typedef struct {
   error_t* error_ll;
 } error_context_t;
-
 
 #define error_new(error_type, token) error_new_int(error_type, token, __FUNCTION__, __LINE__)
 const char* error_type_str(error_type_t);

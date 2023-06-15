@@ -28,8 +28,8 @@ statement_t*  parse_statement(tokenizer3_t*, error_context_t*);
 if_t*         parse_if(tokenizer3_t*, error_context_t*);
 while_t*      parse_while(tokenizer3_t*, error_context_t*);
 
-expression_t* parse_expression_postfix(token_t* postfix, int postfix_len); 
+expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_context_t*); 
 expression_t* parse_expression(tokenizer3_t*, error_context_t*);
-void          get_postfix_rep(tokenizer3_t*, token_t*, int*);
+void          get_postfix_rep(tokenizer3_t*, token_t*, int*, error_context_t*);
 
 #endif
