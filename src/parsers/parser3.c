@@ -42,7 +42,7 @@ program_t* parse(tokenizer3_t* t) {
   logger_channel_set_stream(&logger, ERROR_CHANNEL, stdout);
   logger_channel_set_stream(&logger, PARSE_STATUS_CHANNEL, stdout);
   logger_channel_enable(&logger, WARNING_CHANNEL,      "Warn",        ANSI_RESET);
-  logger_channel_enable(&logger, ERROR_CHANNEL,        "Error",       ANSI_RESET);
+  logger_channel_enable(&logger, ERROR_CHANNEL,        "Error",       ANSI_RED);
   logger_channel_enable(&logger, PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
   return parse_program(t);
 }

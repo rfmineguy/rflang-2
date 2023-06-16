@@ -9,7 +9,7 @@ fn main(): int {
   if x > 4 {
   };
   while x > 4 {
-    if putc(43) && (3 || 1) {
+    if putc(43) + 4 / 5 {
     };
     x = x - 1;
   };

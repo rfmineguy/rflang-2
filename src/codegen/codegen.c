@@ -20,4 +20,7 @@ void codegen_select(program_t* prog, FILE* f, const char* platform) {
   else if (strcmp(platform, "arm64") == 0) {
     UNSUPPORTED("arm64");
   }
+  else if (strcmp(platform, "host") == 0) {
+    UNSUPPORTED("host");
+  }
 }

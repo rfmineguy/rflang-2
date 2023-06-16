@@ -43,6 +43,7 @@ comp_info_t get_comp_info(args_t args) {
   return info;
 }
 
+
 int compile(args_t args) {
   printf(" ====== Compiling ======\n");
   comp_info_t info = get_comp_info(args);
@@ -57,7 +58,7 @@ int compile(args_t args) {
 
   program_t* prog = parse(&t);
   printf("Show program: DISABLED\n");
-  // show_program(prog, 1);
+  show_program(prog, 1);
 
   printf("Compile program: DISABLED\n");
   //analyze_program(prog);

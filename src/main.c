@@ -22,37 +22,6 @@
     #define PLATFORM "Is not linux or windows"
 #endif
 
-static const char *const usages[] = {
-    "basic [options] [[--] args]",
-    "basic [options]",
-    NULL,
-};
-
-int test_new_tokenizer() {
-  const char* file = "code/test/new_expr.rf";
-  FILE* f = fopen(file, "r");
-  if (!f) {
-    fprintf(stderr, "'%s' not present\n", file);
-    return -1;
-  }
-  printf("Testing tokenizer3\n");
-  tokenizer3_t t = tokenizer3_new(f);
-  
-  while (tokenizer3_get(&t, 2).type != T_EOF) {
-    tokenizer3_advance(&t);
-    printf("========================\n");
-    tokenizer3_token_print(t.history[0], &t);
-    tokenizer3_token_print(t.history[1], &t);
-    tokenizer3_token_print(t.history[2], &t);
-    tokenizer3_token_print(t.history[3], &t);
-    tokenizer3_token_print(t.history[4], &t);
-  }
-
-  printf("Tested tokenizer3\n");
-  tokenizer3_free(&t);
-  fclose(f);
-}
-
 int main(int argc, const char** argv) {
   arg_handle_result_t r = args_handle(argc, argv);
   if (!(r.errors |= ERR_NO_IN_FILE)) {
@@ -65,13 +34,15 @@ int main(int argc, const char** argv) {
     fprintf(stderr, "ERROR: No platform supplied. Try -p. See -l for list\n");
   }
   if (r.args.test) {
-    return test_new_tokenizer();
+    printf("No test registered\n");
+    return 0;
   }
   if (r.args.list_comp_platforms) {
     printf("Platforms:\n");
     printf(" - x86_32-linux\n");
     printf(" - x86_64-linux\n");
     printf(" - arm64\n");
+    printf(" - host\n");
     return 420;
   }
   return compile(r.args);
