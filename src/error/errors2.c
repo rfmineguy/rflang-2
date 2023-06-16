@@ -1,7 +1,8 @@
 #include "errors2.h"
 
-const char* error_type_str(error_type_t type) {
+const char* error_type_fmt_str(error_type_t type) {
   switch (type) {
+    case E_INVALID_START_TOKEN: return "Program starting with invalid token";
     case E_MISSING_SEMICOLON: return "Missing semicolon";
     case E_MISSING_USE_PATH: return "Missing path for use";
     case E_MISSING_LB: return "Missing '{' for block";
@@ -9,6 +10,7 @@ const char* error_type_str(error_type_t type) {
     case E_MISSING_FUNC_RETURN_TYPE: return "Function missing return type";
     case E_MISSING_ASSIGN_EQ: return "Assignment missing '='";
     case E_MISMATCHED_LP: return "Mismatched '('";
+    case E_EXPECTED_TOKEN_GOT_TOKEN: return "";
     default: return "error_type_str(...)";
   }
 }
@@ -29,7 +31,7 @@ void error_context_free(error_context_t ctx) {
   }
 }
 
-error_t error_new_int(error_type_t type, token_t t, const char* debug_function, int debug_line_number) {//const char* line_start, const char* filename, int line, int col) {
+error_t error_new_int(error_type_t type, token_t t, const char* debug_function, int debug_line_number) {
   error_t e = {0};
   e.type = type;
   e.token = t;
@@ -72,7 +74,7 @@ void error_show_all(error_context_t* ctx) {
 }
 
 void error_show(error_t err) {
-  fprintf(stderr, "[%d, %s] ERROR : [%s, %d:%d] <%s>: ", err.debug_line_number, err.debug_function, err.filename, err.line_number, err.col_number, error_type_str(err.type));
+  fprintf(stderr, "[%d, %20s] ERROR : [%s, %d:%d] <%s>: ", err.debug_line_number, err.debug_function, err.filename, err.line_number, err.col_number, error_type_fmt_str(err.type));
   // fprintf(stderr, "line_start: %p, %c\n", err.token.loc.line_start);
   char* cur = (char*) err.token.loc.line_start;
   while (*cur != '\n' && *cur != '\0') {

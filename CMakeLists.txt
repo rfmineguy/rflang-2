@@ -43,6 +43,7 @@ set (SOURCES
   src/token.c
   src/compile.c
   src/args.c
+  src/logging/logger_w_channels.c
   src/parsers/parser3.c
   src/parsers/parse_tree.c
   src/codegen/codegen.c

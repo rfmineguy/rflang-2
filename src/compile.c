@@ -59,9 +59,11 @@ int compile(args_t args) {
   printf("Show program: DISABLED\n");
   // show_program(prog, 1);
 
-  analyze_program(prog);
+  printf("Compile program: DISABLED\n");
+  //analyze_program(prog);
   
-  codegen_select(prog, output_file, args.comp_platform);
+  printf("Codegen program: DISABLED\n");
+  // codegen_select(prog, output_file, args.comp_platform);
 
   free_program(prog);
   free(prog);

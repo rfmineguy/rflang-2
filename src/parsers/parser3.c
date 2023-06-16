@@ -1,10 +1,16 @@
 #include "parser3.h"
 #include "../tokenizer3.h"
+#include "../logging/logger_w_channels.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h> //sleep
+
+#define WARNING_CHANNEL 0
+#define ERROR_CHANNEL 1
+#define PARSE_STATUS_CHANNEL 2
+logger_t logger = {0};
 
 int is_asm_type_specifier(token_type_t type) {
   return type == T_X86_32_LINUX || type == T_X86_64_LINUX || type == T_ARM64;
@@ -32,6 +38,12 @@ int get_precedence(token_type_t type) {
 }
 
 program_t* parse(tokenizer3_t* t) {
+  logger_channel_set_stream(&logger, WARNING_CHANNEL, stdout);
+  logger_channel_set_stream(&logger, ERROR_CHANNEL, stdout);
+  logger_channel_set_stream(&logger, PARSE_STATUS_CHANNEL, stdout);
+  logger_channel_enable(&logger, WARNING_CHANNEL,      "Warn",        ANSI_RESET);
+  logger_channel_enable(&logger, ERROR_CHANNEL,        "Error",       ANSI_RESET);
+  logger_channel_enable(&logger, PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
   return parse_program(t);
 }
 
@@ -49,8 +61,10 @@ program_t* parse_program(tokenizer3_t* t) {
   tokenizer3_advance(t);
 
   if (tokenizer3_expect_offset(t, 2, T_ID)) {
-    fprintf(stderr, "Program starting with ID is invalid\n");
-    exit(1);
+    error_push(&ctx, error_new(E_INVALID_START_TOKEN, tokenizer3_get(t, 2)));
+    tokenizer3_advance(t);
+    // fprintf(stderr, "Program starting with ID is invalid\n");
+    // exit(1);
   }
   // Expect use statements second (use statements are only allowed at the start)
   while (tokenizer3_get(t, 2).type == T_USE) {
@@ -64,8 +78,6 @@ program_t* parse_program(tokenizer3_t* t) {
     p->func_list[p->func_list_count++] = func;
     if (!tokenizer3_expect_offset(t, 2, T_SEMICOLON)) {
       error_push(&ctx, error_new(E_MISSING_SEMICOLON, tokenizer3_get(t, 2)));
-      // fprintf(stderr, "Semicolon expected at end of function\n");
-      // exit(1);
     }
     tokenizer3_advance(t);
   }
@@ -86,7 +98,9 @@ use_t* parse_use(tokenizer3_t* t, error_context_t* ctx) {
   }
   strncpy(u->name, t->source_code + tokenizer3_get(t, 2).loc.begin_index, tokenizer3_get(t, 2).loc.length);
   tokenizer3_advance(t);
-  printf("=> Parsed use\n");
+
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed use\n");
+
   return u;
 }
 
@@ -111,24 +125,24 @@ block_t* parse_block(tokenizer3_t* t, error_context_t* ctx) {
     // printf("block: "); tokenizer3_show_token_offset(t, 2);
   }
   tokenizer3_advance(t);    //consume last '}'
-  printf("=> Parsed block\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed block\n");
   return b;
 }
 
 asm_block_t* parse_asm_block(tokenizer3_t* t, error_context_t* ctx) {
-  printf("parse_asm_block START\n");
   asm_block_t* block = calloc(1, sizeof(asm_block_t));
   tokenizer3_advance(t);
   tokenizer3_show_token_offset(t, 2);
   if (!is_asm_type_specifier(tokenizer3_get(t, 2).type)) {
-    fprintf(stderr, "<%s>: %d, Expected asm type specifier, got something else\n", __FUNCTION__, __LINE__);
-    exit(1);
+    error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Assembly type", tokenizer3_get(t, 2)));
+    tokenizer3_advance(t);
+    // error_push(ctx, error_new(E_INVALID_ASM_TYPE, tokenizer3_get(t, 2)));
   }
   block->asm_type = tokenizer3_get(t, 2).type;
   tokenizer3_advance(t);
   if (!tokenizer3_expect_offset(t, 2, T_LB)) {
-    fprintf(stderr, "<%s>: %d, Expected '{', got something else\n", __FUNCTION__, __LINE__);
-    exit(1);
+    error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Left brace", tokenizer3_get(t,2)));
+    // error_push(ctx, error_new(E_MISSING_LB, tokenizer3_get(t, 2)));
   }
   block->asm_source_code_begin = tokenizer3_get(t, 2).loc.begin_index + tokenizer3_get(t, 2).loc.length + t->source_code;
   while (!tokenizer3_expect_offset(t, 2, T_RB)) {
@@ -138,7 +152,7 @@ asm_block_t* parse_asm_block(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_show_token_offset(t, 2);
 
   tokenizer3_advance(t);
-  printf("parse_asm_block FINISH\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed asm block\n");
   return block;
 }
 
@@ -155,7 +169,7 @@ string_lit_t* parse_string_lit(tokenizer3_t* t, error_context_t* ctx) {
   }
   s->str_lit_end = tokenizer3_get(t, 2).loc.begin_index + t->source_code;
   s->length = s->str_lit_end - s->str_lit_begin;
-  printf("=> Parsed string_lit\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed string literal\n");
   return s;
 }
 
@@ -184,14 +198,12 @@ var_t* parse_var(tokenizer3_t* t, error_context_t* ctx) {
     v->indirection ++;
     tokenizer3_advance(t);
   }
-  printf("=> Parsed var\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed var\n");
   return v;
 }
 
 func_decl_t* parse_func_decl(tokenizer3_t* t, error_context_t* ctx) {
   func_decl_t* decl = calloc(1, sizeof(func_decl_t));
-  tokenizer3_show_token_offset(t, 2);
-  tokenizer3_show_history(t);
   if (!tokenizer3_expect_offset(t, 2, T_ID)) {
     fprintf(stderr, "<%s>: %d, Expected ID, got something else\n", __FUNCTION__, __LINE__);
     exit(1);
@@ -200,9 +212,7 @@ func_decl_t* parse_func_decl(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
 
   decl->params = parse_param_list(t, ctx);
-  printf("func_decl -> "); tokenizer3_show_token_offset(t, 2);
-
-  printf("=> Parsed func_decl\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func_decl\n");
   return decl;
 }
 
@@ -230,12 +240,11 @@ func_t* parse_func(tokenizer3_t* t, error_context_t* ctx) {
   }
   f->block = parse_block(t, ctx);
 
-  printf("=> Parsed func\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func\n");
   return f;
 }
 
 func_call_t* parse_func_call(tokenizer3_t* t, error_context_t* ctx) {
-  printf("=> Parsing func_call\n");
   func_call_t* func_call = calloc(1, sizeof(func_call_t));
   if (!tokenizer3_expect_offset(t, 2, T_ID)) {
     fprintf(stderr, "<%s>: %d, Expected ID, got something else\n", __FUNCTION__, __LINE__);
@@ -245,7 +254,7 @@ func_call_t* parse_func_call(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
 
   func_call->args = parse_arg_list(t, ctx);
-  printf("=> Parsed func_call\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func_call\n");
   return func_call;
 }
 
@@ -266,7 +275,7 @@ assign_t* parse_var_assign(tokenizer3_t* t, error_context_t* ctx) {
     a->right_hand_side.expr = parse_expression(t, ctx);
     a->type |= ASSIGN_RHS_EXPR;
   }
-  printf("=> Parsed var_assign\n"); 
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed var_assign\n");
   return a;
 }
 
@@ -291,7 +300,7 @@ assign_t* parse_id_assign(tokenizer3_t* t, error_context_t* ctx) {
     a->type |= ASSIGN_RHS_EXPR;
   }
 
-  printf("=> Parsed id_assign\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed id_assign\n");
   return a;
 }
 
@@ -301,7 +310,7 @@ return_t* parse_return(tokenizer3_t* t, error_context_t* ctx) {
 
   r->expr = parse_expression(t, ctx); 
 
-  printf("=> Parsed return\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed return\n");
   return r;
 }
 
@@ -313,7 +322,6 @@ param_list_t* parse_param_list(tokenizer3_t* t, error_context_t* ctx) {
     exit(1);
   }
   tokenizer3_advance(t);
-  printf("param_list -> "); tokenizer3_show_token_offset(t, 2);
   while (!tokenizer3_expect_offset(t, 2, T_RP)) {
     var_t* v = parse_var(t, ctx);
     p->params[p->params_count++] = v;
@@ -330,8 +338,9 @@ param_list_t* parse_param_list(tokenizer3_t* t, error_context_t* ctx) {
     }
   }
   tokenizer3_advance(t);
-  tokenizer3_show_token_offset(t, 2);
-  printf("=> Parsed param_list\n");
+  //tokenizer3_show_token_offset(t, 2);
+  
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed param_list\n");
   return p;
 }
 
@@ -362,15 +371,16 @@ arg_list_t* parse_arg_list(tokenizer3_t* t, error_context_t* ctx) {
     }
   }
   // tokenizer3_advance(t);
-  printf("parse_arg_list: ");
-  tokenizer3_show_token_offset(t, 2);
-  printf("=> Parsed arg_list\n");
+  // printf("parse_arg_list: ");
+  // tokenizer3_show_token_offset(t, 2);
+  // printf("=> Parsed arg_list\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed arg_list\n");
   return args;
 }
 
 statement_t* parse_statement(tokenizer3_t* t, error_context_t* ctx) {
   statement_t* s = calloc(1, sizeof(statement_t));
-  printf("offset(2): "); tokenizer3_show_token_offset(t, 2);
+  // printf("offset(2): "); tokenizer3_show_token_offset(t, 2);
   if (tokenizer3_expect_offset(t, 2, T_ID)) {
     if (tokenizer3_expect_offset(t, 3, T_COLON)) {
       s->assign = parse_var_assign(t, ctx);
@@ -400,24 +410,25 @@ statement_t* parse_statement(tokenizer3_t* t, error_context_t* ctx) {
   else if (tokenizer3_expect_offset(t, 2, T_ASM)) {
     s->asm_block = parse_asm_block(t, ctx);
   }
-  // else if (tokenizer3_expect_offset(t, 2, T_RB)) {
-  //   free(s);
-  //   return NULL;
-  //   // empty
-  // }
+  else if (tokenizer3_expect_offset(t, 2, T_RB)) {
+    free(s);
+    return NULL;
+    // empty
+  }
   else {
     error_push(ctx, error_new(E_STATEMENT,  tokenizer3_get(t, 2)));
     return NULL;
   }
-  printf("parse_statement: ");
-  usleep(10000000.f/120);
-  printf("offset(2): "); tokenizer3_show_token_offset(t, 2);
+  // printf("parse_statement: ");
+  // usleep(10000000.f/120);
+  // printf("offset(2): "); tokenizer3_show_token_offset(t, 2);
   if (!tokenizer3_expect_offset(t, 2, T_SEMICOLON)) {
     error_push(ctx, error_new(E_MISSING_SEMICOLON, tokenizer3_get(t, 2)));
     // tokenizer3_advance(t);
     // fprintf(stderr, "<%s>: %d, Expected SEMICON, got something else %d\n", __FUNCTION__, __LINE__, tokenizer3_get(t, 2).type);
     // exit(1);
   }
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed statement\n");
   return s;
 }
 
@@ -426,7 +437,7 @@ if_t* parse_if(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
   iff->condition = parse_expression(t, ctx);
   iff->block = parse_block(t, ctx);
-  printf("=> Parsed if\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed if\n");
   return iff;
 }
 
@@ -435,7 +446,7 @@ while_t* parse_while(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
   whle->condition = parse_expression(t, ctx);
   whle->block = parse_block(t, ctx);
-  printf("=> Parsed while\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed while\n");
   return whle;
 }
 
@@ -460,8 +471,8 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_
       func_call->args = calloc(1, sizeof(arg_list_t));
       func_call->args->args = calloc(10, sizeof(expression_t));
       while (exprs[top]->type != EXPR_STRING) {
-        printf("top=%d\n",top);
-        show_expression(exprs[top], 0);
+        //printf("top=%d\n",top);
+        //show_expression(exprs[top], 0);
         func_call->args->args[func_call->args->arg_count++] = exprs[top];
         top--;
       }
@@ -501,7 +512,7 @@ expression_t* parse_expression(tokenizer3_t* t, error_context_t* ctx) {
   //   tokenizer3_token_print(postfix[i], t);
   // }
   expression_t* e = parse_expression_postfix(postfix, postfix_len, ctx); 
-  printf("=> Parsed expression\n");
+  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed expression\n");
   return e;
 }
 
@@ -563,10 +574,8 @@ void get_postfix_rep(tokenizer3_t* t, token_t* postfix_out, int* postfix_length,
         postfix_out[j++] = (token_t) { .type = T_EXPR_FUNC_END, .value.s = "@" };
         was_id_before--;
       }
-      // if (comma_count != 0) {
-      //   postfix_out[j++] = (token_t) { .type = T_EXPR_FUNC_END, .value.s = "@" };
-      // }
       if (top > -1 && stack[top].type != T_LP) {
+        error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Mismatched ')'", tokenizer3_get(t, 2)));
         // error
       }
       else {
