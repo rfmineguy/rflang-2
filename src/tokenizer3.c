@@ -206,6 +206,14 @@ number_t tokenizer3_as_number(tokenizer3_t* t) {
   }
   number.type = 1;
   number.length = digit_count;
+
+  //reverse number
+  int num = number.value.i;
+  number.value.i = 0;
+  while (num > 0) {
+    number.value.i = number.value.i * 10 + num % 10;
+    num = num / 10;
+  }
   return number;
 }
 
