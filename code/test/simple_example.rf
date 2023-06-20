@@ -6,6 +6,7 @@ fn add(a: int, b: int): int {
 
 fn main(): int {
   x: int = 4 - 4 + 3 * 5;
+  y: int = (4+4-a)+a(6+4,a(4,4+2),d)%3+d(4-3,4%4,3-6/5*7);
   if x > 4 {
   };
   while x > 4 {

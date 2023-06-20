@@ -25,6 +25,8 @@ typedef struct {
   int errors;
 } arg_handle_result_t;
 
+
+void                args_help();
 arg_handle_result_t args_handle(int, const char**);
 
 #endif

@@ -18,8 +18,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 # LIBRARIES
 #
 include (FetchContent)
-FetchContent_Declare(argparse  GIT_REPOSITORY https://github.com/cofyc/argparse.git GIT_TAG v1.1.0)
-FetchContent_MakeAvailable(argparse)
+# FetchContent_Declare(argparse  GIT_REPOSITORY https://github.com/cofyc/argparse.git GIT_TAG v1.1.0)
+# FetchContent_MakeAvailable(argparse)
 #FetchContent_GetProperties(argparse)
 #if (NOT argparse_POPULATED)
 #  FetchContent_Populate(argparse)
@@ -42,7 +42,7 @@ FetchContent_MakeAvailable(gtest)
 set (SOURCES 
   src/token.c
   src/compile.c
-  src/args.c
+  src/args2.c
   src/logging/logger_w_channels.c
   src/parsers/parser3.c
   src/parsers/parse_tree.c
@@ -62,7 +62,7 @@ add_executable(rfc-tests
   tests/test.cpp
   ${SOURCES})
 
-target_link_libraries(rfc-tests PRIVATE argparse m gtest_main)
+target_link_libraries(rfc-tests PRIVATE m gtest_main) #argparse)
 target_include_directories(rfc-tests PRIVATE ${argparse_SOURCE_DIR} ${gtest_SOURCE_DIR})
 endif()
 ## ============================================
@@ -71,10 +71,10 @@ add_executable(rfc
   src/main.c
   ${SOURCES})
 
-target_link_libraries(rfc PRIVATE argparse m)
+target_link_libraries(rfc PRIVATE m) #argparse 
 target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR} src/)
 
-# cd buid; sudo make install
 install(TARGETS rfc)
 install(FILES vim-syntax/rf.vim DESTINATION ~/.vim/syntax/)
 install(FILES vim-syntax/ftdetect/rf.vim DESTINATION ~/.vim/ftdetect/)
+install(DIRECTORY rfcstd DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}) #/usr/local/include/stdlib

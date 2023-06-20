@@ -1,3 +1,6 @@
+use io
+use math
+
 fn add(a: int*, b: int): int {
   sum: int = a + b;
   return sum;
@@ -21,7 +24,7 @@ fn func(a: int, b: bool): bool {
   };
   a = add(3, add(5, 3));
   if pow(3, 3, 5 - 4 * 5) < 3 - 4 {
-    return 0;
+    return 0
   };
   while a(3 + 3) < 101 - 4 {
     a = a - 1;

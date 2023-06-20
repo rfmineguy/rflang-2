@@ -1,6 +1,6 @@
 #ifndef COMPILE_H
 #define COMPILE_H
-#include "args.h"
+#include "args2.h"
 #include <limits.h>
 
 typedef struct {
@@ -9,7 +9,8 @@ typedef struct {
   char output_file_path[PATH_MAX];
 } comp_info_t;
 
-comp_info_t get_comp_info(args_t);
-int         compile(args_t);
+comp_info_t get_comp_info(args2_t);
+int         compile_all(args2_t);
+int         compile(args2_t);
 
 #endif
