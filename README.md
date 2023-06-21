@@ -22,10 +22,5 @@ $ cmake ..
 $ sudo make install
 ```
 
-# Basic Usage
-```console
-$ rfc -f <input_file> -o <output_file> -p <target_platform>
-```
-
 # Docs
 [RF Lang Docs](https://rflang-rtd.readthedocs.io/en/latest/index.html)
