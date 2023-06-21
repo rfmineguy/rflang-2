@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include "color.h"
 
+// PARSE CHANNELS
+#define WARNING_CHANNEL 0
+#define ERROR_CHANNEL 1
+#define PARSE_STATUS_CHANNEL 2
+
+// FREE CHANNELS
+#define FREE_STATUS_CHANNEL 3
+
 typedef struct {
   uint64_t    channel_map;
   const char* channel_color[64];
@@ -18,5 +26,7 @@ void      logger_channel_enable(logger_t*, int, const char*, const char*);
 void      logger_channel_disable(logger_t*, int);
 
 void      logger_log(logger_t*, int, const char*, ...);
+
+logger_t* logger_get_global();
 
 #endif

@@ -1,4 +1,5 @@
 #include "parse_tree.h"
+#include "../logging/logger_w_channels.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <locale.h>
@@ -18,6 +19,8 @@ void free_program(program_t* p) {
   }
   free(p->func_list);
   p->func_list = NULL;
+
+  free(p);
 }
 
 void free_use(use_t* use) {

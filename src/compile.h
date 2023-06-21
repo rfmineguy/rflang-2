@@ -1,6 +1,7 @@
 #ifndef COMPILE_H
 #define COMPILE_H
 #include "args2.h"
+#include "parsers/parser3.h"
 #include <limits.h>
 
 typedef struct {
@@ -10,7 +11,9 @@ typedef struct {
 } comp_info_t;
 
 comp_info_t get_comp_info(args2_t);
+
+int         check_all_files_exist(args2_t, const char**);
 int         compile_all(args2_t);
-int         compile(args2_t);
+program_t*  parse_file(const char*, args2_t*);
 
 #endif

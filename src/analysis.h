@@ -1,7 +1,8 @@
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
 #include "parsers/parser3.h"
-#include "chaining_ht.h"
+#include "ht/chain_ht_str_vardat.h"
+#include "ht/chain_ht_str_program.h"
 
 /* NOTES:
  *  - analysis will include the following features
@@ -10,7 +11,7 @@
  */
 
 typedef struct {
-  chaining_ht_t ht;
+  chaining_ht_str_var_t ht;
   int scope_number;
   int scope_depth;
 } analyze_context_t;

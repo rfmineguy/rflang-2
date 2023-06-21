@@ -7,10 +7,7 @@
 #include <assert.h>
 #include <unistd.h> //sleep
 
-#define WARNING_CHANNEL 0
-#define ERROR_CHANNEL 1
-#define PARSE_STATUS_CHANNEL 2
-logger_t logger = {0};
+// CHANNEL defs in 'logging/logger_w_channels.h'
 
 int is_asm_type_specifier(token_type_t type) {
   return type == T_X86_32_LINUX || type == T_X86_64_LINUX || type == T_ARM64;
@@ -38,12 +35,12 @@ int get_precedence(token_type_t type) {
 }
 
 program_t* parse(tokenizer3_t* t) {
-  logger_channel_set_stream(&logger, WARNING_CHANNEL, stdout);
-  logger_channel_set_stream(&logger, ERROR_CHANNEL, stdout);
-  logger_channel_set_stream(&logger, PARSE_STATUS_CHANNEL, stdout);
-  logger_channel_enable(&logger, WARNING_CHANNEL,      "Warn",        ANSI_RESET);
-  logger_channel_enable(&logger, ERROR_CHANNEL,        "Error",       ANSI_RED);
-  logger_channel_enable(&logger, PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
+  logger_channel_set_stream(logger_get_global(), WARNING_CHANNEL, stdout);
+  logger_channel_set_stream(logger_get_global(), ERROR_CHANNEL, stdout);
+  logger_channel_set_stream(logger_get_global(), PARSE_STATUS_CHANNEL, stdout);
+  logger_channel_enable(logger_get_global(), WARNING_CHANNEL,      "Warn",        ANSI_RESET);
+  logger_channel_enable(logger_get_global(), ERROR_CHANNEL,        "Error",       ANSI_RED);
+  logger_channel_enable(logger_get_global(), PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
   return parse_program(t);
 }
 
@@ -99,7 +96,7 @@ use_t* parse_use(tokenizer3_t* t, error_context_t* ctx) {
   strncpy(u->name, t->source_code + tokenizer3_get(t, 2).loc.begin_index, tokenizer3_get(t, 2).loc.length);
   tokenizer3_advance(t);
 
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed use\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed use\n");
 
   return u;
 }
@@ -125,34 +122,32 @@ block_t* parse_block(tokenizer3_t* t, error_context_t* ctx) {
     // printf("block: "); tokenizer3_show_token_offset(t, 2);
   }
   tokenizer3_advance(t);    //consume last '}'
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed block\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed block\n");
   return b;
 }
 
 asm_block_t* parse_asm_block(tokenizer3_t* t, error_context_t* ctx) {
   asm_block_t* block = calloc(1, sizeof(asm_block_t));
   tokenizer3_advance(t);
-  tokenizer3_show_token_offset(t, 2);
+  // tokenizer3_show_token_offset(t, 2);
   if (!is_asm_type_specifier(tokenizer3_get(t, 2).type)) {
     error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Assembly type", tokenizer3_get(t, 2)));
     tokenizer3_advance(t);
-    // error_push(ctx, error_new(E_INVALID_ASM_TYPE, tokenizer3_get(t, 2)));
   }
   block->asm_type = tokenizer3_get(t, 2).type;
   tokenizer3_advance(t);
   if (!tokenizer3_expect_offset(t, 2, T_LB)) {
     error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Left brace", tokenizer3_get(t,2)));
-    // error_push(ctx, error_new(E_MISSING_LB, tokenizer3_get(t, 2)));
   }
   block->asm_source_code_begin = tokenizer3_get(t, 2).loc.begin_index + tokenizer3_get(t, 2).loc.length + t->source_code;
   while (!tokenizer3_expect_offset(t, 2, T_RB)) {
     tokenizer3_advance(t);
   }
   block->asm_source_code_end = tokenizer3_get(t, 2).loc.begin_index + t->source_code;
-  tokenizer3_show_token_offset(t, 2);
+  // tokenizer3_show_token_offset(t, 2);
 
   tokenizer3_advance(t);
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed asm block\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed asm block\n");
   return block;
 }
 
@@ -169,7 +164,7 @@ string_lit_t* parse_string_lit(tokenizer3_t* t, error_context_t* ctx) {
   }
   s->str_lit_end = tokenizer3_get(t, 2).loc.begin_index + t->source_code;
   s->length = s->str_lit_end - s->str_lit_begin;
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed string literal\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed string literal\n");
   return s;
 }
 
@@ -198,7 +193,7 @@ var_t* parse_var(tokenizer3_t* t, error_context_t* ctx) {
     v->indirection ++;
     tokenizer3_advance(t);
   }
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> Parsed var\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed var\n");
   return v;
 }
 
@@ -212,7 +207,7 @@ func_decl_t* parse_func_decl(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
 
   decl->params = parse_param_list(t, ctx);
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func_decl\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed func_decl\n");
   return decl;
 }
 
@@ -240,7 +235,7 @@ func_t* parse_func(tokenizer3_t* t, error_context_t* ctx) {
   }
   f->block = parse_block(t, ctx);
 
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed func\n");
   return f;
 }
 
@@ -254,7 +249,7 @@ func_call_t* parse_func_call(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
 
   func_call->args = parse_arg_list(t, ctx);
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed func_call\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed func_call\n");
   return func_call;
 }
 
@@ -275,7 +270,7 @@ assign_t* parse_var_assign(tokenizer3_t* t, error_context_t* ctx) {
     a->right_hand_side.expr = parse_expression(t, ctx);
     a->type |= ASSIGN_RHS_EXPR;
   }
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed var_assign\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed var_assign\n");
   return a;
 }
 
@@ -300,7 +295,7 @@ assign_t* parse_id_assign(tokenizer3_t* t, error_context_t* ctx) {
     a->type |= ASSIGN_RHS_EXPR;
   }
 
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed id_assign\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed id_assign\n");
   return a;
 }
 
@@ -310,7 +305,7 @@ return_t* parse_return(tokenizer3_t* t, error_context_t* ctx) {
 
   r->expr = parse_expression(t, ctx); 
 
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed return\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed return\n");
   return r;
 }
 
@@ -340,7 +335,7 @@ param_list_t* parse_param_list(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
   //tokenizer3_show_token_offset(t, 2);
   
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed param_list\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed param_list\n");
   return p;
 }
 
@@ -374,7 +369,7 @@ arg_list_t* parse_arg_list(tokenizer3_t* t, error_context_t* ctx) {
   // printf("parse_arg_list: ");
   // tokenizer3_show_token_offset(t, 2);
   // printf("=> Parsed arg_list\n");
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed arg_list\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed arg_list\n");
   return args;
 }
 
@@ -428,7 +423,7 @@ statement_t* parse_statement(tokenizer3_t* t, error_context_t* ctx) {
     // fprintf(stderr, "<%s>: %d, Expected SEMICON, got something else %d\n", __FUNCTION__, __LINE__, tokenizer3_get(t, 2).type);
     // exit(1);
   }
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed statement\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed statement\n");
   return s;
 }
 
@@ -437,7 +432,7 @@ if_t* parse_if(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
   iff->condition = parse_expression(t, ctx);
   iff->block = parse_block(t, ctx);
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed if\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed if\n");
   return iff;
 }
 
@@ -446,7 +441,7 @@ while_t* parse_while(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
   whle->condition = parse_expression(t, ctx);
   whle->block = parse_block(t, ctx);
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed while\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed while\n");
   return whle;
 }
 
@@ -512,7 +507,7 @@ expression_t* parse_expression(tokenizer3_t* t, error_context_t* ctx) {
   //   tokenizer3_token_print(postfix[i], t);
   // }
   expression_t* e = parse_expression_postfix(postfix, postfix_len, ctx); 
-  logger_log(&logger, PARSE_STATUS_CHANNEL, "=> parsed expression\n");
+  logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed expression\n");
   return e;
 }
 

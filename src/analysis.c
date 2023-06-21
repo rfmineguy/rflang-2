@@ -3,7 +3,7 @@
 
 int analyze_program(program_t* program) {
   analyze_context_t ctx = {0};
-  ctx.ht = chaining_ht_alloc(10);
+  ctx.ht = chaining_ht_str_var_alloc(10);
   
   printf("... analyze_program\n");
   for (int i = 0; i < program->use_list_count; i++) {
@@ -13,8 +13,8 @@ int analyze_program(program_t* program) {
     analyze_func(program->func_list[i], &ctx);
   }
 
-  chaining_ht_show(ctx.ht, 0);
-  chaining_ht_free(ctx.ht);
+  chaining_ht_str_var_show(ctx.ht, 0);
+  chaining_ht_str_var_free(ctx.ht);
   return 1; 
 }
 
@@ -42,12 +42,12 @@ int analyze_func(func_t* func, analyze_context_t* ctx) {
 }
 
 int analyze_func_decl(func_decl_t* func_decl, analyze_context_t* ctx) {
-  chaining_entry_data_t d = {0};
+  entry_var d = {0};
   strncpy(d.key, func_decl->name, 100);
   d.scope_depth = ctx->scope_depth;
   d.scope_number = ctx->scope_number;
   d.type = 1; // FUNC
-  chaining_ht_put(ctx->ht, func_decl->name, d);
+  chaining_ht_str_var_put(ctx->ht, func_decl->name, d);
   
   int params_status = analyze_param_list(func_decl->params, ctx);
 
@@ -62,12 +62,12 @@ int analyze_param_list(param_list_t* params, analyze_context_t* ctx) {
 }
 
 int analyze_var(var_t* var, analyze_context_t* ctx) {
-  chaining_entry_data_t d = {0};
+  entry_var d = {0};
   strncpy(d.key, var->name, 100);
   d.scope_depth = ctx->scope_depth;
   d.scope_number = ctx->scope_number;
   d.type = 2; // VAR
-  chaining_ht_put(ctx->ht, var->name, d);
+  chaining_ht_str_var_put(ctx->ht, var->name, d);
   return 1;
 }
 
@@ -111,7 +111,7 @@ int analyze_return(return_t* ret, analyze_context_t* ctx) {
 
 int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int depth) {
   func_call_t* func_call = func_call_expr->value.func_call;
-  if (!chaining_ht_contains(ctx->ht, func_call->name)) {
+  if (!chaining_ht_str_var_contains(ctx->ht, func_call->name)) {
     fprintf(stderr, "%s : '%s' not defined\n", __func__, func_call->name);
   }
   else {
@@ -137,11 +137,11 @@ int analyze_assign(assign_t* assign, analyze_context_t* ctx) {
   if (assign->type & ASSIGN_LHS_ID) {
     int lhs_id_status = 1; // trivial to analyze an ID (string literal)
     // check if the id is in the HashTable. if not its illegal code
-    if (!chaining_ht_contains(ctx->ht, assign->left_hand_side.id)) {
+    if (!chaining_ht_str_var_contains(ctx->ht, assign->left_hand_side.id)) {
       fprintf(stderr, "'%s' not defined\n", assign->left_hand_side.id);
     }
     else {
-      chaining_entry_data_t data = chaining_ht_find(ctx->ht, assign->left_hand_side.id);
+      entry_var data = chaining_ht_str_var_find(ctx->ht, assign->left_hand_side.id);
       if (data.scope_number != ctx->scope_number || data.scope_depth < ctx->scope_depth) {
         fprintf(stderr, "'%s' out of scope\n", assign->left_hand_side.id);
       }

@@ -171,7 +171,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
     t->col += id.length;
     return;
   }
-  printf("Unknown: %c\n", *t->cursor);
+  printf("[%s: %d] Unknown character: '%c'\n", __func__, __LINE__, *t->cursor);
   t->history[4] = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
   t->cursor += 1;
   t->col += 1;

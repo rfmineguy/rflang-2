@@ -1,6 +1,5 @@
 #include "compile.h"
 #include "codegen/codegen.h"
-#include "parsers/parser3.h"
 #include "analysis.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,24 +42,33 @@ comp_info_t get_comp_info(args2_t args) {
   return info;
 }
 
+int check_all_files_exist(args2_t args, const char** failed_file) {
+  int i;
+  for (i = 0; i < args.input_files_count; i++) {
+    // make sure the listed files all exist
+    char* rp = realpath(args.input_files[i], NULL);
+    if (!rp) {
+      free(rp);
+      break;
+    }
+    FILE* f = fopen(args.input_files[i], "r");
+    if (!f) {
+      fclose(f);
+      free(rp);
+      break;
+    }
+    fclose(f);
+    free(rp);
+  }
+  if (i != args.input_files_count) {
+    *failed_file = args.input_files[i];
+    return 0;
+  }
+  return 1;
+}
+
 int compile_all(args2_t args) {
-  /* MOCK CODE
-  // make a hashtable for storing already parsed files
-  hashmap<string, program> cached_parses = ht_new(...);
-
-  // parse every file supplied to the compiler
-  for (int i = 0; i < args.input_files_count; i++) {
-    tokenizer3_t t = tokenizer3_new(args.input_files[i]);   // make tokenizer for the input file
-    program_t* p = parse(&t);                               // generate ast for the tokenizer
-    ht_put(cached_parses, args.input_files[i], p);          // cache the ast for later analysis
-  }
-
-  for (int i = 0; i < cached_parses.size; i++) {
-    analyze(p, cached_parses);                              // analyze the cached parse, with awareness
-  }
-  */
-
-  /* ISSUES WITH THIS ^^
+  /* POTENTIAL ISSUES WITH THIS
    *  - For standard library functions, how would this work?
    *    + It would be have to be "on demand to some extent", sort of like 
    */
@@ -73,9 +81,45 @@ int compile_all(args2_t args) {
    *      * /usr/rfc/std/math.rf
    *      * /usr/rfc/std/string.rf
    *      * /usr/rfc/std/stddef.rf
+   *    + If the used module doesn't exist locally use the args.include_dirs to look for the requested module
+   *      If it doesn't exist, obviously there was a problem
    */
 
-  return 1;
+  // Esure that all the files supplied actually do exist before moving on to parsing
+  printf("Compiling all\n");
+  const char* failed_file = NULL;
+  if (!check_all_files_exist(args, &failed_file)) {
+    fprintf(stderr, "'%s' doesn't exist\n", failed_file);
+    return 1;
+  }
+
+  // Begin parsing source files
+  chaining_ht_str_program_t cached_parses = chaining_ht_str_program_alloc(10);
+  for (int i = 0; i < args.input_files_count; i++) {
+    if (!chaining_ht_str_program_contains(cached_parses, (char*) args.input_files[i])) {
+      program_t* prog = parse_file(args.input_files[i], &args);
+      // show_program(prog, 1);
+      chaining_ht_str_program_put(cached_parses, (char*) args.input_files[i], prog);
+      printf("Parsed, '%s'\n", args.input_files[i]);
+    }
+  }
+  // show_program(chaining_ht_str_program_find(cached_parses, "entry.rf").p, 0);
+  chaining_ht_str_program_show(cached_parses, 0);
+  chaining_ht_str_program_free(cached_parses);
+
+  // Start analysis of the modules
+}
+
+program_t* parse_file(const char* file_path, args2_t* args) {
+  program_t* prog = NULL;
+  char* rp = realpath(file_path, NULL); //NOTE: I think some better error checking could happen here; see `man 3 realpath`
+
+  tokenizer3_t t = tokenizer3_new(rp);
+  prog = parse(&t);
+  tokenizer3_free(&t);
+
+  free(rp);
+  return prog;
 }
 
 int compile(args2_t args) {

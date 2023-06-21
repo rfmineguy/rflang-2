@@ -1,6 +1,8 @@
 #include "logger_w_channels.h"
 #include <stdarg.h>
 
+logger_t g_rfc_logger = {0};
+
 void logger_reset(logger_t* logger) {
   logger->channel_map = 0;
   for (int i = 0; i < 64; i++) {
@@ -50,4 +52,8 @@ void logger_log(logger_t* logger, int channel, const char* fmt, ...) {
   va_start(args, fmt);
   vfprintf(logger->channel_streams[channel], fmt, args);
   va_end(args);
+}
+
+logger_t* logger_get_global() {
+  return &g_rfc_logger;
 }

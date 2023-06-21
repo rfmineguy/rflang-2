@@ -23,32 +23,6 @@
     #define PLATFORM "Is not linux or windows"
 #endif
 
-void old_arg_handling(){
-  /*
-  arg_handle_result_t r = args_handle(argc, argv);
-  if (!(r.errors |= ERR_NO_IN_FILE)) {
-    fprintf(stderr, "ERROR: No input source file supplied. Try -f\n");
-  }
-  if (!(r.errors |= ERR_NO_OUT_FILE)) {
-    fprintf(stderr, "ERROR: No output filepath supplied. Try -o\n");
-  }
-  if (!(r.errors |= ERR_NO_PLATFORM)) {
-    fprintf(stderr, "ERROR: No platform supplied. Try -p. See -l for list\n");
-  }
-  if (r.args.test) {
-    printf("No test registered\n");
-    return 0;
-  }
-  if (r.args.list_comp_platforms) {
-    printf("Platforms:\n");
-    printf(" - x86_32-linux\n");
-    printf(" - x86_64-linux\n");
-    printf(" - arm64\n");
-    printf(" - host\n");
-    return 420;
-  }*/
-}
-
 int main(int argc, const char** argv) {
   // Parse and retrieve arguments
   args2_t args = {0};
@@ -74,5 +48,5 @@ int main(int argc, const char** argv) {
     return 421;
   }
 
-  return compile(args);
+  return compile_all(args);
 }
