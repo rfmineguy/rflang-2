@@ -10,7 +10,8 @@
     .length = len,\
     .line = tokenizer->line,\
     .column = tokenizer->col,\
-    .line_start = tokenizer->line_start }
+    .line_start = tokenizer->line_start,\
+    .file = tokenizer->source_filename }
 
 #define TOK_CHECK_CH(ch, tp) \
   if (*t->cursor == ch) {\

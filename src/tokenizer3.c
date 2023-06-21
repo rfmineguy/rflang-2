@@ -20,6 +20,7 @@ tokenizer3_t tokenizer3_new(const char* filename) {
   fseek(f, 0, SEEK_SET);
 
   // setup initial values of tokenizer
+  t.source_filename = filename;
   t.source_code = malloc(sizeof(char) * t.source_length + 1);
   fread(t.source_code, sizeof(char), t.source_length, f);
   t.source_code[t.source_length] = 0;

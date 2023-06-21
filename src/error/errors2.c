@@ -1,4 +1,5 @@
 #include "errors2.h"
+#include <unistd.h>
 
 const char* error_type_fmt_str(error_type_t type) {
   switch (type) {
@@ -74,8 +75,10 @@ void error_show_all(error_context_t* ctx) {
 }
 
 void error_show(error_t err) {
-  fprintf(stderr, "[%d, %20s] ERROR : [%s, %d:%d] <%s>: ", err.debug_line_number, err.debug_function, err.filename, err.line_number, err.col_number, error_type_fmt_str(err.type));
-  // fprintf(stderr, "line_start: %p, %c\n", err.token.loc.line_start);
+  fprintf(stderr, "[%d, %20s] ERROR : [%s, %d:%d] <%s>: ",
+      err.debug_line_number, err.debug_function, err.token.loc.file,
+      err.line_number, err.col_number, error_type_fmt_str(err.type));
+
   char* cur = (char*) err.token.loc.line_start;
   while (*cur != '\n' && *cur != '\0') {
     fputc(*cur, stderr);

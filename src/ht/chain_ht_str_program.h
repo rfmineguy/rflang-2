@@ -2,7 +2,6 @@
 #define CHAINING_HT_STR_PROG_H
 #include "../parsers/parser3.h"
 
-// forward declare chaining_entry
 typedef struct chaining_node_str_program_t chaining_node_str_program_t; 
 
 typedef struct {

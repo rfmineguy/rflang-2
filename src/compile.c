@@ -98,16 +98,19 @@ int compile_all(args2_t args) {
   for (int i = 0; i < args.input_files_count; i++) {
     if (!chaining_ht_str_program_contains(cached_parses, (char*) args.input_files[i])) {
       program_t* prog = parse_file(args.input_files[i], &args);
-      // show_program(prog, 1);
       chaining_ht_str_program_put(cached_parses, (char*) args.input_files[i], prog);
       printf("Parsed, '%s'\n", args.input_files[i]);
     }
   }
+
   // show_program(chaining_ht_str_program_find(cached_parses, "entry.rf").p, 0);
-  chaining_ht_str_program_show(cached_parses, 0);
-  chaining_ht_str_program_free(cached_parses);
+  // chaining_ht_str_program_show(cached_parses, 0);
 
   // Start analysis of the modules
+  
+  
+  chaining_ht_str_program_show(cached_parses, 0);
+  chaining_ht_str_program_free(cached_parses);
 }
 
 program_t* parse_file(const char* file_path, args2_t* args) {
