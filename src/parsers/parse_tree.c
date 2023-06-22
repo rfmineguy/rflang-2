@@ -21,6 +21,7 @@ void free_program(program_t* p) {
   p->func_list = NULL;
 
   free(p);
+  p = NULL;
 }
 
 void free_use(use_t* use) {
@@ -123,10 +124,15 @@ void free_expression(expression_t* expr) {
     free(expr->value.func_call);
     expr->value.func_call = NULL;
   }
-  free_expression(expr->left);
-  free(expr->left);
-  free_expression(expr->right);
-  free(expr->right);
+  if (expr->type == EXPR_COMPOUND) {
+    free_expression(expr->left);
+    free(expr->left);
+    expr->left = NULL;
+    free_expression(expr->right);
+    free(expr->right);
+    expr->right = NULL;
+  }
+  
 }
 
 void free_iff(if_t* iff) {
@@ -192,7 +198,7 @@ void tabs(int count) {
 }
 
 void show_program(program_t* p, int level) {
-  tabs(level - 1); printf("Program\n");
+  tabs(level - 1); printf("Program {%s}\n", p->name);
   if (!p) {
     tabs(level); printf("NULL\n");
     return;
@@ -361,6 +367,7 @@ void show_var(var_t* var, int level) {
 
 void show_expression(expression_t* expr, int level) {
   tabs(level); printf("Expr");
+  // tabs(level + 1); printf("%p", expr);
   if (!expr) {
     // printf("\n");
     tabs(level+1); printf("NULL\n");

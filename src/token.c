@@ -2,6 +2,7 @@
 
 const char* token_type_stringify(token_type_t t) {
   switch (t) {
+    case T_EXPR_FUNC_END:return "FuncEnd";
     case T_INVALID:     return "Invalid";
     case T_UNKNOWN:     return "Unknown";
     case T_NL:          return "NL";

@@ -47,6 +47,7 @@ set (SOURCES
   src/logging/logger_w_channels.c
   src/parsers/parser3.c
   src/parsers/parse_tree.c
+  src/expression_validation.c
   src/codegen/codegen.c
   src/codegen/codegen_x86_64.c
   src/error/errors2.c
@@ -74,8 +75,8 @@ add_executable(rfc
   src/main.c
   ${SOURCES})
 
-target_link_libraries(rfc PRIVATE m) #argparse 
-target_include_directories(rfc PRIVATE ${argparse_SOURCE_DIR} src/)
+target_link_libraries(rfc PRIVATE m) 
+target_include_directories(rfc PRIVATE src/)
 
 install(TARGETS rfc)
 install(FILES vim-syntax/rf.vim DESTINATION ~/.vim/syntax/)

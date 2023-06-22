@@ -55,6 +55,7 @@ typedef struct {
 typedef struct {
   char* source_code;
   const char* source_filename;
+  const char* module_name;
   int source_length;
 
   char* cursor;

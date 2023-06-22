@@ -1,0 +1,11 @@
+fn func() {
+  if 1 {
+  };
+  while b {
+  };
+};
+
+fn func2() {
+  if func(9, a(4, 5), b() {
+  };
+};

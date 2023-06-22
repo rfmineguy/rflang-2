@@ -39,23 +39,31 @@ int chaining_ht_str_program_hash(chaining_ht_str_program_t ht, char* key) {
   return hash % ht.M;
 }
 
-void chaining_ht_str_program_show_entry(entry_program entry) {
+void chaining_ht_str_program_show_entry(entry_program entry, entry_print_style print_style) {
   // printf("{key: %7s, scope_depth: %d, scope_number: %d, type: %s}", entry.key, entry.scope_depth, entry.scope_number, map_type_to_string(entry.type));
-  printf("{key (modname): %s}\n", entry.key);
+  switch (print_style) {
+    case MODULE_NAME:
+      printf("{key (modname): %s}\n", entry.key); 
+      break;
+    case MODULE_PARSE_TREE:
+      show_program(entry.p, 0);
+      break;
+    default:
+      break;
+  }
+  printf("\n");
 }
 
-void chaining_ht_str_program_show(chaining_ht_str_program_t ht, int context) {
+void chaining_ht_str_program_show(chaining_ht_str_program_t ht, entry_print_style print_style) {
   printf("Showing chaining hash table {%d}\n", ht.M);
   for (int i = 0; i < ht.M; i++) {
     chaining_node_str_program_t* e = ht.buffer[i];
-    if (context) printf("%d:\n", i);
     while (e != NULL) {
       printf("\t");
-      chaining_ht_str_program_show_entry(e->value);
+      chaining_ht_str_program_show_entry(e->value, print_style);
       // printf("\n");
       e = e->next;
     }
-    if (context) printf("NULL\n");
   }
 }
 

@@ -4,6 +4,11 @@
 
 typedef struct chaining_node_str_program_t chaining_node_str_program_t; 
 
+typedef enum {
+  MODULE_PARSE_TREE,
+  MODULE_NAME
+} entry_print_style;
+
 typedef struct {
   char key[100];
   program_t* p;
@@ -25,8 +30,8 @@ void                     chaining_ht_str_program_free(chaining_ht_str_program_t)
 
 int                      chaining_ht_str_program_hash(chaining_ht_str_program_t, char*);
 
-void                     chaining_ht_str_program_show_entry(entry_program);
-void                     chaining_ht_str_program_show(chaining_ht_str_program_t, int);
+void                     chaining_ht_str_program_show_entry(entry_program, entry_print_style);
+void                     chaining_ht_str_program_show(chaining_ht_str_program_t, entry_print_style);
 
 void                     chaining_ht_str_program_put(chaining_ht_str_program_t, char*, program_t*);
 int                      chaining_ht_str_program_remove(chaining_ht_str_program_t, char*);

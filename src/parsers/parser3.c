@@ -1,4 +1,5 @@
 #include "parser3.h"
+#include "../expression_validation.h"
 #include "../tokenizer3.h"
 #include "../logging/logger_w_channels.h"
 #include <stdlib.h>
@@ -44,6 +45,7 @@ program_t* parse_program(tokenizer3_t* t) {
   const int FUNC_DEFAULT_MAX = 5;
   const int USE_DEFAULT_MAX  = 5;
   program_t* p = calloc(1, sizeof(program_t));
+  strncat(p->name, t->module_name, 30);
   p->func_list_max = FUNC_DEFAULT_MAX;
   p->use_list_max = USE_DEFAULT_MAX;
   p->func_list = calloc(p->func_list_max, sizeof(func_t));
@@ -440,6 +442,9 @@ while_t* parse_while(tokenizer3_t* t, error_context_t* ctx) {
 }
 
 expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_context_t* ctx) {
+  // for (int i = 0; i < postfix_len; i++) {
+  //   printf("%s -> ", token_type_stringify(postfix[i].type));
+  // }
   expression_t* exprs[postfix_len];
   int top = -1;
   for (int i = 0; i < postfix_len; i++) {
@@ -473,11 +478,15 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_
       top--;
       e->type = EXPR_FUNC_CALL;
       exprs[++top] = e;
+      show_expression(exprs[top], 0);
     }
     else {
       expression_t* l = exprs[top - 1];
       expression_t* r = exprs[top];
       
+      exprs[top - 1] = NULL;
+      exprs[top] = NULL;
+
       top -= 2;
       e->type = EXPR_COMPOUND;
       e->value.operation = postfix[i].type;
@@ -486,7 +495,10 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_
       exprs[++top] = e;
     }
   }
-  // show_expression(exprs[0], 0);
+  // printf("%d\n", postfix_len);
+  // for (int i = 0; i < postfix_len; i++) {
+  //   printf("%d:\n", i); show_expression(exprs[i], 1);
+  // }
   return exprs[0];
 }
 
@@ -496,6 +508,10 @@ expression_t* parse_expression(tokenizer3_t* t, error_context_t* ctx) {
   token_t postfix[100] = {0};
   int postfix_len = 0;
   
+  if (!validate_expression(t, ctx, &postfix_len)) {
+    fprintf(stderr, "=> Failed to validate expression\n");
+    return NULL;
+  }
   get_postfix_rep(t, postfix, &postfix_len, ctx);
   // for (int i = 0; i < postfix_len; i++) {
   //   tokenizer3_token_print(postfix[i], t);

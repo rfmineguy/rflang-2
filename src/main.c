@@ -7,7 +7,6 @@
 #include "parsers/parser3.h"
 #include "tokenizer3.h"
 #include "analysis.h"
-#include "argparse.h"
 #include "args2.h"
 #include "compile.h"
 #include "logging/logger_w_channels.h"

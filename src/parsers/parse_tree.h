@@ -35,7 +35,9 @@ typedef enum {
   ASSIGN_RHS_STR_LIT = 4,
   ASSIGN_RHS_EXPR    = 8,
 } assign_type_t;
+
 struct program_t {
+  char name[30];
   use_t**     use_list;
   int         use_list_count, use_list_max;
   func_t**    func_list;
