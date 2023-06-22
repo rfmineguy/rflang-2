@@ -8,7 +8,7 @@ project(rfc-tests LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall") # -fsanitize=address")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 
 # file (COPY vim-syntax/rf.vim DESTINATION )
@@ -52,7 +52,6 @@ set (SOURCES
   src/codegen/codegen_x86_64.c
   src/error/errors2.c
   src/tokenizer3.c
-  #src/chaining_ht.c
   src/ht/chain_ht_str_vardat.c
   src/ht/chain_ht_str_program.c
   src/analysis.c)

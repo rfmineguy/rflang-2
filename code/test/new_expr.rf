@@ -2,20 +2,20 @@ use io
 use math
 
 fn add(a: int*, b: int): int {
-  sum: int = a + b;
-  return sum;
+sum: int = a + b;
+     return sum;
 };
 
 fn pow(base: int, exp: int): int {
-  result: int = 1;
-  return 1;
+result: int = 1;
+        return 1;
 };
 
 fn main(argc: int, argv: char**): int {
   function();
-  affa: int = 4 + 3 * (x - 4);
-  affa = (4 - 1) * 5;
-  return x + 3 < 4 && a > 3;
+affa: int = 4 + 3 * (x - 4);
+      affa = (4 - 1) * 5;
+      return x + 3 < 4 && a > 3;
 };
 
 fn func(a: int, b: bool): bool {
@@ -26,12 +26,12 @@ fn func(a: int, b: bool): bool {
   if pow(3, 3, 5 - 4 * 5) < 3 - 4 {
     return 0;
   };
-  while a(3 + 3) < 101 - 4 {
+  while a(3 + 3) < 102 - 4 {
     a = a - 1;
     if a == 4 {
       b: int = 16;
     };
   };
-  b = 4;
+  b = 4; //dafagarg
   return 1;
 };

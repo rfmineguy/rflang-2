@@ -43,6 +43,9 @@ int compile_all(args2_t args) {
   chaining_ht_str_program_show(cached_parses, MODULE_PARSE_TREE);
   chaining_ht_str_program_free(cached_parses);
 
+  fprintf(stderr, "====================================================\n");
+  fprintf(stderr, "NOTE: rfc leaks a little bit of memory at the moment\n"); 
+  fprintf(stderr, "====================================================\n");
   return 2; //NOTE: Neutral
 }
 

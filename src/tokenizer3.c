@@ -44,6 +44,7 @@ void tokenizer3_free(tokenizer3_t* t) {
 }
 
 void tokenizer3_consume_comments(tokenizer3_t* t) {
+  // HANDLE MULTILINE COMMENTS
   if (strncmp(t->cursor, "*/", 2) == 0) {
     fprintf(stderr, "Ending comment block alone... skipping it\n");
     t->cursor += 2;
@@ -72,6 +73,12 @@ void tokenizer3_consume_comments(tokenizer3_t* t) {
       t->cursor++;
       t->line_start = t->cursor;
     }
+  }
+  // HANDLE SINGLE LINE COMMENTS
+  if (strncmp(t->cursor, "//", 2) == 0) {
+    while (*t->cursor != '\n') {
+      t->cursor ++;
+    } 
   }
 }
 
