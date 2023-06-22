@@ -1,6 +1,7 @@
 #include "compile.h"
 #include "codegen/codegen.h"
 #include "analysis.h"
+#include "file_util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,30 +43,29 @@ comp_info_t get_comp_info(args2_t args) {
   return info;
 }
 
-int check_all_files_exist(args2_t args, const char** failed_file) {
-  int i;
-  for (i = 0; i < args.input_files_count; i++) {
-    // make sure the listed files all exist
-    char* rp = realpath(args.input_files[i], NULL);
-    if (!rp) {
-      free(rp);
-      break;
-    }
-    FILE* f = fopen(args.input_files[i], "r");
-    if (!f) {
-      fclose(f);
-      free(rp);
-      break;
-    }
-    fclose(f);
-    free(rp);
-  }
-  if (i != args.input_files_count) {
-    *failed_file = args.input_files[i];
-    return 0;
-  }
-  return 1;
-}
+// int check_all_files_exist(args2_t args, const char** failed_file) {
+//   int i;
+//   for (i = 0; i < args.input_files_count; i++) {
+//     char* rp = realpath(args.input_files[i], NULL);
+//     if (!rp) {
+//       free(rp);
+//       break;
+//     }
+//     FILE* f = fopen(args.input_files[i], "r");
+//     if (!f) {
+//       fclose(f);
+//       free(rp);
+//       break;
+//     }
+//     fclose(f);
+//     free(rp);
+//   }
+//   if (i != args.input_files_count) {
+//     *failed_file = args.input_files[i];
+//     return 0;
+//   }
+//   return 1;
+// }
 
 int compile_all(args2_t args) {
   /* POTENTIAL ISSUES WITH THIS
@@ -88,29 +88,62 @@ int compile_all(args2_t args) {
   // Esure that all the files supplied actually do exist before moving on to parsing
   printf("Compiling all\n");
   const char* failed_file = NULL;
-  if (!check_all_files_exist(args, &failed_file)) {
-    fprintf(stderr, "'%s' doesn't exist\n", failed_file);
+  if (!file_util_check_input_modules_exist(&args, &failed_file)) {
+    fprintf(stderr, "Module ['%s'] doesn't exist in stdlib or local\n", failed_file);
     return 1;
   }
 
   // Begin parsing source files
   chaining_ht_str_program_t cached_parses = chaining_ht_str_program_alloc(10);
+  /*
   for (int i = 0; i < args.input_files_count; i++) {
     if (!chaining_ht_str_program_contains(cached_parses, (char*) args.input_files[i])) {
       program_t* prog = parse_file(args.input_files[i], &args);
       chaining_ht_str_program_put(cached_parses, (char*) args.input_files[i], prog);
       printf("Parsed, '%s'\n", args.input_files[i]);
+
+      for (int i = 0; i < prog->use_list_count; i++) {
+        // parse the used files
+      }
     }
   }
-
-  // show_program(chaining_ht_str_program_find(cached_parses, "entry.rf").p, 0);
-  // chaining_ht_str_program_show(cached_parses, 0);
+  */
+  for (int i = 0; i < args.input_modules_count; i++) {
+    parse_file_rec(args.input_modules[i], &args, cached_parses);
+  }
 
   // Start analysis of the modules
-  
-  
   chaining_ht_str_program_show(cached_parses, 0);
   chaining_ht_str_program_free(cached_parses);
+
+  return 2; //NOTE: Neutral
+}
+
+void parse_file_rec(const char* module, args2_t* args, chaining_ht_str_program_t ht) {
+  if (chaining_ht_str_program_contains(ht, (char*) module)) {
+    fprintf(stderr, "Module '%s' has already been parsed\n", module);
+    return;
+  }
+  char full_path_local[PATH_MAX], full_path_stdlib[PATH_MAX];
+  int has_local = file_util_local_module_exists(module, full_path_local, PATH_MAX);
+  int has_std   = file_util_stdlib_module_exists(module, full_path_stdlib, PATH_MAX);
+  // printf("local: %s\n", has_local ? "Yes":"No");
+  // printf("std: %s\n", has_std ? "Yes":"No");
+  if (!has_local && !has_std) {
+    fprintf(stderr, "Module [%s] doesn't exist locally or in the stdlib\n", module);
+    return;
+  }
+  
+  printf("Parsing [%s]\n", module);
+  tokenizer3_t t = tokenizer3_new(has_local ? full_path_local : full_path_stdlib);
+  program_t* prog = parse(&t);
+  chaining_ht_str_program_put(ht, (char*) module, prog);
+
+  tokenizer3_free(&t);
+
+  for (int i = 0; i < prog->use_list_count; i++) {
+    parse_file_rec(prog->use_list[i]->name, args, ht);
+  }
 }
 
 program_t* parse_file(const char* file_path, args2_t* args) {

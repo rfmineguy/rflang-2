@@ -35,13 +35,7 @@ int get_precedence(token_type_t type) {
 }
 
 program_t* parse(tokenizer3_t* t) {
-  logger_channel_set_stream(logger_get_global(), WARNING_CHANNEL, stdout);
-  logger_channel_set_stream(logger_get_global(), ERROR_CHANNEL, stdout);
-  logger_channel_set_stream(logger_get_global(), PARSE_STATUS_CHANNEL, stdout);
-  logger_channel_enable(logger_get_global(), WARNING_CHANNEL,      "Warn",        ANSI_RESET);
-  logger_channel_enable(logger_get_global(), ERROR_CHANNEL,        "Error",       ANSI_RED);
-  logger_channel_enable(logger_get_global(), PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
-  return parse_program(t);
+ return parse_program(t);
 }
 
 program_t* parse_program(tokenizer3_t* t) {

@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 typedef struct {
-  const char*         input_files[100];
-  int                 input_files_count;
+  const char*         input_modules[100];
+  int                 input_modules_count;
 
   const char*         include_dirs[100];
   int                 include_dirs_count;

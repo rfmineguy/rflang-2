@@ -1,7 +1,7 @@
 fn pow(base: int, exp: int): int {
   r: int = 1;
   while exp > 0 {
-    r *= base;
+    r = r * base;
   };
   return r;
 };

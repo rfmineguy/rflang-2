@@ -2,6 +2,7 @@
 #define COMPILE_H
 #include "args2.h"
 #include "parsers/parser3.h"
+#include "ht/chain_ht_str_program.h"
 #include <limits.h>
 
 typedef struct {
@@ -14,6 +15,8 @@ comp_info_t get_comp_info(args2_t);
 
 int         check_all_files_exist(args2_t, const char**);
 int         compile_all(args2_t);
+
+void        parse_file_rec(const char*, args2_t*, chaining_ht_str_program_t);
 program_t*  parse_file(const char*, args2_t*);
 
 #endif

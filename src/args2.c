@@ -1,11 +1,12 @@
 #include "args2.h"
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 void args2_help() {
   printf("Usage: rfc <options>\n\n");
   printf("  -h                : Display this help menu\n");
-  printf("  -f <file_list>    : Supply list of files to compile\n");
+  printf("  -f <modules_list> : Supply list of modules to compile (NOTE: do not specify the file extension)\n");
   printf("  -I <inc_dir_list> : Supply list of directories to treat as include dirs\n");
   printf("  -S                : Whether rfc should generate assembly files for the input files\n");
   printf("  -o <file_name>    : Supply a filename for the generated executable\n");
@@ -15,9 +16,9 @@ void args2_help() {
 
 void args2_show(args2_t* args) {
   printf("args:\n");
-  printf("  input_files: \n");
-  for (int i = 0; i < args->input_files_count; i++) {
-    printf("   - %s\n", args->input_files[i]);
+  printf("  input_modules: \n");
+  for (int i = 0; i < args->input_modules_count; i++) {
+    printf("   - %s\n", args->input_modules[i]);
   }
   printf("  include_dirs: \n");
   for (int i = 0; i < args->include_dirs_count; i++) {
@@ -32,9 +33,8 @@ void args2_show(args2_t* args) {
 
 int args2_handle(int argc, const char** argv, args2_t* p_args) {
   // Set up constant fields
-  p_args->input_files_count = 0;
+  p_args->input_modules_count = 0;
   p_args->include_dirs_count = 0;
-  p_args->include_dirs[p_args->include_dirs_count++] = "/usr/local/include/stdlib";
 
   // Parse arg list
   char c;
@@ -45,13 +45,17 @@ int args2_handle(int argc, const char** argv, args2_t* p_args) {
         break;
       case 'f':
         optind--;
-        p_args->input_files_count = 0;
+        p_args->input_modules_count = 0;
         while (optind < argc && *argv[optind] != '-') {
-          if (p_args->input_files_count > 99) {
-            fprintf(stderr, "Too many input files. { supplied (%d), max (%d) }\n", p_args->input_files_count, 100);
+          if (p_args->input_modules_count > 99) {
+            fprintf(stderr, "Too many input modules. { supplied (%d), max (%d) }\n", p_args->input_modules_count, 100);
             return 6;
           }
-          p_args->input_files[p_args->input_files_count++] = argv[optind];
+          if (strchr(argv[optind], '.') != NULL) {
+            fprintf(stderr, "Input modules should not include extension. Error with [%s]\n", argv[optind]);
+            return 7;
+          }
+          p_args->input_modules[p_args->input_modules_count++] = argv[optind];
           optind++;
         }
         break;
@@ -60,7 +64,7 @@ int args2_handle(int argc, const char** argv, args2_t* p_args) {
         while (optind < argc && *argv[optind] != '-') {
           if (p_args->include_dirs_count > 99) {
             fprintf(stderr, "Too many include directories. { supplied (%d), max (%d) }\n", p_args->include_dirs_count, 100);
-            return 7;
+            return 8;
           }
           p_args->include_dirs[p_args->include_dirs_count++] = argv[optind];
           optind++;

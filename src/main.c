@@ -8,10 +8,9 @@
 #include "tokenizer3.h"
 #include "analysis.h"
 #include "argparse.h"
-// #include "args.h"
 #include "args2.h"
 #include "compile.h"
-// #include "codegen.h"
+#include "logging/logger_w_channels.h"
 
 #if defined(__linux__) // any linux distribution
     #define PLATFORM "linux"
@@ -20,15 +19,24 @@
 #elif defined(_WIN32) // any windows system
     #define PLATFORM "windows"
 #else
-    #define PLATFORM "Is not linux or windows"
+    #define PLATFORM "Is not linux, apple, or windows"
 #endif
+
+void setup_logger_channels() {
+  logger_channel_set_stream(logger_get_global(), WARNING_CHANNEL, stdout);
+  logger_channel_set_stream(logger_get_global(), ERROR_CHANNEL, stdout);
+  logger_channel_set_stream(logger_get_global(), PARSE_STATUS_CHANNEL, stdout);
+  logger_channel_enable(logger_get_global(), WARNING_CHANNEL,      "Warn",        ANSI_RESET);
+  logger_channel_enable(logger_get_global(), ERROR_CHANNEL,        "Error",       ANSI_RED);
+  logger_channel_enable(logger_get_global(), PARSE_STATUS_CHANNEL, "ParseStatus", ANSI_RESET);
+}
 
 int main(int argc, const char** argv) {
   // Parse and retrieve arguments
   args2_t args = {0};
   int result = args2_handle(argc, argv, &args); 
   if (result != 0) {
-    fprintf(stderr, "ERROR: %d.. parsing arguments\n", result);
+    fprintf(stderr, "Argument parsing error(code: %d)\n", result);
     args2_help();
     return result;
   }
@@ -43,10 +51,11 @@ int main(int argc, const char** argv) {
     printf(" - host\n");
     return 420;
   }
-  if (args.input_files_count == 0) {
+  if (args.input_modules_count == 0) {
     fprintf(stderr, "ERROR: Must supply at least one file to compile\n");
     return 421;
   }
 
+  //setup_logger_channels();
   return compile_all(args);
 }

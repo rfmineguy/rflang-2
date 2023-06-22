@@ -37,7 +37,7 @@ void logger_channel_disable(logger_t* logger, int channel) {
 
 void logger_log(logger_t* logger, int channel, const char* fmt, ...) {
   if ((logger->channel_map & (0x1 << channel)) == 0 || logger->channel_streams[channel] == NULL) {
-    fprintf(stderr, ANSI_RESET "logger_log:: something wrong with channel(%d)\n", channel);
+    // fprintf(stderr, ANSI_RESET "logger_log:: something wrong with channel(%d)\n", channel);
     return;
   }
   if (logger->channel_prefix[channel]) {
