@@ -214,7 +214,7 @@ number_t tokenizer3_as_number(tokenizer3_t* t) {
     digit_count++;
     temp_cursor++;
   }
-  number.type = 1;
+  number.type = 1; //floats not permited
   number.length = digit_count;
 
   //reverse number

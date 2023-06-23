@@ -12,4 +12,3 @@ fn _start() {
     call exit
   };
 };
-

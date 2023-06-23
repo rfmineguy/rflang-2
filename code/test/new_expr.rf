@@ -32,6 +32,6 @@ fn func(a: int, b: bool): bool {
       b: int = 16;
     };
   };
-  b = 4;//single line comment
+  b = 4; //single line comment
   return 1;
 };

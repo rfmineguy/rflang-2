@@ -43,7 +43,7 @@ void chaining_ht_str_module_show_entry(entry_module entry, entry_print_style pri
   // printf("{key: %7s, scope_depth: %d, scope_number: %d, type: %s}", entry.key, entry.scope_depth, entry.scope_number, map_type_to_string(entry.type));
   switch (print_style) {
     case MODULE_NAME:
-      printf("{key (modname): %s}\n", entry.key); 
+      printf("{key (modname): %s}", entry.key); 
       break;
     case MODULE_PARSE_TREE:
       show_module(entry.p, 0);

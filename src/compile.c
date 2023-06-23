@@ -40,7 +40,7 @@ int compile_all(args2_t args) {
   }
 
   // Start analysis of the modules
-  // chaining_ht_str_module_show(cached_parses, MODULE_PARSE_TREE);
+  chaining_ht_str_module_show(cached_parses, MODULE_NAME);
   chaining_ht_str_module_free(cached_parses);
 
   fprintf(stderr, "====================================================\n");
@@ -85,36 +85,4 @@ module_t* parse_file(const char* file_path, args2_t* args) {
 
   free(rp);
   return prog;
-}
-
-int compile(args2_t args) {
-  // printf(" ====== Compiling ======\n");
-  // comp_info_t info = get_comp_info(args);
-  // printf("CWD: %s\n", info.cwd);
-  // printf("OutFile: %s\n", info.output_file_path);
-  // printf("InFile: %s\n", info.input_file_path);
-
-  // // FILE* input_file = openf(info.input_file_path, "r");
-  // FILE* output_file = openf(info.output_file_path, "w");
-
-  // tokenizer3_t t = tokenizer3_new(info.input_file_path);
-
-  // program_t* prog = parse(&t);
-  // printf("Show program: DISABLED\n");
-  // show_program(prog, 1);
-
-  // printf("Compile program: DISABLED\n");
-  // //analyze_program(prog);
-  // 
-  // printf("Codegen program: DISABLED\n");
-  // // codegen_select(prog, output_file, args.comp_platform);
-
-  // free_program(prog);
-  // free(prog);
-  // prog = NULL;
-
-  // tokenizer3_free(&t);
-
-  // fclose(output_file);
-  return 0;
 }
