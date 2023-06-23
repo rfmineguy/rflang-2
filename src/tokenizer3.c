@@ -74,6 +74,7 @@ void tokenizer3_consume_comments(tokenizer3_t* t) {
       t->line_start = t->cursor;
     }
   }
+  
   // HANDLE SINGLE LINE COMMENTS
   if (strncmp(t->cursor, "//", 2) == 0) {
     while (*t->cursor != '\n') {
@@ -112,6 +113,7 @@ void tokenizer3_advance(tokenizer3_t* t) {
   // ensure any whitespace is skipped
   tokenizer3_consume_whitespace(t);
   tokenizer3_consume_comments(t);
+  tokenizer3_consume_whitespace(t);
 
   // 2. Replace the last element with the next token
   TOK_CHECK_STR("fn", 2, T_FN)
