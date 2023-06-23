@@ -38,6 +38,27 @@ tokenizer3_t tokenizer3_new(const char* filename) {
   return t;
 }
 
+tokenizer3_t tokenizer3_new_from_str(const char* source_string) {
+  tokenizer3_t t = {0};
+  t.source_filename = "None";
+  t.source_length = strlen(source_string);
+  t.source_code = malloc(sizeof(char) * t.source_length);
+  strncpy(t.source_code, source_string, sizeof(char) * t.source_length);
+  t.source_code[t.source_length] = 0;
+  t.cursor = t.source_code;
+  t.line_start = t.source_code;
+
+  for (int i = 0; i < 5; i++) {
+    t.history[i].loc.line_start = t.source_code;
+  }
+  // make sure the history buffer starts off half full, so our center is at index 2
+  for (int i = 0; i < 2; i++) {
+    tokenizer3_advance(&t);
+  }
+
+  return t;
+}
+
 void tokenizer3_free(tokenizer3_t* t) {
   free(t->source_code);
   t->source_code = NULL;

@@ -66,6 +66,7 @@ typedef struct {
 } tokenizer3_t;
 
 tokenizer3_t tokenizer3_new(const char*);
+tokenizer3_t tokenizer3_new_from_str(const char*);
 void         tokenizer3_free(tokenizer3_t*);
 
 void         tokenizer3_advance(tokenizer3_t*);
