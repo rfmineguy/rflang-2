@@ -11,7 +11,11 @@
  */
 
 typedef struct {
-  chaining_ht_str_var_t ht;
+  const char* used_modules[10];
+  int         used_modules_count;
+
+  chaining_ht_str_var_t var_ht;
+  chaining_ht_str_module_t* parsed_module_ht;
   int scope_number;
   int scope_depth;
 } analyze_context_t;
@@ -20,7 +24,7 @@ typedef struct {
   int is_const_expr;
 } expression_info_t;
 
-int analyze_module(module_t*);
+int analyze_module(module_t*, chaining_ht_str_module_t*);
 int analyze_use(use_t*, analyze_context_t*);
 int analyze_block(block_t*, analyze_context_t*);
 int analyze_func(func_t*, analyze_context_t*);

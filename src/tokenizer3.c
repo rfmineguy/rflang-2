@@ -304,7 +304,6 @@ const char*  tokenizer3_get_token_offset_as_string(tokenizer3_t* t, int offset) 
     case T_ARM64:         return "ARM64_ASM";        break;
     case T_EOF:           return "EOF";              break;
     default:              return "unimplemented token\n"; break;
-
   }
 }
 

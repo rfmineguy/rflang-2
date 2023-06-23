@@ -1,10 +1,15 @@
 #include "analysis.h"
 #include <string.h>
 
-int analyze_module(module_t* module) {
+int analyze_search_module(const char* module, chaining_ht_str_module_t* ht, const char* symbol) {
+
+}
+
+int analyze_module(module_t* module, chaining_ht_str_module_t* ht) {
   analyze_context_t ctx = {0};
-  ctx.ht = chaining_ht_str_var_alloc(10);
-  
+  ctx.var_ht = chaining_ht_str_var_alloc(10);
+  ctx.parsed_module_ht = ht;
+
   printf("... analyze_module\n");
   for (int i = 0; i < module->use_list_count; i++) {
     analyze_use(module->use_list[i], &ctx);
@@ -13,14 +18,15 @@ int analyze_module(module_t* module) {
     analyze_func(module->func_list[i], &ctx);
   }
 
-  chaining_ht_str_var_show(ctx.ht, 0);
-  chaining_ht_str_var_free(ctx.ht);
-  return 1; 
+  chaining_ht_str_var_show(ctx.var_ht, 0);
+  chaining_ht_str_var_free(ctx.var_ht);
+  return 1;
 }
 
 int analyze_use(use_t* use, analyze_context_t* ctx) {
-  // TODO_: maybe later we can analyze the use to get context from that file?
-  return 1; 
+  // TODO: maybe later we can analyze the use to get context from that file?
+  ctx->used_modules[ctx->used_modules_count++] = use->name;
+  return 1;
 }
 
 int analyze_block(block_t* block, analyze_context_t* ctx) {
@@ -47,7 +53,7 @@ int analyze_func_decl(func_decl_t* func_decl, analyze_context_t* ctx) {
   d.scope_depth = ctx->scope_depth;
   d.scope_number = ctx->scope_number;
   d.type = 1; // FUNC
-  chaining_ht_str_var_put(ctx->ht, func_decl->name, d);
+  chaining_ht_str_var_put(ctx->var_ht, func_decl->name, d);
   
   int params_status = analyze_param_list(func_decl->params, ctx);
 
@@ -67,7 +73,7 @@ int analyze_var(var_t* var, analyze_context_t* ctx) {
   d.scope_depth = ctx->scope_depth;
   d.scope_number = ctx->scope_number;
   d.type = 2; // VAR
-  chaining_ht_str_var_put(ctx->ht, var->name, d);
+  chaining_ht_str_var_put(ctx->var_ht, var->name, d);
   return 1;
 }
 
@@ -111,7 +117,8 @@ int analyze_return(return_t* ret, analyze_context_t* ctx) {
 
 int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int depth) {
   func_call_t* func_call = func_call_expr->value.func_call;
-  if (!chaining_ht_str_var_contains(ctx->ht, func_call->name)) {
+  if (!chaining_ht_str_var_contains(ctx->var_ht, func_call->name)) {
+
     fprintf(stderr, "%s : '%s' not defined\n", __func__, func_call->name);
   }
   else {
@@ -137,11 +144,11 @@ int analyze_assign(assign_t* assign, analyze_context_t* ctx) {
   if (assign->type & ASSIGN_LHS_ID) {
     int lhs_id_status = 1; // trivial to analyze an ID (string literal)
     // check if the id is in the HashTable. if not its illegal code
-    if (!chaining_ht_str_var_contains(ctx->ht, assign->left_hand_side.id)) {
+    if (!chaining_ht_str_var_contains(ctx->var_ht, assign->left_hand_side.id)) {
       fprintf(stderr, "'%s' not defined\n", assign->left_hand_side.id);
     }
     else {
-      entry_var data = chaining_ht_str_var_find(ctx->ht, assign->left_hand_side.id);
+      entry_var data = chaining_ht_str_var_find(ctx->var_ht, assign->left_hand_side.id);
       if (data.scope_number != ctx->scope_number || data.scope_depth < ctx->scope_depth) {
         fprintf(stderr, "'%s' out of scope\n", assign->left_hand_side.id);
       }

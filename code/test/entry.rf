@@ -1,7 +1,7 @@
 fn exit(code: int) {
   asm x86_64-linux {
-    mov rax, 0x3c
-    mov rdi, [rbp + 8]
+    movq %rax, $0x3c
+    movq %rdi, -8(%rbp)
     syscall
   };
 };

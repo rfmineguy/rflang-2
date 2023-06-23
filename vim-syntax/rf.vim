@@ -10,9 +10,9 @@ endif
 " Keywords
 syn keyword KeywordDataTypes int char short double float bool 
 syn keyword KeywordVoid void
-syn keyword KeywordFlow for if while return
-syn keyword LanguageConstructs asm fn 
-syn keyword Preproc use
+syn keyword LanguageStatements for if while return asm fn 
+syn keyword Define def
+syn keyword Module use
 syn keyword AsmTypes x86_64-linux x86_32-linux arm64
 
 "Block
@@ -27,10 +27,11 @@ syn case match
 hi def link KeywordDataTypes Type
 hi def link KeywordVoid Type
 hi def link KeywordFlow Repeat
-hi def link LanguageConstructs Statement
+hi def link LanguageStatements Statement
+hi def link Define Preproc
+hi def link Module PreProc
 hi def link bNumber Number
 hi def link AsmTypes Type
-hi def link Preproc PreProc
 hi def link StringLiteral Constant
 
 let b:current_syntax = "rf"
