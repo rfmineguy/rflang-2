@@ -53,7 +53,7 @@ set (SOURCES
   src/error/errors2.c
   src/tokenizer3.c
   src/ht/chain_ht_str_vardat.c
-  src/ht/chain_ht_str_program.c
+  src/ht/chain_ht_str_module.c
   src/analysis.c)
 
 ## ============================================

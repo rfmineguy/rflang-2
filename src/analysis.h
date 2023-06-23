@@ -2,7 +2,7 @@
 #define ANALYSIS_H
 #include "parsers/parser3.h"
 #include "ht/chain_ht_str_vardat.h"
-#include "ht/chain_ht_str_program.h"
+#include "ht/chain_ht_str_module.h"
 
 /* NOTES:
  *  - analysis will include the following features
@@ -20,7 +20,7 @@ typedef struct {
   int is_const_expr;
 } expression_info_t;
 
-int analyze_program(program_t*);
+int analyze_module(module_t*);
 int analyze_use(use_t*, analyze_context_t*);
 int analyze_block(block_t*, analyze_context_t*);
 int analyze_func(func_t*, analyze_context_t*);

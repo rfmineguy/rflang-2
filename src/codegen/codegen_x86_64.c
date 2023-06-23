@@ -10,7 +10,7 @@
 #define WRITE_DATA(str, ...) \
   ctx->currently_written_data += snprintf(ctx->data_segment_source + ctx->currently_written_data, 1000, str, ##__VA_ARGS__)
 
-void x86_64_codegen_program(program_t* p, FILE* f) {
+void x86_64_codegen_module(module_t* p, FILE* f) {
   printf("Beginning codegen for x86_64-linux\n");
   x86_64_codegen_context ctx = {0};
   ctx.code_segment_source = calloc(1000, 1);

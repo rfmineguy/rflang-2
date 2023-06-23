@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <locale.h>
 
-void free_program(program_t* p) {
+void free_module(module_t* p) {
   for (int i = 0; i < p->use_list_count; i++) {
     free_use(p->use_list[i]);
     free(p->use_list[i]);
@@ -197,7 +197,7 @@ void tabs(int count) {
   printf("%lc%lc", UP_RIGHT_DOWN, LEFT_RIGHT);
 }
 
-void show_program(program_t* p, int level) {
+void show_module(module_t* p, int level) {
   tabs(level - 1); printf("Program {%s}\n", p->name);
   if (!p) {
     tabs(level); printf("NULL\n");

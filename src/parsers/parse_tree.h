@@ -3,7 +3,7 @@
 #include "../token.h"
 
 // Forward declarations
-typedef struct program_t    program_t;
+typedef struct module_t     module_t;
 typedef struct use_t        use_t;
 typedef struct asm_block_t  asm_block_t;
 typedef struct block_t      block_t;
@@ -36,7 +36,7 @@ typedef enum {
   ASSIGN_RHS_EXPR    = 8,
 } assign_type_t;
 
-struct program_t {
+struct module_t {
   char name[30];
   use_t**     use_list;
   int         use_list_count, use_list_max;
@@ -135,7 +135,7 @@ struct while_t {
 };
 
 // Free
-void          free_program(program_t*);
+void          free_module(module_t*);
 void          free_use(use_t*);
 void          free_block(block_t*);
 void          free_asm_block(asm_block_t*);
@@ -156,7 +156,7 @@ void          free_statement(statement_t*);
 
 // Show
 void          tabs(int);
-void          show_program(program_t*, int);
+void          show_module(module_t*, int);
 void          show_use(use_t*, int);
 void          show_block(block_t*, int);
 void          show_asm_block(asm_block_t*, int);

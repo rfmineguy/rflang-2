@@ -9,9 +9,9 @@ int           is_operator(token_type_t);
 int           get_precedence(token_type_t);
 int           is_type_token(token_type_t);
 
-program_t*    parse(tokenizer3_t*);
+module_t*     parse(tokenizer3_t*);
 
-program_t*    parse_program(tokenizer3_t*);
+module_t*     parse_module(tokenizer3_t*);
 use_t*        parse_use(tokenizer3_t*, error_context_t*);
 block_t*      parse_block(tokenizer3_t*, error_context_t*);
 asm_block_t*  parse_asm_block(tokenizer3_t*, error_context_t*);

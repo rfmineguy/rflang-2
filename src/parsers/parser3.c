@@ -35,16 +35,16 @@ int get_precedence(token_type_t type) {
   }
 }
 
-program_t* parse(tokenizer3_t* t) {
- return parse_program(t);
+module_t* parse(tokenizer3_t* t) {
+ return parse_module(t);
 }
 
-program_t* parse_program(tokenizer3_t* t) {
+module_t* parse_module(tokenizer3_t* t) {
   error_context_t ctx = error_context_new();
 
   const int FUNC_DEFAULT_MAX = 5;
   const int USE_DEFAULT_MAX  = 5;
-  program_t* p = calloc(1, sizeof(program_t));
+  module_t* p = calloc(1, sizeof(module_t));
   strncat(p->name, t->module_name, 30);
   p->func_list_max = FUNC_DEFAULT_MAX;
   p->use_list_max = USE_DEFAULT_MAX;
@@ -56,8 +56,6 @@ program_t* parse_program(tokenizer3_t* t) {
   if (tokenizer3_expect_offset(t, 2, T_ID)) {
     error_push(&ctx, error_new(E_INVALID_START_TOKEN, tokenizer3_get(t, 2)));
     tokenizer3_advance(t);
-    // fprintf(stderr, "Program starting with ID is invalid\n");
-    // exit(1);
   }
   // Expect use statements second (use statements are only allowed at the start)
   while (tokenizer3_get(t, 2).type == T_USE) {
@@ -478,7 +476,7 @@ expression_t* parse_expression_postfix(token_t* postfix, int postfix_len, error_
       top--;
       e->type = EXPR_FUNC_CALL;
       exprs[++top] = e;
-      show_expression(exprs[top], 0);
+      // show_expression(exprs[top], 0);
     }
     else {
       expression_t* l = exprs[top - 1];

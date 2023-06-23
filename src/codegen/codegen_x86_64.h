@@ -12,7 +12,7 @@ typedef struct {
 
 void x86_64_codegen_entry_stub  (x86_64_codegen_context*);
 
-void x86_64_codegen_program     (program_t*, FILE*); 
+void x86_64_codegen_module      (module_t*, FILE*); 
 void x86_64_codegen_use         (use_t* u, x86_64_codegen_context*);
 void x86_64_codegen_asm_block   (asm_block_t*, x86_64_codegen_context*);
 void x86_64_codegen_block       (block_t*, x86_64_codegen_context*);

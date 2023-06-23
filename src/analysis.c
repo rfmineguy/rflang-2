@@ -1,16 +1,16 @@
 #include "analysis.h"
 #include <string.h>
 
-int analyze_program(program_t* program) {
+int analyze_module(module_t* module) {
   analyze_context_t ctx = {0};
   ctx.ht = chaining_ht_str_var_alloc(10);
   
-  printf("... analyze_program\n");
-  for (int i = 0; i < program->use_list_count; i++) {
-    analyze_use(program->use_list[i], &ctx);
+  printf("... analyze_module\n");
+  for (int i = 0; i < module->use_list_count; i++) {
+    analyze_use(module->use_list[i], &ctx);
   }
-  for (int i = 0; i < program->func_list_count; i++) {
-    analyze_func(program->func_list[i], &ctx);
+  for (int i = 0; i < module->func_list_count; i++) {
+    analyze_func(module->func_list[i], &ctx);
   }
 
   chaining_ht_str_var_show(ctx.ht, 0);
