@@ -2,7 +2,7 @@
 #include <string.h>
 
 int analyze_search_module(const char* module, chaining_ht_str_module_t* ht, const char* symbol) {
-
+  return 0;
 }
 
 int analyze_module(module_t* module, chaining_ht_str_module_t* ht) {
@@ -44,7 +44,7 @@ int analyze_block(block_t* block, analyze_context_t* ctx) {
 int analyze_func(func_t* func, analyze_context_t* ctx) {
   int decl_status = analyze_func_decl(func->decl, ctx);
   int block_status = analyze_block(func->block, ctx);
-  return decl_status;
+  return decl_status && block_status;
 }
 
 int analyze_func_decl(func_decl_t* func_decl, analyze_context_t* ctx) {
@@ -101,7 +101,7 @@ int analyze_statement(statement_t* stmt, analyze_context_t* ctx) {
   if (stmt->whle) {
     analyze_while(stmt->whle, ctx);
   }
-  return 1;  
+  return 1;
 }
 
 int analyze_iff(if_t* iff, analyze_context_t* ctx) {
@@ -118,7 +118,10 @@ int analyze_return(return_t* ret, analyze_context_t* ctx) {
 int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int depth) {
   func_call_t* func_call = func_call_expr->value.func_call;
   if (!chaining_ht_str_var_contains(ctx->var_ht, func_call->name)) {
-
+    // search modules for this symbol
+    for (int i = 0; i < ctx->used_modules_count; i++) {
+      
+    }
     fprintf(stderr, "%s : '%s' not defined\n", __func__, func_call->name);
   }
   else {
@@ -165,7 +168,7 @@ int analyze_assign(assign_t* assign, analyze_context_t* ctx) {
 
 int analyze_asm_block(asm_block_t* asm_block, analyze_context_t* ctx) {
   // not much to do here.. TODO: yet
-  return 1;  
+  return 1;
 }
 
 int analyze_while(while_t* whle, analyze_context_t* ctx) {

@@ -35,6 +35,11 @@ int compile_all(args2_t args) {
 
   // Begin parsing source files
   chaining_ht_str_module_t cached_parses = chaining_ht_str_module_alloc(10);
+  // chaining_ht_str_analyzed_t cached_analyzes = chaining_ht_str_analyzed_alloc(10);
+
+  // NOTE: Maintain a master hash table containing
+  //  1. Each symbol gets attributed to a particular module 
+
   for (int i = 0; i < args.input_modules_count; i++) {
     parse_file_rec(args.input_modules[i], &args, cached_parses);
   }

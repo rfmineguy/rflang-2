@@ -18,23 +18,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
 # LIBRARIES
 #
 include (FetchContent)
-# FetchContent_Declare(argparse  GIT_REPOSITORY https://github.com/cofyc/argparse.git GIT_TAG v1.1.0)
-# FetchContent_MakeAvailable(argparse)
-#FetchContent_GetProperties(argparse)
-#if (NOT argparse_POPULATED)
-#  FetchContent_Populate(argparse)
-#  message(${argparse_SOURCE_DIR})
-#  add_subdirectory(${argparse_SOURCE_DIR})
-#endif()
-
 FetchContent_Declare(gtest  GIT_REPOSITORY https://github.com/google/googletest.git GIT_TAG v1.13.0)
 FetchContent_MakeAvailable(gtest)
-# FetchContent_GetProperties(gtest)
-# if (NOT gtest_POPULATED)
-#   FetchContent_Populate(gtest)
-#   message(${gtest_SOURCE_DIR})
-#   add_subdirectory(${gtest_SOURCE_DIR})
-# endif()
 
 ## ============================================
 ##   Source files
@@ -59,7 +44,7 @@ set (SOURCES
 ## ============================================
 ##   Testing binary
 ## ============================================
-set(TESTS OFF)
+set(TESTS ON)
 if (TESTS)
 add_executable(rfc-tests
   tests/test.cpp
