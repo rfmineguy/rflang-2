@@ -1,6 +1,9 @@
 #include "analysis.h"
 #include <string.h>
 
+#define MAX(a, b) ((a) >= (b)) ? (a) : (b)
+#define MIN(a, b) ((a) <= (b)) ? (a) : (b)
+
 int analyze_search_module(const char* module, chaining_ht_str_module_t* ht, const char* symbol) {
   return 0;
 }
@@ -42,12 +45,14 @@ int analyze_block(block_t* block, analyze_context_t* ctx) {
 }
 
 int analyze_func(func_t* func, analyze_context_t* ctx) {
-  int decl_status = analyze_func_decl(func->decl, ctx);
-  int block_status = analyze_block(func->block, ctx);
-  return decl_status && block_status;
+  int status = 0;
+  status = MAX(status, analyze_func_decl(func->decl, ctx));
+  status = MAX(status, analyze_block(func->block, ctx));
+  return status;
 }
 
 int analyze_func_decl(func_decl_t* func_decl, analyze_context_t* ctx) {
+  int status = 0;
   entry_var d = {0};
   strncpy(d.key, func_decl->name, 100);
   d.scope_depth = ctx->scope_depth;
@@ -55,16 +60,17 @@ int analyze_func_decl(func_decl_t* func_decl, analyze_context_t* ctx) {
   d.type = 1; // FUNC
   chaining_ht_str_var_put(ctx->var_ht, func_decl->name, d);
   
-  int params_status = analyze_param_list(func_decl->params, ctx);
+  status = MAX(status, analyze_param_list(func_decl->params, ctx));
 
-  return 1;
+  return status;
 }
 
 int analyze_param_list(param_list_t* params, analyze_context_t* ctx) {
+  int status = 0;
   for (int i = 0; i < params->params_count; i++) {
-    int var_status = analyze_var(params->params[i], ctx);
+    status = MAX(status, analyze_var(params->params[i], ctx));
   }
-  return 1;
+  return status;
 }
 
 int analyze_var(var_t* var, analyze_context_t* ctx) {
@@ -84,38 +90,40 @@ int analyze_string_lit(string_lit_t* str_lit, analyze_context_t* ctx) {
 
 int analyze_statement(statement_t* stmt, analyze_context_t* ctx) {
   if (stmt->iff) {
-    analyze_iff(stmt->iff, ctx);
+    return analyze_iff(stmt->iff, ctx);
   }
   if (stmt->ret) {
-    analyze_return(stmt->ret, ctx);
+    return analyze_return(stmt->ret, ctx);
   }
   if (stmt->func_call_expr) {
-    analyze_expression(stmt->func_call_expr, ctx, 0);
+    return analyze_expression(stmt->func_call_expr, ctx, 0);
   }
   if (stmt->assign) {
-    analyze_assign(stmt->assign, ctx);
+    return analyze_assign(stmt->assign, ctx);
   }
   if (stmt->asm_block) {
-    analyze_asm_block(stmt->asm_block, ctx);
+    return analyze_asm_block(stmt->asm_block, ctx);
   }
   if (stmt->whle) {
-    analyze_while(stmt->whle, ctx);
+    return analyze_while(stmt->whle, ctx);
   }
-  return 1;
+  return 0;
 }
 
 int analyze_iff(if_t* iff, analyze_context_t* ctx) {
-  int condition_status = analyze_expression(iff->condition, ctx, 0);
-  int block_status = analyze_block(iff->block, ctx);
-  return 1;  
+  int status = 0;
+  status = MAX(status, analyze_expression(iff->condition, ctx, 0));
+  status = MAX(status, analyze_block(iff->block, ctx));
+  return status;  
 }
 
 int analyze_return(return_t* ret, analyze_context_t* ctx) {
   int expression_status = analyze_expression(ret->expr, ctx, 0);
-  return 1;  
+  return expression_status;  
 }
 
 int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int depth) {
+  int status = 0;
   func_call_t* func_call = func_call_expr->value.func_call;
   if (!chaining_ht_str_var_contains(ctx->var_ht, func_call->name)) {
     // search modules for this symbol
@@ -133,37 +141,55 @@ int analyze_func_call(expression_t* func_call_expr, analyze_context_t* ctx, int 
     printf("  args : ");
     arg_list_t* args = func_call->args;
     for (int i = 0; i < args->arg_count; i++) {
-      analyze_expression(args->args[i], ctx, depth + 1);
+      int sub_status = analyze_expression(args->args[i], ctx, depth + 1);
+      if (sub_status && !status) {
+        status = sub_status;
+      }
     }
   }
-  return 1;  
+  return status;
 }
 
 int analyze_assign(assign_t* assign, analyze_context_t* ctx) {
   printf("analyze_assign\n");
+  int status = 0;
   if (assign->type & ASSIGN_LHS_VAR) {
     int lhs_var_status = analyze_var(assign->left_hand_side.var, ctx);
+    if (lhs_var_status && !status) {
+      status = lhs_var_status;
+    }
   }
-  if (assign->type & ASSIGN_LHS_ID) {
+  else if (assign->type & ASSIGN_LHS_ID) {
     int lhs_id_status = 1; // trivial to analyze an ID (string literal)
     // check if the id is in the HashTable. if not its illegal code
     if (!chaining_ht_str_var_contains(ctx->var_ht, assign->left_hand_side.id)) {
       fprintf(stderr, "'%s' not defined\n", assign->left_hand_side.id);
+      lhs_id_status = 0;
     }
     else {
       entry_var data = chaining_ht_str_var_find(ctx->var_ht, assign->left_hand_side.id);
       if (data.scope_number != ctx->scope_number || data.scope_depth < ctx->scope_depth) {
         fprintf(stderr, "'%s' out of scope\n", assign->left_hand_side.id);
+        lhs_id_status = 0;
       }
+    }
+    if (lhs_id_status && !status) {
+      status = lhs_id_status;
     }
   }
   if (assign->type & ASSIGN_RHS_STR_LIT) {
     int rhs_str_status = analyze_string_lit(assign->right_hand_side.str_lit, ctx);
+    if (rhs_str_status && !status) {
+      status = rhs_str_status;
+    }
   }
-  if (assign->type & ASSIGN_LHS_ID) {
+  else if (assign->type & ASSIGN_LHS_ID) {
     int rhs_expr_status = analyze_expression(assign->right_hand_side.expr, ctx, 0);
+    if (rhs_expr_status && !status) {
+      status = rhs_expr_status;
+    }
   }
-  return 1;  
+  return status;
 }
 
 int analyze_asm_block(asm_block_t* asm_block, analyze_context_t* ctx) {

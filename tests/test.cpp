@@ -129,7 +129,12 @@ TEST(parsing, validate_expression_success_w_func_call_1) {
   
   tokenizer3_advance(&t);
   int postfix_len = 0;
-  EXPECT_TRUE(validate_expression(&t, &ctx, &postfix_len));
+  ASSERT_TRUE(validate_expression(&t, &ctx, &postfix_len));
+  
+  // Root
+  EXPECT_TRUE(e != NULL);
+  EXPECT_TRUE(e->type == EXPR_COMPOUND);
+  EXPECT_TRUE(e->value.operation == T_MOD);
 
   FINISH();
 }
