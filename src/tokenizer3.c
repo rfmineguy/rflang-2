@@ -202,7 +202,9 @@ void tokenizer3_advance(tokenizer3_t* t) {
     t->col += id.length;
     return;
   }
-  printf("[%s: %d] Unknown character: '%c'\n", __func__, __LINE__, *t->cursor);
+  if (t->unknown_ch_warning)
+    printf("[%s: %d] Unknown character: '%c'\n", __func__, __LINE__, *t->cursor);
+
   t->history[4] = (token_t) {.type = T_UNKNOWN, LOC_FIELD(t, 1)};
   t->cursor += 1;
   t->col += 1;
@@ -388,4 +390,12 @@ void tokenizer3_token_print(token_t t, tokenizer3_t* tokenizer) {
     case T_EOF:           PRINT_TOKEN("EOF", t);              break;
     default:              printf("unimplemented token\n");    break;
   }
+}
+
+void tokenizer3_enable_unknown_ch_warning(tokenizer3_t* t) {
+  t->unknown_ch_warning = 1;
+}
+
+void tokenizer3_disable_unknown_ch_warning(tokenizer3_t* t) {
+  t->unknown_ch_warning = 0;
 }

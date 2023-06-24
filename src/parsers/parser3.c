@@ -123,22 +123,32 @@ block_t* parse_block(tokenizer3_t* t, error_context_t* ctx) {
 asm_block_t* parse_asm_block(tokenizer3_t* t, error_context_t* ctx) {
   asm_block_t* block = calloc(1, sizeof(asm_block_t));
   tokenizer3_advance(t);
-  // tokenizer3_show_token_offset(t, 2);
   if (!is_asm_type_specifier(tokenizer3_get(t, 2).type)) {
     error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Assembly type", tokenizer3_get(t, 2)));
     tokenizer3_advance(t);
   }
   block->asm_type = tokenizer3_get(t, 2).type;
+
+  // We don't care about any unknown characters within an asm block
+  // ================================
+  tokenizer3_disable_unknown_ch_warning(t);
   tokenizer3_advance(t);
   if (!tokenizer3_expect_offset(t, 2, T_LB)) {
     error_push(ctx, MAKE_GENERAL_EXPECT_ERROR("Left brace", tokenizer3_get(t,2)));
   }
+
+  // Find bounds of the assembly code
+  // ================================
   block->asm_source_code_begin = tokenizer3_get(t, 2).loc.begin_index + tokenizer3_get(t, 2).loc.length + t->source_code;
   while (!tokenizer3_expect_offset(t, 2, T_RB)) {
     tokenizer3_advance(t);
   }
   block->asm_source_code_end = tokenizer3_get(t, 2).loc.begin_index + t->source_code;
-  // tokenizer3_show_token_offset(t, 2);
+  // ================================
+
+  // The asm block is done being parsed, re-enable the unkown char warning
+  // ================================
+  tokenizer3_enable_unknown_ch_warning(t);
 
   tokenizer3_advance(t);
   logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> Parsed asm block\n");

@@ -62,6 +62,8 @@ typedef struct {
   const char* line_start;
   int col, line;
 
+  int unknown_ch_warning;
+
   token_t history[5];     // [0-1]->prev, [2]->current, [3-4]->next
 } tokenizer3_t;
 
@@ -83,5 +85,8 @@ void         tokenizer3_show_history(tokenizer3_t*);
 void         tokenizer3_show_token_offset(tokenizer3_t*, int);
 const char*  tokenizer3_get_token_offset_as_string(tokenizer3_t*, int);
 void         tokenizer3_token_print(token_t, tokenizer3_t*);
+
+void         tokenizer3_enable_unknown_ch_warning(tokenizer3_t*);
+void         tokenizer3_disable_unknown_ch_warning(tokenizer3_t*);
 
 #endif
