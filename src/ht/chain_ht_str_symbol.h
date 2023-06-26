@@ -4,12 +4,20 @@
 typedef struct chaining_node_str_symbol_t chaining_node_str_symbol_t; 
 
 typedef enum {
-  SYM_FUNC
+  SYM_FUNC, SYM_VAR
 } symbol_type;
 
 typedef struct {
   char key[100];
   symbol_type type;
+  union {
+    struct {
+    } var;
+    struct {
+      int param_count;
+      int return_type;
+    } func_signature;
+  } data;
 } entry_symbol;
 
 struct chaining_node_str_symbol_t {

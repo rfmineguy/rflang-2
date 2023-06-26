@@ -21,8 +21,6 @@ void chaining_ht_str_symbol_free(chaining_ht_str_symbol_t ht) {
     while (e != NULL) {
       chaining_node_str_symbol_t* t = e;
       e = e->next;
-      // free_symbol(t->value.p);
-      printf("Freed symbol\n");
       free(t);
       t = NULL;
     }
@@ -40,10 +38,13 @@ int chaining_ht_str_symbol_hash(chaining_ht_str_symbol_t ht, char* key) {
 }
 
 void chaining_ht_str_symbol_show_entry(entry_symbol entry) {
-  // printf("{key: %7s, scope_depth: %d, scope_number: %d, type: %s}", entry.key, entry.scope_depth, entry.scope_number, map_type_to_string(entry.type));
   switch (entry.type) {
-  case SYM_FUNC: 
-    printf("{type = func, symbol = %s}\n", entry.key);
+  case SYM_FUNC:
+    printf("{type = func, symbol = %10s, param_count = %3d, return_type = %3d}\n", 
+        entry.key, entry.data.func_signature.param_count, entry.data.func_signature.return_type);
+    break;
+  case SYM_VAR:
+    printf("{type = var, symbol = %s}\n", entry.key);
     break;
   }
 }

@@ -89,14 +89,17 @@ void analyze_module_rec(const char* module_name, args2_t* args, chaining_ht_str_
 
 void analyze_module_temp(module_t* module, chaining_ht_str_symbol_t sym_ht) {
   printf("   Analyzing module '%s'\n", module->name);
-  // analyze functions should traverse the module tree, and populate the symbol hash table with it
   for (int i = 0; i < module->func_list_count; i++) {
     func_t* f = module->func_list[i];
     func_decl_t* decl = f->decl;
     if (chaining_ht_str_symbol_contains(sym_ht, decl->name)) {
       fprintf(stderr, "ERROR: Func '%s' already defined\n", decl->name);
-      continue; //go to next func_decl
+      continue;
     }
-    chaining_ht_str_symbol_put(sym_ht, decl->name, (entry_symbol){});
+    entry_symbol e = {0};
+    e.type=SYM_FUNC;
+    e.data.func_signature.param_count = decl->params->params_count;
+    e.data.func_signature.return_type = f->return_type;
+    chaining_ht_str_symbol_put(sym_ht, decl->name, e);
   }
 }
