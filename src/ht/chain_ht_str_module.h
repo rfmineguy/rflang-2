@@ -22,7 +22,7 @@ struct chaining_node_str_module_t {
 
 typedef struct {
   chaining_node_str_module_t** buffer;
-  int M;
+  int M, size;
 } chaining_ht_str_module_t;
 
 chaining_ht_str_module_t chaining_ht_str_module_alloc(int);

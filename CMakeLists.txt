@@ -39,6 +39,7 @@ set (SOURCES
   src/tokenizer3.c
   src/ht/chain_ht_str_vardat.c
   src/ht/chain_ht_str_module.c
+  src/ht/chain_ht_str_symbol.c
   src/analysis.c)
 
 ## ============================================
