@@ -40,7 +40,8 @@ set (SOURCES
   src/ht/chain_ht_str_vardat.c
   src/ht/chain_ht_str_module.c
   src/ht/chain_ht_str_symbol.c
-  src/analysis.c)
+  src/analysis.c
+  src/analysis2.c)
 
 ## ============================================
 ##   Testing binary

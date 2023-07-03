@@ -9,6 +9,8 @@ typedef enum {
 
 typedef struct {
   char key[100];
+  int scope_number, scope_depth;
+
   symbol_type type;
   union {
     struct {

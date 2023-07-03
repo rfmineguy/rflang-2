@@ -40,17 +40,16 @@ int chaining_ht_str_symbol_hash(chaining_ht_str_symbol_t ht, char* key) {
 void chaining_ht_str_symbol_show_entry(entry_symbol entry) {
   switch (entry.type) {
   case SYM_FUNC:
-    printf("{type = func, symbol = %10s, param_count = %3d, return_type = %3d}\n", 
+    printf("{type = function, symbol = %10s, param_count = %3d, return_type = %3d}\n", 
         entry.key, entry.data.func_signature.param_count, entry.data.func_signature.return_type);
     break;
   case SYM_VAR:
-    printf("{type = var, symbol = %s}\n", entry.key);
+    printf("{type = variable, symbol = %s}\n", entry.key);
     break;
   }
 }
 
 void chaining_ht_str_symbol_show(chaining_ht_str_symbol_t ht) {
-  printf("Showing chaining hash table {%d}\n", ht.M);
   for (int i = 0; i < ht.M; i++) {
     chaining_node_str_symbol_t* e = ht.buffer[i];
     while (e != NULL) {

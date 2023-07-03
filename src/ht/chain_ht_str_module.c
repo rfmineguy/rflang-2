@@ -55,7 +55,6 @@ void chaining_ht_str_module_show_entry(entry_module entry, entry_print_style pri
 }
 
 void chaining_ht_str_module_show(chaining_ht_str_module_t ht, entry_print_style print_style) {
-  printf("Showing chaining hash table {%d}\n", ht.M);
   for (int i = 0; i < ht.M; i++) {
     chaining_node_str_module_t* e = ht.buffer[i];
     while (e != NULL) {

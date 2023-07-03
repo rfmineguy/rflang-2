@@ -1,6 +1,6 @@
 #include "compile.h"
 #include "codegen/codegen.h"
-#include "analysis.h"
+#include "analysis2.h"
 #include "file_util.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +30,9 @@ int compile_all(args2_t args) {
   }
 
   // Display the hash tables
+  printf("Symbol Table:\n------------\n");
   chaining_ht_str_symbol_show(symbols);
+  printf("Module Table:\n------------\n");
   chaining_ht_str_module_show(cached_parses, MODULE_NAME);
 
   // Free the memory for the various hash tables we have
@@ -82,24 +84,5 @@ void analyze_module_rec(const char* module_name, args2_t* args, chaining_ht_str_
     analyze_module_rec(module->use_list[i]->name, args, mod_ht, sym_ht);
   }
 
-  // By the time we get here, all dependent parse trees should have been analyzed and
-  //    populated their symbols into the hash table
-  analyze_module_temp(module, sym_ht);
-}
-
-void analyze_module_temp(module_t* module, chaining_ht_str_symbol_t sym_ht) {
-  printf("   Analyzing module '%s'\n", module->name);
-  for (int i = 0; i < module->func_list_count; i++) {
-    func_t* f = module->func_list[i];
-    func_decl_t* decl = f->decl;
-    if (chaining_ht_str_symbol_contains(sym_ht, decl->name)) {
-      fprintf(stderr, "ERROR: Func '%s' already defined\n", decl->name);
-      continue;
-    }
-    entry_symbol e = {0};
-    e.type=SYM_FUNC;
-    e.data.func_signature.param_count = decl->params->params_count;
-    e.data.func_signature.return_type = f->return_type;
-    chaining_ht_str_symbol_put(sym_ht, decl->name, e);
-  }
+  analyze2_module(module, sym_ht);
 }
