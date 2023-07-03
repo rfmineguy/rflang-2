@@ -211,6 +211,25 @@ func_decl_t* parse_func_decl(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);
 
   decl->params = parse_param_list(t, ctx);
+  
+  int has_colon = tokenizer3_expect_offset(t, 2, T_COLON);
+  int has_type  = is_type_token(tokenizer3_get(t, 3).type);
+  if (has_colon && has_type) {
+    decl->return_type = tokenizer3_get(t, 3).type;
+    decl->return_type_str = token_type_stringify(decl->return_type);
+    decl->has_return_type = 1;
+    tokenizer3_advance(t);
+    tokenizer3_advance(t);
+  }
+  else if (has_colon && !has_type) {
+    error_push(ctx, error_new(E_MISSING_FUNC_RETURN_TYPE, tokenizer3_get(t, 2)));
+    tokenizer3_advance(t);
+  }
+  else if (!has_colon && !has_type) {
+    decl->has_return_type = 1;
+    decl->return_type = T_VOID;
+  }
+
   logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed func_decl\n");
   return decl;
 }
@@ -220,23 +239,6 @@ func_t* parse_func(tokenizer3_t* t, error_context_t* ctx) {
   tokenizer3_advance(t);                      // skip past T_FN
   
   f->decl = parse_func_decl(t, ctx);
-  int has_colon = tokenizer3_expect_offset(t, 2, T_COLON);
-  int has_type  = is_type_token(tokenizer3_get(t, 3).type);
-  if (has_colon && has_type) {
-    f->return_type = tokenizer3_get(t, 3).type;
-    f->return_type_str = token_type_stringify(f->return_type);
-    f->has_return_type = 1;
-    tokenizer3_advance(t);
-    tokenizer3_advance(t);
-  }
-  else if (has_colon && !has_type) {
-    error_push(ctx, error_new(E_MISSING_FUNC_RETURN_TYPE, tokenizer3_get(t, 2)));
-    tokenizer3_advance(t);
-  }
-  else if (!has_colon && !has_type) {
-    f->has_return_type = 1;
-    f->return_type = T_VOID;
-  }
   f->block = parse_block(t, ctx);
 
   logger_log(logger_get_global(), PARSE_STATUS_CHANNEL, "=> parsed func\n");

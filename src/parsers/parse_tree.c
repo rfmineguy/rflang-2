@@ -262,7 +262,6 @@ void show_string_lit(string_lit_t* str_lit, int level) {
 void show_func(func_t* func, int level) {
   tabs(level); printf("Func\n");
   show_func_decl(func->decl, level + 1);
-  tabs(level + 1); printf("Return Type : %d = %s\n", func->return_type, func->has_return_type ? func->return_type_str : "N/A");
   show_block(func->block, level + 2);
 }
 
@@ -273,6 +272,7 @@ void show_func_decl(func_decl_t* decl, int level) {
     return;
   }
   tabs(level + 1); printf("name: %s\n", decl->name);
+  tabs(level + 1); printf("return type : %d = %s\n", decl->return_type, decl->has_return_type ? decl->return_type_str : "N/A");
   show_param_list(decl->params, level + 1);
 }
 

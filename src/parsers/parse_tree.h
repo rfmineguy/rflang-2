@@ -56,13 +56,13 @@ struct asm_block_t {
   asm_type_t asm_type;
 };
 struct func_t {
-  int          has_return_type;
-  token_type_t return_type;
-  const char*  return_type_str;
   func_decl_t* decl;
   block_t*     block;
 };
 struct func_decl_t {
+  int          has_return_type;
+  token_type_t return_type;
+  const char*  return_type_str;
   char name[30];
   param_list_t* params;
 };
@@ -156,6 +156,7 @@ void          free_statement(statement_t*);
 
 // Show
 void          tabs(int);
+
 void          show_module(module_t*, int);
 void          show_use(use_t*, int);
 void          show_block(block_t*, int);
